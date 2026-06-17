@@ -4,7 +4,8 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "public/build/**"]
+      "outputs": ["dist/**", ".next/**", "public/build/**"],
+      "env": ["PAYLOAD_PUBLIC_SERVER_URL", "REVALIDATE_SECRET"]
     },
     "lint": {},
     "dev": {

@@ -13,7 +13,6 @@ type Props = {
 export async function generateMetadata({ params }: Props) {
   const { agentSlug } = await params;
   const landingPage = await resolveLandingPage(agentSlug);
-  
   if (!landingPage) return { title: 'Not Found' };
   
   const heroBlock = landingPage.blocks?.find((b: NonNullable<LandingPage['blocks']>[number]) => b.blockType === 'heroBanner');
