@@ -13,7 +13,6 @@ const SERVER_URL =
 const REVALIDATE_TIME = 60; // 60 seconds
 
 async function fetchAPI(endpoint: string) {
-  console.error(`${SERVER_URL}/api${endpoint}`);
   const res = await fetch(`${SERVER_URL}/api${endpoint}`, {
     next: { revalidate: REVALIDATE_TIME },
   });
