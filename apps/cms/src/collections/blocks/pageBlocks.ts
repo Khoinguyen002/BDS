@@ -32,7 +32,7 @@ export const pageBlocks: Block[] = [
         type: "relationship",
         relationTo: "apartments",
         hasMany: true,
-        filterOptions: ({ data, siblingData }) => {
+        filterOptions: ({ data, siblingData }): any => {
           const owner =
             (data as Partial<LandingPage>)?.owner ||
             (siblingData as Partial<LandingPage>)?.owner;
@@ -43,7 +43,6 @@ export const pageBlocks: Block[] = [
             return { owner: { equals: ownerId } };
           }
           
-          // Trả về một object Where hợp lệ để cho phép tất cả các bản ghi
           return { id: { exists: true } };
         },
       },
