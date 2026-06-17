@@ -1,4 +1,4 @@
-import type { Block } from "payload";
+import type { Block, Where } from "payload";
 import type { LandingPage } from "@bds/shared/payload-types";
 
 export const pageBlocks: Block[] = [
@@ -32,7 +32,7 @@ export const pageBlocks: Block[] = [
         type: "relationship",
         relationTo: "apartments",
         hasMany: true,
-        filterOptions: ({ data, siblingData }): any => {
+        filterOptions: ({ data, siblingData }): Where => {
           const owner =
             (data as Partial<LandingPage>)?.owner ||
             (siblingData as Partial<LandingPage>)?.owner;
