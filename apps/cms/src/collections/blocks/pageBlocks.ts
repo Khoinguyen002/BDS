@@ -42,7 +42,9 @@ export const pageBlocks: Block[] = [
           if (ownerId) {
             return { owner: { equals: ownerId } };
           }
-          return true; // Nếu đéo có owner (ví dụ đang tạo Template), cho phép chọn tất cả
+          
+          // Trả về một object Where hợp lệ để cho phép tất cả các bản ghi
+          return { id: { exists: true } };
         },
       },
     ],
