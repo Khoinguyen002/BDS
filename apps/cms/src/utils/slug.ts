@@ -27,8 +27,8 @@ export async function generateUniqueSlug(base: string, req: PayloadRequest): Pro
 
   while (!isUnique) {
     const existing = await payload.find({
-      collection: 'landing-pages',
-      where: { slug: { equals: currentSlug } },
+      collection: 'users',
+      where: { agentSlug: { equals: currentSlug } },
       req, // crucial: pass req down so it participates in the transaction
       depth: 0,
     })

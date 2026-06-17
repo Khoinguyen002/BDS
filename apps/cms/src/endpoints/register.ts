@@ -7,8 +7,8 @@ export const registerHandler: PayloadHandler = async (req) => {
 
   // v3: body không tự gắn vào req — phải tự đọc
   const body = await req.json?.()
-  const email = body?.email
-  const password = body?.password
+  const email = body?.email as string
+  const password = body?.password as string
 
   if (!email || !password) {
     return Response.json(
@@ -25,22 +25,23 @@ export const registerHandler: PayloadHandler = async (req) => {
   if (transactionID) req.transactionID = transactionID
 
   try {
-    // 1. Tạo user — truyền NGUYÊN req để kế thừa transactionID
+    // 1. Sinh slug từ email (truyền req để query slug trùng cũng nằm trong transaction)
+    const brandName = email.split('@')[0]
+    const agentSlug = await generateUniqueSlug(brandName, req)
+
+    // 2. Tạo user — truyền NGUYÊN req để kế thừa transactionID
     const user = await payload.create({
       collection: 'users',
-      data: { email, password, role: 'agent' },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      data: { email, password, role: 'agent', brandName, agentSlug } as any,
       req,
     })
-
-    // 2. Sinh slug (truyền req để query slug trùng cũng nằm trong transaction)
-    const slug = await generateUniqueSlug(email.split('@')[0], req)
 
     // 3. Tạo landing page — cùng req, cùng transaction
     await payload.create({
       collection: 'landing-pages',
       data: {
         owner: user.id,
-        slug,
         blocks: [
           { blockType: 'heroBanner', title: `Trang của ${email}` },
         ],

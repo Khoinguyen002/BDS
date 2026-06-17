@@ -1,13 +1,18 @@
-export const triggerRevalidate = async ({ doc, req, collection }: any) => {
+import type { PayloadRequest } from 'payload';
+import type { LandingPage, Apartment } from '@bds/shared/payload-types';
+
+export const triggerRevalidate = async ({ doc, req, collection }: { doc: Partial<LandingPage & Apartment>, req: PayloadRequest, collection: string }) => {
   if (!doc.owner) return;
   
-  const landing = await req.payload.find({
-    collection: 'landing-pages',
-    where: { owner: { equals: doc.owner } },
-    depth: 0,
+  const ownerId = typeof doc.owner === 'object' ? doc.owner.id : doc.owner;
+  if (!ownerId) return;
+
+  const userDoc = await req.payload.findByID({
+    collection: 'users',
+    id: ownerId as number,
     req,
   });
-  const agentSlug = landing.docs[0]?.slug;
+  const agentSlug = userDoc?.agentSlug;
   if (!agentSlug) return;
   
   try {

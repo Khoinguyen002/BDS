@@ -1,6 +1,7 @@
 {
   "name": "bds-monorepo",
   "private": true,
+  "packageManager": "pnpm@10.6.3",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",

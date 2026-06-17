@@ -1,13 +1,13 @@
-export async function resolveAgent(slug: string) {
+import { getUserBySlug, getLandingPageByOwner } from './payload-fetcher';
+
+export async function resolveLandingPage(agentSlug: string) {
   try {
-    const res = await fetch(`${process.env.PAYLOAD_PUBLIC_SERVER_URL || 'http://localhost:3001'}/api/landing-pages?where[slug][equals]=${slug}&depth=1`);
-    const data = await res.json();
-    if (data.docs && data.docs.length > 0) {
-      return data.docs[0];
-    }
-    return null;
+    const user = await getUserBySlug(agentSlug);
+    if (!user) return null;
+    
+    return await getLandingPageByOwner(user.id);
   } catch (error) {
-    console.error('Error resolving agent:', error);
+    console.error('Error resolving landing page:', error);
     return null;
   }
 }

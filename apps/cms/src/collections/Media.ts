@@ -4,7 +4,7 @@ import { getEffectiveTier, TIERS } from '@bds/shared'
 export const Media: CollectionConfig = {
   slug: 'media',
   upload: {
-    disableLocalStorage: true,
+    disableLocalStorage: !!process.env.S3_BUCKET,
   },
   access: {
     read: () => true,
@@ -18,7 +18,7 @@ export const Media: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
       required: true,
-      defaultValue: ({ req }: any) => req.user?.id,
+      defaultValue: ({ req }) => req.user?.id,
       admin: {
         position: 'sidebar',
       }
@@ -34,7 +34,7 @@ export const Media: CollectionConfig = {
 
           const tier = getEffectiveTier(user)
           
-          if (file.mimeType?.startsWith('video/') && !TIERS[tier].video) {
+          if ((file.mimetype as string)?.startsWith('video/') && !TIERS[tier].video) {
             throw new Error(`Your ${tier} tier does not support video uploads.`)
           }
 
@@ -49,9 +49,9 @@ export const Media: CollectionConfig = {
       }
     ],
     afterChange: [
-      async ({ doc, req, operation }) => {
+      async ({ req, operation }) => {
         if (operation === 'create' && req.user && req.file) {
-          const ownerUser = await req.payload.findByID({ collection: 'users', id: req.user.id as string, req })
+          const ownerUser = await req.payload.findByID({ collection: 'users', id: String(req.user.id), req })
           const newSize = (ownerUser.usage?.storageBytes || 0) + req.file.size
           await req.payload.update({
             collection: 'users',

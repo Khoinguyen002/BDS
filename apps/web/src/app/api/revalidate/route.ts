@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     if (!path) return NextResponse.json({ error: 'Path required' }, { status: 400 });
     revalidatePath(path);
     return NextResponse.json({ revalidated: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
   }
 }

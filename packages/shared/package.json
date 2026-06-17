@@ -3,5 +3,11 @@
   "version": "1.0.0",
   "main": "tiers.ts",
   "types": "tiers.ts",
-  "dependencies": {}
+  "exports": {
+    ".": "./tiers.ts",
+    "./payload-types": "./payload-types.ts"
+  },
+  "devDependencies": {
+    "payload": "^3.85.1"
+  }
 }
