@@ -33,13 +33,16 @@ export const pageBlocks: Block[] = [
         relationTo: "apartments",
         hasMany: true,
         filterOptions: ({ data, siblingData }) => {
-          const ownerId =
+          const owner =
             (data as Partial<LandingPage>)?.owner ||
             (siblingData as Partial<LandingPage>)?.owner;
+            
+          const ownerId = typeof owner === 'object' && owner !== null && 'id' in owner ? owner.id : owner;
+
           if (ownerId) {
             return { owner: { equals: ownerId } };
           }
-          return false;
+          return true; // Nếu đéo có owner (ví dụ đang tạo Template), cho phép chọn tất cả
         },
       },
     ],
