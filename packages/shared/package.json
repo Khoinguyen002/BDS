@@ -1,0 +1,7 @@
+{
+  "name": "@bds/shared",
+  "version": "1.0.0",
+  "main": "tiers.ts",
+  "types": "tiers.ts",
+  "dependencies": {}
+}
