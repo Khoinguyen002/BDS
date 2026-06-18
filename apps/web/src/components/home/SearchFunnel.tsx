@@ -19,47 +19,46 @@ import { LocationPanel, type SelectedLocation } from "./LocationCombobox";
 import { parseSearchQuery, type PropertyMode } from "@/lib/search-parser";
 
 // ─────────────────────────────────────────────────────────────
-// Price ranges by mode
+// Price ranges by mode (labels resolved via i18n)
 // ─────────────────────────────────────────────────────────────
-const PRICE_RANGES: Record<string, { label: string; value: string }[]> = {
+const PRICE_RANGES: Record<string, { labelKey: string; value: string }[]> = {
   "apartment-sale": [
-    { label: "Dưới 2 tỷ", value: "0-2000000000" },
-    { label: "2 – 5 tỷ", value: "2000000000-5000000000" },
-    { label: "5 – 10 tỷ", value: "5000000000-10000000000" },
-    { label: "10 – 20 tỷ", value: "10000000000-20000000000" },
-    { label: "Trên 20 tỷ", value: "20000000000-" },
+    { labelKey: "home.price_under_2b", value: "0-2000000000" },
+    { labelKey: "home.price_2b_5b", value: "2000000000-5000000000" },
+    { labelKey: "home.price_5b_10b", value: "5000000000-10000000000" },
+    { labelKey: "home.price_10b_20b", value: "10000000000-20000000000" },
+    { labelKey: "home.price_over_20b", value: "20000000000-" },
   ],
   "land_house-sale": [
-    { label: "Dưới 2 tỷ", value: "0-2000000000" },
-    { label: "2 – 5 tỷ", value: "2000000000-5000000000" },
-    { label: "5 – 10 tỷ", value: "5000000000-10000000000" },
-    { label: "10 – 20 tỷ", value: "10000000000-20000000000" },
-    { label: "Trên 20 tỷ", value: "20000000000-" },
+    { labelKey: "home.price_under_2b", value: "0-2000000000" },
+    { labelKey: "home.price_2b_5b", value: "2000000000-5000000000" },
+    { labelKey: "home.price_5b_10b", value: "5000000000-10000000000" },
+    { labelKey: "home.price_10b_20b", value: "10000000000-20000000000" },
+    { labelKey: "home.price_over_20b", value: "20000000000-" },
   ],
   "apartment-rent": [
-    { label: "Dưới 10 triệu/tháng", value: "0-10000000" },
-    { label: "10 – 20 triệu/tháng", value: "10000000-20000000" },
-    { label: "20 – 40 triệu/tháng", value: "20000000-40000000" },
-    { label: "Trên 40 triệu/tháng", value: "40000000-" },
+    { labelKey: "home.price_under_10m_month", value: "0-10000000" },
+    { labelKey: "home.price_10m_20m_month", value: "10000000-20000000" },
+    { labelKey: "home.price_20m_40m_month", value: "20000000-40000000" },
+    { labelKey: "home.price_over_40m_month", value: "40000000-" },
   ],
   "boarding_room-rent": [
-    { label: "Dưới 2 triệu/tháng", value: "0-2000000" },
-    { label: "2 – 5 triệu/tháng", value: "2000000-5000000" },
-    { label: "5 – 10 triệu/tháng", value: "5000000-10000000" },
-    { label: "Trên 10 triệu/tháng", value: "10000000-" },
+    { labelKey: "home.price_under_2m_month", value: "0-2000000" },
+    { labelKey: "home.price_2m_5m_month", value: "2000000-5000000" },
+    { labelKey: "home.price_5m_10m_month", value: "5000000-10000000" },
+    { labelKey: "home.price_over_10m_month", value: "10000000-" },
   ],
 };
 
 // ─────────────────────────────────────────────────────────────
-// Dynamic placeholders (P2)
+// Dynamic placeholders (resolved via i18n)
 // ─────────────────────────────────────────────────────────────
-const PLACEHOLDERS: Partial<Record<PropertyMode, string>> = {
-  "apartment-sale": "Căn hộ 3PN Quận 2 dưới 5 tỷ",
-  "apartment-rent": "Căn hộ 2PN Bình Thạnh dưới 20 triệu",
-  "land_house-sale": "Nhà phố Quận 7 dưới 10 tỷ",
-  "boarding_room-rent": "Phòng trọ Quận 7 dưới 5 triệu",
+const PLACEHOLDER_KEYS: Partial<Record<PropertyMode, string>> = {
+  "apartment-sale": "home.search_placeholder_apartment_sale",
+  "apartment-rent": "home.search_placeholder_apartment_rent",
+  "land_house-sale": "home.search_placeholder_land_house_sale",
+  "boarding_room-rent": "home.search_placeholder_boarding_room_rent",
 };
-const fallbackPlaceholder = "Nhập khu vực, loại nhà...";
 
 // ─────────────────────────────────────────────────────────────
 // Props
@@ -91,7 +90,10 @@ export const SearchFunnel = ({ agentSlug, locations = [] }: SearchFunnelProps) =
   // Derived
   const propertyMode: PropertyMode | "" = propertyType ? `${propertyType}-${listingType}` as PropertyMode : "";
   const currentPriceRanges = propertyMode ? (PRICE_RANGES[propertyMode] ?? []) : (PRICE_RANGES[`apartment-${listingType}`] ?? []);
-  const currentPlaceholder = propertyMode ? (PLACEHOLDERS[propertyMode] ?? fallbackPlaceholder) : (PLACEHOLDERS[`apartment-${listingType}` as PropertyMode] ?? fallbackPlaceholder);
+  const placeholderKey = propertyMode
+    ? (PLACEHOLDER_KEYS[propertyMode] ?? "home.search_placeholder_fallback")
+    : (PLACEHOLDER_KEYS[`apartment-${listingType}` as PropertyMode] ?? "home.search_placeholder_fallback");
+  const currentPlaceholder = t(placeholderKey as Parameters<typeof t>[0]);
 
   // ── NLP Parser (P3) ───────────────────────────────────────
   const parserTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -352,15 +354,15 @@ export const SearchFunnel = ({ agentSlug, locations = [] }: SearchFunnelProps) =
               {currentPriceRanges.length > 0
                 ? currentPriceRanges.map((r) => (
                     <option key={r.value} value={r.value}>
-                      {r.label}
+                      {t(r.labelKey as Parameters<typeof t>[0])}
                     </option>
                   ))
                 : (
                   <>
-                    <option value="0-2000000000">Dưới 2 tỷ</option>
-                    <option value="2000000000-5000000000">2 – 5 tỷ</option>
-                    <option value="5000000000-10000000000">5 – 10 tỷ</option>
-                    <option value="10000000000-">Trên 10 tỷ</option>
+                    <option value="0-2000000000">{t("home.price_under_2b")}</option>
+                    <option value="2000000000-5000000000">{t("home.price_2b_5b")}</option>
+                    <option value="5000000000-10000000000">{t("home.price_5b_10b")}</option>
+                    <option value="10000000000-">{t("home.price_over_10b")}</option>
                   </>
                 )}
             </select>

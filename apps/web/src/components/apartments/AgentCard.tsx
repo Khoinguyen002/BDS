@@ -66,7 +66,7 @@ export const AgentCard = ({ owner, listingType }: AgentCardProps) => {
                 {tApartments("call_now") || "Gọi điện"}
               </a>
             </Button>
-            <Button asChild size="lg" className="w-full bg-blue-500 hover:bg-blue-600 text-white">
+            <Button asChild size="lg" className="w-full">
               <a href={owner.profile?.zaloUrl || `https://zalo.me/${owner.profile?.phoneNumber || ""}`} target="_blank" rel="noreferrer">
                 Chat Zalo
               </a>
