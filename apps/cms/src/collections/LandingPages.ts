@@ -1,6 +1,6 @@
-import type { CollectionConfig } from "payload";
+import { CollectionConfig, APIError } from "payload";
 import { getEffectiveTier, TIERS } from "@bds/shared";
-import { triggerRevalidate } from "../utils/revalidate";
+import { triggerRevalidatePaths } from "../utils/revalidate";
 
 import { pageBlocks } from "./blocks/pageBlocks";
 
@@ -92,7 +92,7 @@ export const LandingPages: CollectionConfig = {
           });
           const tier = getEffectiveTier(user);
           if (data.blocks.length > TIERS[tier].maxBlocks) {
-            throw new Error(`Maximum blocks limit reached for ${tier} tier.`);
+            throw new APIError(`Maximum blocks limit reached for ${tier} tier.`, 400, undefined, true);
           }
 
           if (operation === 'create' && user.role !== 'admin') {
@@ -102,7 +102,7 @@ export const LandingPages: CollectionConfig = {
               req,
             });
             if (totalDocs >= 1) {
-              throw new Error('Mỗi Agent chỉ được tạo tối đa 1 Landing Page!');
+              throw new APIError('Mỗi Agent chỉ được tạo tối đa 1 Landing Page!', 400, undefined, true);
             }
           }
         }
@@ -112,7 +112,17 @@ export const LandingPages: CollectionConfig = {
     ],
     afterChange: [
       async ({ doc, req }) => {
-        await triggerRevalidate({ doc, req, collection: "landing-pages" });
+        if (doc.owner) {
+          const ownerId = typeof doc.owner === 'object' ? doc.owner.id : doc.owner;
+          const userDoc = await req.payload.findByID({
+            collection: 'users',
+            id: ownerId as number,
+            req,
+          });
+          if (userDoc?.agentSlug) {
+            await triggerRevalidatePaths([`/vi/${userDoc.agentSlug}`, `/en/${userDoc.agentSlug}`]);
+          }
+        }
       },
     ],
   },

@@ -7,7 +7,7 @@ import ContactForm from '@/components/blocks/ContactForm';
 import type { LandingPage } from '@bds/shared/payload-types';
 
 type Props = {
-  params: Promise<{ agentSlug: string }>
+  params: Promise<{ agentSlug: string, locale: string }>
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -23,7 +23,11 @@ export async function generateMetadata({ params }: Props) {
   }
 }
 
-export default async function LandingPage({ params }: Props) {
+export default async function AgentPage({
+  params,
+}: {
+  params: Promise<{ locale: string; agentSlug: string }>;
+}) {
   const { agentSlug } = await params;
   
   const landingPage = await resolveLandingPage(agentSlug);
@@ -32,7 +36,7 @@ export default async function LandingPage({ params }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="bg-background">
       {landingPage.blocks?.map((block: NonNullable<LandingPage['blocks']>[number], idx: number) => {
         switch (block.blockType) {
           case 'heroBanner':
@@ -40,7 +44,7 @@ export default async function LandingPage({ params }: Props) {
           case 'aboutAgent':
             return <AboutAgent key={idx} {...block} />;
           case 'listApartments':
-            return <ListApartments key={idx} {...block} ownerId={landingPage.owner} />;
+            return <ListApartments key={idx} {...block} ownerId={landingPage.owner} agentSlug={agentSlug} />;
           case 'contactForm':
             return <ContactForm key={idx} {...block} ownerId={landingPage.owner} />;
           default:

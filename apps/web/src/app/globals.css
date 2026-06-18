@@ -2,28 +2,82 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-
+/* ─── Light Mode Tokens ─────────────────────────────────── */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --background-subtle: #f4f4f5;   /* zinc-100 – alternate section bg */
+  --foreground: #09090b;          /* zinc-950 */
+  --foreground-secondary: #52525b; /* zinc-600 */
+  --foreground-muted: #71717a;    /* zinc-500 */
+  --border: #e4e4e7;              /* zinc-200 */
+  --border-strong: #d4d4d8;       /* zinc-300 */
+  --theme-radius: 0px;            /* Default sharp; overridable per agent via ThemeInjector */
 }
 
+/* ─── Dark Mode Tokens ──────────────────────────────────── */
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #09090b;          /* zinc-950 */
+  --background-subtle: #18181b;   /* zinc-900 – alternate section bg */
+  --foreground: #fafafa;          /* zinc-50 */
+  --foreground-secondary: #a1a1aa; /* zinc-400 */
+  --foreground-muted: #71717a;    /* zinc-500 */
+  --border: #27272a;              /* zinc-800 */
+  --border-strong: #3f3f46;       /* zinc-700 */
 }
 
+/* ─── Tailwind Theme Bridge ─────────────────────────────── */
 @theme inline {
   --color-background: var(--background);
+  --color-background-subtle: var(--background-subtle);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-primary: var(--theme-primary, #2563eb);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--theme-primary, #059669); /* Emerald default */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
+/* ─── Base ──────────────────────────────────────────────── */
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s ease, color 0.15s ease;
 }
 
+/* ─── Typography ────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.025em;
+  font-feature-settings: "ss01", "ss02";
+}
+
+/* ─── Selection ─────────────────────────────────────────── */
+::selection {
+  background-color: var(--theme-primary, #059669);
+  color: #fff;
+}
+
+/* ─── Scrollbar (subtle refinement) ────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground-muted);
+}
+
+/* ─── Focus Ring ────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--theme-primary, #059669);
+  outline-offset: 2px;
+}

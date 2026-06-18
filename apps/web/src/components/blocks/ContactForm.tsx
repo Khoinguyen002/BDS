@@ -1,96 +1,116 @@
 import type { LandingPage, User } from "@bds/shared/payload-types";
+import { getTranslations } from "next-intl/server";
+import { PhoneIcon, ShieldCheckIcon } from "@phosphor-icons/react/dist/ssr";
+import { AnimatedSection } from "@/components/AnimatedSection";
 
-export default function ContactForm(
+export default async function ContactForm(
   props: Extract<
     NonNullable<LandingPage["blocks"]>[number],
     { blockType: "contactForm" }
   > & { ownerId?: number | User },
 ) {
   const { title, placeholder } = props;
+  const t = await getTranslations("contact");
 
   return (
-    <section className="py-24 px-4 md:px-8 bg-zinc-50 dark:bg-zinc-950 relative overflow-hidden">
-      {/* Premium subtle background glow based on theme primary */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-96 opacity-20 dark:opacity-10 blur-3xl rounded-full pointer-events-none" style={{ backgroundColor: 'var(--theme-primary)' }} />
-
+    <section className="py-24 px-4 md:px-8 bg-background-subtle border-t border-border relative overflow-hidden">
       <div className="relative max-w-5xl mx-auto">
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-[calc(var(--theme-radius)+0.5rem)] p-8 md:p-16 shadow-2xl flex flex-col md:flex-row gap-16 items-center">
-          
-          {/* Text Content */}
-          <div className="w-full md:w-5/12">
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-zinc-900 dark:text-white tracking-tight">
-              {title || "Liên Hệ Với Chúng Tôi"}
-            </h2>
-            <p className="text-zinc-500 dark:text-zinc-400 text-lg mb-10 font-light leading-relaxed">
-              {placeholder ||
-                "Hãy để lại thông tin, chuyên viên của chúng tôi sẽ liên hệ lại với bạn trong thời gian sớm nhất."}
-            </p>
+        <div className="bg-background border border-border p-8 md:p-16 flex flex-col md:flex-row gap-12 md:gap-16 items-start">
 
-            <div className="space-y-6">
+          {/* Text Content */}
+          <AnimatedSection direction="up" className="w-full md:w-5/12 flex flex-col gap-8">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-medium mb-4 text-foreground tracking-tight leading-[1.1]">
+                {title || t("title")}
+              </h2>
+              <p className="text-foreground-secondary text-base leading-relaxed">
+                {placeholder || t("description")}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-md" style={{ backgroundColor: 'var(--theme-primary)' }}>
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
+                <div
+                  className="w-10 h-10 flex items-center justify-center text-white shrink-0"
+                  style={{ backgroundColor: "var(--theme-primary)" }}
+                >
+                  <PhoneIcon weight="regular" className="w-4 h-4" />
                 </div>
-                <span className="text-zinc-700 dark:text-zinc-300 font-medium">Hỗ trợ khách hàng 24/7</span>
+                <span className="text-foreground-secondary text-sm font-medium">
+                  {t("support_247")}
+                </span>
               </div>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-md" style={{ backgroundColor: 'var(--theme-primary)' }}>
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
+                <div
+                  className="w-10 h-10 flex items-center justify-center text-white shrink-0"
+                  style={{ backgroundColor: "var(--theme-primary)" }}
+                >
+                  <ShieldCheckIcon weight="regular" className="w-4 h-4" />
                 </div>
-                <span className="text-zinc-700 dark:text-zinc-300 font-medium">Bảo mật thông tin tuyệt đối</span>
+                <span className="text-foreground-secondary text-sm font-medium">
+                  {t("security")}
+                </span>
               </div>
             </div>
-          </div>
+          </AnimatedSection>
 
           {/* Form */}
-          <div className="w-full md:w-7/12">
-            <form className="space-y-5 bg-zinc-50/50 dark:bg-zinc-950/50 p-6 md:p-8 rounded-(--theme-radius) border border-zinc-100 dark:border-zinc-800">
+          <AnimatedSection delay={0.2} direction="up" className="w-full md:w-7/12">
+            <form className="flex flex-col gap-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
-                  Họ và tên
+                <label
+                  htmlFor="contact-name"
+                  className="block text-xs font-semibold uppercase tracking-widest text-foreground-muted mb-2"
+                >
+                  {t("full_name")}
                 </label>
                 <input
                   type="text"
-                  id="name"
-                  className="w-full px-4 py-3.5 rounded-[calc(var(--theme-radius)-0.25rem)] border border-zinc-200 dark:border-zinc-700 outline-none transition-all bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-(--theme-primary) focus:border-transparent text-zinc-900 dark:text-white placeholder:text-zinc-400"
-                  placeholder="Nguyễn Văn A"
+                  id="contact-name"
+                  className="w-full px-4 py-3.5 border border-border bg-background outline-none transition-all focus:border-[var(--theme-primary)] text-foreground placeholder:text-foreground-muted text-sm"
+                  placeholder={t("full_name_placeholder")}
                 />
               </div>
+
               <div>
-                <label htmlFor="phone" className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
-                  Số điện thoại
+                <label
+                  htmlFor="contact-phone"
+                  className="block text-xs font-semibold uppercase tracking-widest text-foreground-muted mb-2"
+                >
+                  {t("phone_number")}
                 </label>
                 <input
                   type="tel"
-                  id="phone"
-                  className="w-full px-4 py-3.5 rounded-[calc(var(--theme-radius)-0.25rem)] border border-zinc-200 dark:border-zinc-700 outline-none transition-all bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-(--theme-primary) focus:border-transparent text-zinc-900 dark:text-white placeholder:text-zinc-400"
-                  placeholder="0912 345 678"
+                  id="contact-phone"
+                  className="w-full px-4 py-3.5 border border-border bg-background outline-none transition-all focus:border-[var(--theme-primary)] text-foreground placeholder:text-foreground-muted text-sm"
+                  placeholder={t("phone_placeholder")}
                 />
               </div>
+
               <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
-                  Email (Không bắt buộc)
+                <label
+                  htmlFor="contact-email"
+                  className="block text-xs font-semibold uppercase tracking-widest text-foreground-muted mb-2"
+                >
+                  {t("email_optional")}
                 </label>
                 <input
                   type="email"
-                  id="email"
-                  className="w-full px-4 py-3.5 rounded-[calc(var(--theme-radius)-0.25rem)] border border-zinc-200 dark:border-zinc-700 outline-none transition-all bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-(--theme-primary) focus:border-transparent text-zinc-900 dark:text-white placeholder:text-zinc-400"
-                  placeholder="example@mail.com"
+                  id="contact-email"
+                  className="w-full px-4 py-3.5 border border-border bg-background outline-none transition-all focus:border-[var(--theme-primary)] text-foreground placeholder:text-foreground-muted text-sm"
+                  placeholder={t("email_placeholder")}
                 />
               </div>
+
               <button
                 type="button"
-                className="w-full py-4 text-white font-bold rounded-[calc(var(--theme-radius)-0.25rem)] shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 mt-4"
-                style={{ backgroundColor: 'var(--theme-primary)' }}
+                className="w-full py-4 text-white text-sm font-semibold uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all duration-200 mt-2"
+                style={{ backgroundColor: "var(--theme-primary)" }}
               >
-                Gửi Yêu Cầu
+                {t("submit_button")}
               </button>
             </form>
-          </div>
+          </AnimatedSection>
 
         </div>
       </div>

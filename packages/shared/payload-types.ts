@@ -73,6 +73,8 @@ export interface Config {
     apartments: Apartment;
     leads: Lead;
     templates: Template;
+    translations: Translation;
+    amenities: Amenity;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,6 +88,8 @@ export interface Config {
     apartments: ApartmentsSelect<false> | ApartmentsSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     templates: TemplatesSelect<false> | TemplatesSelect<true>;
+    translations: TranslationsSelect<false> | TranslationsSelect<true>;
+    amenities: AmenitiesSelect<false> | AmenitiesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -133,6 +137,13 @@ export interface User {
   id: number;
   brandName: string;
   agentSlug: string;
+  verified?: boolean | null;
+  profile?: {
+    experienceYears?: number | null;
+    successfulTransactions?: number | null;
+    phoneNumber?: string | null;
+    zaloUrl?: string | null;
+  };
   role?: ('admin' | 'agent') | null;
   subscription?: {
     tier?: ('free' | 'pro') | null;
@@ -304,12 +315,120 @@ export interface Media {
  */
 export interface Apartment {
   id: number;
+  listingType: 'sale' | 'rent';
   title: string;
+  address?: string | null;
+  gallery?: (number | Media)[] | null;
+  tourUrl?: string | null;
+  details?: {
+    overview?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    highlights?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    landscape?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  keyFacts?: {
+    direction?: string | null;
+    balconyDirection?: string | null;
+    floorLevel?: ('low' | 'mid' | 'high') | null;
+    area?: number | null;
+    bedrooms?: number | null;
+    bathrooms?: number | null;
+    furnitureStatus?: ('empty' | 'basic' | 'full') | null;
+    petFriendly?: boolean | null;
+    freeHours?: boolean | null;
+    handoverYear?: number | null;
+    buildingQuality?: ('new' | 'renovated' | 'old') | null;
+  };
+  price?: number | null;
+  priceBreakdown?: {
+    totalPrice?: number | null;
+    pricePerSqm?: number | null;
+    transferFee?: string | null;
+    taxResponsibility?: ('buyer' | 'seller' | 'negotiated') | null;
+    managementFee?: number | null;
+    negotiable?: boolean | null;
+  };
+  rentPricing?: {
+    pricePerMonth?: number | null;
+    deposit?: ('1_month' | '2_months' | '3_months' | 'other') | null;
+    utilitiesPrice?: ('state' | 'business' | 'negotiated') | null;
+    minLeaseTerm?: number | null;
+    availableDate?: string | null;
+    managementFeeIncluded?: boolean | null;
+    negotiable?: boolean | null;
+  };
+  legal?: {
+    documentType?: ('pink_book' | 'sale_contract' | 'other') | null;
+    ownershipTerm?: ('long_term' | '50_years') | null;
+    bankMortgaged?: boolean | null;
+    bankSupportPercentage?: number | null;
+  };
+  location?: {
+    lat?: number | null;
+    lng?: number | null;
+  };
+  amenities?: (number | Amenity)[] | null;
+  investment?: {
+    rentalYield?: number | null;
+  };
   slug?: string | null;
   owner: number | User;
-  gallery?: (number | Media)[] | null;
-  price?: number | null;
-  address?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "amenities".
+ */
+export interface Amenity {
+  id: number;
+  title: string;
+  /**
+   * Phosphor Icon component name (e.g., "SwimmingPool", "Barbell")
+   */
+  icon: string;
+  category: 'internal' | 'external';
   updatedAt: string;
   createdAt: string;
 }
@@ -324,9 +443,28 @@ export interface Lead {
   email?: string | null;
   owner: number | User;
   apartmentRef?: (number | null) | Apartment;
-  status?: ('new' | 'contacted') | null;
+  type: 'sale' | 'rent' | 'consignment';
+  message?: string | null;
+  status?: ('new' | 'contacted' | 'closed' | 'lost') | null;
   deleted?: boolean | null;
   dedupeWarning?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage localization strings for the frontend.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "translations".
+ */
+export interface Translation {
+  id: number;
+  /**
+   * Key format: namespace.key (e.g. hero.title)
+   */
+  key: string;
+  value: string;
+  namespace?: ('common' | 'hero' | 'nav' | 'footer' | 'apartments' | 'agent' | 'contact') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -377,6 +515,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'templates';
         value: number | Template;
+      } | null)
+    | ({
+        relationTo: 'translations';
+        value: number | Translation;
+      } | null)
+    | ({
+        relationTo: 'amenities';
+        value: number | Amenity;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -427,6 +573,15 @@ export interface PayloadMigration {
 export interface UsersSelect<T extends boolean = true> {
   brandName?: T;
   agentSlug?: T;
+  verified?: T;
+  profile?:
+    | T
+    | {
+        experienceYears?: T;
+        successfulTransactions?: T;
+        phoneNumber?: T;
+        zaloUrl?: T;
+      };
   role?: T;
   subscription?:
     | T
@@ -533,12 +688,77 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "apartments_select".
  */
 export interface ApartmentsSelect<T extends boolean = true> {
+  listingType?: T;
   title?: T;
+  address?: T;
+  gallery?: T;
+  tourUrl?: T;
+  details?:
+    | T
+    | {
+        overview?: T;
+        highlights?: T;
+        landscape?: T;
+      };
+  keyFacts?:
+    | T
+    | {
+        direction?: T;
+        balconyDirection?: T;
+        floorLevel?: T;
+        area?: T;
+        bedrooms?: T;
+        bathrooms?: T;
+        furnitureStatus?: T;
+        petFriendly?: T;
+        freeHours?: T;
+        handoverYear?: T;
+        buildingQuality?: T;
+      };
+  price?: T;
+  priceBreakdown?:
+    | T
+    | {
+        totalPrice?: T;
+        pricePerSqm?: T;
+        transferFee?: T;
+        taxResponsibility?: T;
+        managementFee?: T;
+        negotiable?: T;
+      };
+  rentPricing?:
+    | T
+    | {
+        pricePerMonth?: T;
+        deposit?: T;
+        utilitiesPrice?: T;
+        minLeaseTerm?: T;
+        availableDate?: T;
+        managementFeeIncluded?: T;
+        negotiable?: T;
+      };
+  legal?:
+    | T
+    | {
+        documentType?: T;
+        ownershipTerm?: T;
+        bankMortgaged?: T;
+        bankSupportPercentage?: T;
+      };
+  location?:
+    | T
+    | {
+        lat?: T;
+        lng?: T;
+      };
+  amenities?: T;
+  investment?:
+    | T
+    | {
+        rentalYield?: T;
+      };
   slug?: T;
   owner?: T;
-  gallery?: T;
-  price?: T;
-  address?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -552,6 +772,8 @@ export interface LeadsSelect<T extends boolean = true> {
   email?: T;
   owner?: T;
   apartmentRef?: T;
+  type?: T;
+  message?: T;
   status?: T;
   deleted?: T;
   dedupeWarning?: T;
@@ -600,6 +822,28 @@ export interface TemplatesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "translations_select".
+ */
+export interface TranslationsSelect<T extends boolean = true> {
+  key?: T;
+  value?: T;
+  namespace?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "amenities_select".
+ */
+export interface AmenitiesSelect<T extends boolean = true> {
+  title?: T;
+  icon?: T;
+  category?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -42,16 +42,16 @@ const NodeRenderer = ({ node }: { node: ElementNode | TextNode }) => {
 
   switch (elNode.type) {
     case "paragraph":
-      return <p className="mb-4 text-gray-700 leading-relaxed">{children}</p>;
+      return <p className="mb-4 text-foreground-secondary leading-relaxed">{children}</p>;
     case "heading":
       const Tag = (elNode.tag as keyof React.JSX.IntrinsicElements) || "h2";
       const headingClasses: Record<string, string> = {
-        h1: "text-4xl font-bold mb-6 text-gray-900",
-        h2: "text-3xl font-bold mb-4 text-gray-900",
-        h3: "text-2xl font-bold mb-3 text-gray-900",
-        h4: "text-xl font-bold mb-2 text-gray-900",
-        h5: "text-lg font-bold mb-2 text-gray-900",
-        h6: "text-base font-bold mb-2 text-gray-900",
+        h1: "text-4xl font-bold mb-6 text-zinc-900 dark:text-zinc-100",
+        h2: "text-3xl font-bold mb-4 text-zinc-900 dark:text-zinc-100",
+        h3: "text-2xl font-bold mb-3 text-zinc-900 dark:text-zinc-100",
+        h4: "text-xl font-bold mb-2 text-zinc-900 dark:text-zinc-100",
+        h5: "text-lg font-bold mb-2 text-zinc-900 dark:text-zinc-100",
+        h6: "text-base font-bold mb-2 text-zinc-900 dark:text-zinc-100",
       };
       return <Tag className={headingClasses[Tag as string] || headingClasses.h2}>{children}</Tag>;
     case "list":
@@ -59,10 +59,10 @@ const NodeRenderer = ({ node }: { node: ElementNode | TextNode }) => {
       const listClass = elNode.tag === "ol" ? "list-decimal ml-6 mb-4" : "list-disc ml-6 mb-4";
       return <ListTag className={listClass}>{children}</ListTag>;
     case "listitem":
-      return <li className="mb-1 text-gray-700">{children}</li>;
+      return <li className="mb-1 text-zinc-700 dark:text-zinc-300">{children}</li>;
     case "quote":
       return (
-        <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4">
+        <blockquote className="border-l-4 border-[var(--theme-primary)] pl-4 italic text-foreground-secondary my-4">
           {children}
         </blockquote>
       );
@@ -75,7 +75,7 @@ const NodeRenderer = ({ node }: { node: ElementNode | TextNode }) => {
 export default function RichTextRenderer({ content }: { content: LexicalRoot }) {
   if (!content || !content.root) return null;
   return (
-    <div className="prose prose-blue max-w-none">
+    <div className="prose max-w-none dark:prose-invert prose-zinc">
       <NodeRenderer node={content.root} />
     </div>
   );

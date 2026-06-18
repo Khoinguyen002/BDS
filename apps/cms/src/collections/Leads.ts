@@ -37,9 +37,21 @@ export const Leads: CollectionConfig = {
     },
     { name: "apartmentRef", type: "relationship", relationTo: "apartments" },
     {
+      name: "type",
+      type: "select",
+      options: [
+        { label: { vi: "Liên hệ Bán", en: "Sale Contact" }, value: "sale" },
+        { label: { vi: "Liên hệ Thuê", en: "Rent Contact" }, value: "rent" },
+        { label: { vi: "Đăng tin/Ký gửi", en: "Consignment" }, value: "consignment" },
+      ],
+      required: true,
+      defaultValue: "sale",
+    },
+    { name: "message", type: "textarea" },
+    {
       name: "status",
       type: "select",
-      options: ["new", "contacted"],
+      options: ["new", "contacted", "closed", "lost"],
       defaultValue: "new",
     },
     { name: "deleted", type: "checkbox", defaultValue: false },

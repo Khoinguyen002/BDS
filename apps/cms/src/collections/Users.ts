@@ -37,6 +37,28 @@ export const Users: CollectionConfig = {
       },
     },
     {
+      name: 'verified',
+      type: 'checkbox',
+      label: 'Verified Agent Badge',
+      defaultValue: false,
+      access: {
+        create: ({ req: { user } }) => user?.role === 'admin',
+        update: ({ req: { user } }) => user?.role === 'admin',
+      },
+      admin: { position: 'sidebar' },
+    },
+    {
+      name: 'profile',
+      type: 'group',
+      label: 'Agent Profile',
+      fields: [
+        { name: 'experienceYears', type: 'number', label: 'Years of Experience' },
+        { name: 'successfulTransactions', type: 'number', label: 'Successful Transactions' },
+        { name: 'phoneNumber', type: 'text', label: 'Phone Number' },
+        { name: 'zaloUrl', type: 'text', label: 'Zalo URL (e.g., https://zalo.me/0123456789)' },
+      ]
+    },
+    {
       name: 'role',
       type: 'select',
       options: [

@@ -1,19 +1,16 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import createMiddleware from 'next-intl/middleware';
 
-export async function proxy(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
-  if (pathname.startsWith('/api') || pathname.startsWith('/_next') || pathname.startsWith('/admin')) {
-    return NextResponse.next();
-  }
+const intlMiddleware = createMiddleware({
+  // A list of all locales that are supported
+  locales: ['vi', 'en'],
 
-  const slug = pathname.split('/')[1];
-  if (!slug) return NextResponse.next();
+  // Used when no locale matches
+  defaultLocale: 'vi',
+});
 
-
-  return NextResponse.next();
-}
+export const proxy = intlMiddleware;
 
 export const config = {
-  matcher: '/:path*',
-}
+  // Match only internationalized pathnames
+  matcher: ['/', '/(vi|en)/:path*']
+};

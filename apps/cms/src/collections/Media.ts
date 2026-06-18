@@ -39,8 +39,11 @@ export const Media: CollectionConfig = {
             (file.mimetype as string)?.startsWith("video/") &&
             !TIERS[tier].video
           ) {
-            throw new Error(
+            throw new APIError(
               `Your ${tier} tier does not support video uploads.`,
+              400,
+              undefined,
+              true
             );
           }
 
@@ -48,7 +51,7 @@ export const Media: CollectionConfig = {
           const maxStorageBytes = TIERS[tier].maxStorageMB * 1024 * 1024;
 
           if (storageBytes + file.size > maxStorageBytes) {
-            throw new Error(`Storage limit exceeded. Upgrade to pro.`);
+            throw new APIError(`Storage limit exceeded. Upgrade to pro.`, 400, undefined, true);
           }
         }
         return data;

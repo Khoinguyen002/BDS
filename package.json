@@ -8,6 +8,7 @@
     "lint": "turbo run lint"
   },
   "devDependencies": {
+    "@eslint/compat": "^2.1.0",
     "turbo": "^2.0.0"
   }
 }
