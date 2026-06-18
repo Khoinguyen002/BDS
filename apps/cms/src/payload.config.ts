@@ -13,6 +13,7 @@ import { Apartments } from "./collections/Apartments";
 import { Leads } from "./collections/Leads";
 import { Templates } from "./collections/Templates";
 import { registerHandler } from "./endpoints/register";
+import { env } from "./env";
 
 export default buildConfig({
   i18n: {
@@ -23,18 +24,16 @@ export default buildConfig({
     defaultLocale: "vi",
     fallback: true,
   },
-  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL || "http://localhost:3001",
+  serverURL: env.PAYLOAD_PUBLIC_SERVER_URL,
   db: postgresAdapter({
     pool: {
-      connectionString:
-        process.env.DATABASE_URI ||
-        "postgres://postgres:postgres@127.0.0.1:5432/bds",
+      connectionString: env.DATABASE_URI,
     },
     push: true,
   }),
   editor: lexicalEditor({}),
-  cors: [process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"],
-  csrf: [process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"],
+  cors: [env.NEXT_PUBLIC_APP_URL],
+  csrf: [env.NEXT_PUBLIC_APP_URL],
   cookiePrefix: "payload",
   typescript: {
     outputFile: path.resolve(
@@ -42,23 +41,23 @@ export default buildConfig({
       "../../../packages/shared/payload-types.ts",
     ),
   },
-  secret: process.env.PAYLOAD_SECRET || "supersecret",
+  secret: env.PAYLOAD_SECRET,
   collections: [Users, LandingPages, Media, Apartments, Leads, Templates],
   plugins: [
-    ...(process.env.S3_BUCKET
+    ...(env.S3_BUCKET
       ? [
           s3Storage({
             collections: {
               media: true,
             },
-            bucket: process.env.S3_BUCKET,
+            bucket: env.S3_BUCKET,
             config: {
               credentials: {
-                accessKeyId: process.env.S3_ACCESS_KEY_ID || "",
-                secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || "",
+                accessKeyId: env.S3_ACCESS_KEY_ID || "",
+                secretAccessKey: env.S3_SECRET_ACCESS_KEY || "",
               },
-              region: process.env.S3_REGION || "auto",
-              endpoint: process.env.S3_ENDPOINT || "",
+              region: env.S3_REGION,
+              endpoint: env.S3_ENDPOINT || "",
               forcePathStyle: true,
             },
           }),

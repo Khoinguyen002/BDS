@@ -1,5 +1,6 @@
 import type { PayloadRequest } from 'payload';
 import type { LandingPage, Apartment } from '@bds/shared/payload-types';
+import { env } from '../env';
 
 export const triggerRevalidate = async ({ doc, req, collection }: { doc: Partial<LandingPage & Apartment>, req: PayloadRequest, collection: string }) => {
   if (!doc.owner) return;
@@ -22,10 +23,10 @@ export const triggerRevalidate = async ({ doc, req, collection }: { doc: Partial
     }
 
     await Promise.all(paths.map(path => 
-      fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/revalidate`, {
+      fetch(`${env.NEXT_PUBLIC_APP_URL}/api/revalidate`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.REVALIDATE_SECRET}`,
+          'Authorization': `Bearer ${env.REVALIDATE_SECRET}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ path })

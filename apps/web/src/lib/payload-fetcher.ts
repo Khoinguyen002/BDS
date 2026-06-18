@@ -7,9 +7,9 @@
  */
 
 import type { User, LandingPage, Apartment } from "@bds/shared/payload-types";
+import { env } from "../env";
 
-const SERVER_URL =
-  process.env.PAYLOAD_PUBLIC_SERVER_URL || "http://localhost:3001";
+const SERVER_URL = env.PAYLOAD_PUBLIC_SERVER_URL;
 const REVALIDATE_TIME = 60; // 60 seconds
 
 async function fetchAPI(endpoint: string) {

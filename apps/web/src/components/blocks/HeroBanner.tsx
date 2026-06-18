@@ -1,5 +1,6 @@
 import type { LandingPage, Media } from "@bds/shared/payload-types";
 import Image from "next/image";
+import { env } from "@/env";
 
 export default function HeroBanner(
   props: Extract<
@@ -13,7 +14,7 @@ export default function HeroBanner(
   const bgImage =
     typeof backgroundImage === "object" ? (backgroundImage as Media) : null;
   const bgUrl = bgImage?.url 
-    ? (bgImage.url.startsWith("http") ? bgImage.url : `${process.env.PAYLOAD_PUBLIC_SERVER_URL || "http://localhost:3001"}${bgImage.url}`)
+    ? (bgImage.url.startsWith("http") ? bgImage.url : `${env.PAYLOAD_PUBLIC_SERVER_URL}${bgImage.url}`)
     : "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=2000&q=80";
 
   return (

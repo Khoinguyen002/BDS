@@ -3,6 +3,7 @@ import type { LandingPage, User, Apartment } from "@bds/shared/payload-types";
 import Image from "next/image";
 import Link from "next/link";
 import { getApartmentsByOwner } from "@/lib/payload-fetcher";
+import { env } from "@/env";
 
 export default async function ListApartments(
   props: Extract<
@@ -70,7 +71,7 @@ export default async function ListApartments(
               const url = apartment.gallery[0].url as string;
               imageUrl = url.startsWith("http")
                 ? url
-                : `${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}${url}`;
+                : `${env.NEXT_PUBLIC_SERVER_URL}${url}`;
             }
 
             return (

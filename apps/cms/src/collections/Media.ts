@@ -1,10 +1,11 @@
 import { CollectionConfig, APIError } from "payload";
 import { getEffectiveTier, TIERS } from "@bds/shared";
+import { env } from "../env";
 
 export const Media: CollectionConfig = {
   slug: "media",
   upload: {
-    disableLocalStorage: !!process.env.S3_BUCKET,
+    disableLocalStorage: !!env.S3_BUCKET,
   },
   access: {
     read: () => true,

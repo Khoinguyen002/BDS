@@ -1,6 +1,7 @@
 import type { LandingPage, Media } from "@bds/shared/payload-types";
 import Image from "next/image";
 import RichTextRenderer from "./RichTextRenderer";
+import { env } from "@/env";
 
 export default function AboutAgent(
   props: Extract<
@@ -11,7 +12,7 @@ export default function AboutAgent(
   const { content, avatar } = props;
   const avatarImage = typeof avatar === "object" ? (avatar as Media) : null;
   const avatarUrl = avatarImage?.url 
-    ? (avatarImage.url.startsWith("http") ? avatarImage.url : `${process.env.PAYLOAD_PUBLIC_SERVER_URL || "http://localhost:3001"}${avatarImage.url}`)
+    ? (avatarImage.url.startsWith("http") ? avatarImage.url : `${env.PAYLOAD_PUBLIC_SERVER_URL}${avatarImage.url}`)
     : "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80";
 
   return (

@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { User, Media } from "@bds/shared/payload-types";
 import { ThemeInjector } from "@/components/ThemeInjector";
 import { getApartmentBySlugOrId } from "@/lib/payload-fetcher";
+import { env } from "@/env";
 
 // Helper to format currency
 const formatVND = (price?: number | null) => {
@@ -22,7 +23,7 @@ const getImageUrl = (media?: string | Media | null) => {
   
   return m.url.startsWith("http")
     ? m.url
-    : `${process.env.PAYLOAD_PUBLIC_SERVER_URL || "http://localhost:3001"}${m.url}`;
+    : `${env.PAYLOAD_PUBLIC_SERVER_URL}${m.url}`;
 };
 
 type Props = {
