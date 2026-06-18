@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { resolveLandingPage } from '@/lib/resolver';
+import { getLocations } from '@/lib/payload-fetcher';
 import HeroBanner from '@/components/blocks/HeroBanner';
 import AboutAgent from '@/components/blocks/AboutAgent';
 import ListApartments from '@/components/blocks/ListApartments';
@@ -28,19 +29,21 @@ export default async function AgentPage({
 }: {
   params: Promise<{ locale: string; agentSlug: string }>;
 }) {
-  const { agentSlug } = await params;
+  const { agentSlug, locale } = await params;
   
   const landingPage = await resolveLandingPage(agentSlug);
   if (!landingPage) {
     notFound();
   }
 
+  const locations = await getLocations(locale);
+
   return (
     <main className="bg-background">
       {landingPage.blocks?.map((block: NonNullable<LandingPage['blocks']>[number], idx: number) => {
         switch (block.blockType) {
           case 'heroBanner':
-            return <HeroBanner key={idx} {...block} />;
+            return <HeroBanner key={idx} {...block} agentSlug={agentSlug} locations={locations} />;
           case 'aboutAgent':
             return <AboutAgent key={idx} {...block} />;
           case 'listApartments':

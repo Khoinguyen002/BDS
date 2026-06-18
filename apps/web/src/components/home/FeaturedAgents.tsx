@@ -17,8 +17,8 @@ export const FeaturedAgents = ({ agents, locale }: FeaturedAgentsProps) => {
   if (!agents || agents.length === 0) return null;
 
   return (
-    <section className="py-24 px-4 md:px-8 bg-background">
-      <div className="max-w-7xl mx-auto">
+    <section className="py-24 bg-background">
+      <div className="container">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold tracking-tight mb-4">{t("featured_agents_title")}</h2>
@@ -37,7 +37,7 @@ export const FeaturedAgents = ({ agents, locale }: FeaturedAgentsProps) => {
               <Link 
                 key={agent.id} 
                 href={`/${locale}/${agent.agentSlug}`}
-                className="group flex flex-col items-center p-6 rounded-3xl bg-background-subtle border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg"
+                className="group flex flex-col items-center p-6 rounded-none bg-background-subtle border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg"
               >
                 <div className="w-24 h-24 rounded-full overflow-hidden mb-4 relative ring-4 ring-background shadow-sm">
                   <Image src={avatarUrl} alt={agent.brandName || "Agent"} fill className="object-cover" />

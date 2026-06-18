@@ -5,8 +5,9 @@ import type { Apartment } from "@bds/shared/payload-types";
 import Image from "next/image";
 import Link from "next/link";
 import { env } from "@/env";
-import { MapPinIcon, ArrowsOutIcon, BedIcon, BathtubIcon } from "@phosphor-icons/react/dist/ssr";
+import { MapPinIcon, ArrowsOutIcon, BedIcon, BathtubIcon, HouseLineIcon, BuildingApartmentIcon, DoorOpenIcon } from "@phosphor-icons/react/dist/ssr";
 import { useLocale, useTranslations } from "next-intl";
+import { useCurrency } from "@/hooks/useCurrency";
 
 type PropertyCardProps = {
   apartment: Apartment;
@@ -16,15 +17,7 @@ type PropertyCardProps = {
 export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
   const locale = useLocale();
   const t = useTranslations("apartments");
-
-  const formatVND = (price?: number | null) => {
-    if (!price) return t("price_contact");
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+  const { formatCurrency } = useCurrency();
 
   const fallbackImage = "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80";
   let imageUrl = fallbackImage;
@@ -42,15 +35,18 @@ export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
       : `${env.PAYLOAD_PUBLIC_SERVER_URL || "http://localhost:3001"}${url}`;
   }
 
+  const resolvedAgentSlug = agentSlug || (typeof apartment.owner === 'object' && apartment.owner?.agentSlug);
+
   // The detail URL
-  const href = agentSlug
-    ? `/${locale}/${agentSlug}/apartments/${apartment.slug || apartment.id}`
+  const href = resolvedAgentSlug
+    ? `/${locale}/${resolvedAgentSlug}/apartments/${apartment.slug || apartment.id}`
     : `/${locale}/apartments/${apartment.slug || apartment.id}`;
 
-  const price = apartment.priceBreakdown?.totalPrice || apartment.price;
+  const price = apartment.price;
+  const displayPrice = (!price || price < 1000000) ? t("negotiable") : formatCurrency(price);
 
   return (
-    <Link href={href} className="group block bg-background-subtle rounded-3xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all hover:-translate-y-1">
+    <Link href={href} className="group flex flex-col h-full bg-background-subtle rounded-none overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
       <div className="relative w-full aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-zinc-900">
         <Image
           src={imageUrl}
@@ -59,12 +55,25 @@ export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
           className="object-cover transition-transform duration-700 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-md px-3 py-1.5 rounded-full text-xs uppercase tracking-wider font-bold text-foreground">
-          {t("for_sale") || "Đang Bán"}
+        <div className="absolute top-4 left-4 flex gap-2">
+          {apartment.propertyType && (
+            <div className="bg-background/90 backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-wider font-bold text-foreground">
+              {t(`type_${apartment.propertyType}`)}
+            </div>
+          )}
+          {apartment.listingType === "sale" ? (
+            <div className="bg-primary/90 text-primary-foreground backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-wider font-bold">
+              {t("for_sale") || "Đang Bán"}
+            </div>
+          ) : (
+            <div className="bg-primary/90 text-primary-foreground backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-wider font-bold">
+              {t("for_rent") || "Cho Thuê"}
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="p-5 flex flex-col gap-3">
+      <div className="p-5 flex flex-col gap-3 grow">
         <div className="flex justify-between items-start gap-4">
           <h3 className="text-lg font-medium tracking-tight text-foreground line-clamp-1 group-hover:text-primary transition-colors">
             {apartment.title}
@@ -72,7 +81,7 @@ export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
         </div>
 
         <span className="text-xl font-bold text-primary tabular-nums">
-          {formatVND(price)}
+          {displayPrice}
         </span>
 
         <div className="text-foreground-muted flex items-center gap-2 text-sm font-light mt-1 mb-2 line-clamp-1">
@@ -81,24 +90,65 @@ export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
         </div>
 
         {/* Small Key Facts Footer */}
-        <div className="flex items-center gap-4 pt-4 border-t border-border/50 text-foreground-muted text-xs font-medium">
-          {apartment.keyFacts?.area && (
-            <div className="flex items-center gap-1.5">
-              <ArrowsOutIcon weight="duotone" className="w-4 h-4" />
-              {apartment.keyFacts.area} m²
-            </div>
-          )}
-          {apartment.keyFacts?.bedrooms && (
-            <div className="flex items-center gap-1.5">
-              <BedIcon weight="duotone" className="w-4 h-4" />
-              {apartment.keyFacts.bedrooms} PN
-            </div>
-          )}
-          {apartment.keyFacts?.bathrooms && (
-            <div className="flex items-center gap-1.5">
-              <BathtubIcon weight="duotone" className="w-4 h-4" />
-              {apartment.keyFacts.bathrooms} WC
-            </div>
+        <div className="flex items-center gap-4 pt-4 border-t border-border/50 text-foreground-muted text-xs font-medium mt-auto">
+          {apartment.propertyType === "boarding_room" ? (
+            <>
+              {apartment.keyFacts?.area && (
+                <div className="flex items-center gap-1.5">
+                  <ArrowsOutIcon weight="duotone" className="w-4 h-4" />
+                  {apartment.keyFacts.area} m²
+                </div>
+              )}
+              {apartment.keyFacts?.bathroomType && (
+                <div className="flex items-center gap-1.5">
+                  <BathtubIcon weight="duotone" className="w-4 h-4" />
+                  {t(`bathroom_${apartment.keyFacts.bathroomType}`)}
+                </div>
+              )}
+            </>
+          ) : apartment.propertyType === "land_house" ? (
+            <>
+              {apartment.keyFacts?.landArea && (
+                <div className="flex items-center gap-1.5">
+                  <ArrowsOutIcon weight="duotone" className="w-4 h-4" />
+                  {apartment.keyFacts.landArea} m²
+                </div>
+              )}
+              {apartment.keyFacts?.numFloors && (
+                <div className="flex items-center gap-1.5">
+                  <HouseLineIcon weight="duotone" className="w-4 h-4" />
+                  {apartment.keyFacts.numFloors} {t("num_floors")}
+                </div>
+              )}
+              {apartment.keyFacts?.direction && (
+                <div className="flex items-center gap-1.5 min-w-0" title={`${t("house_direction")} ${t(`direction_${apartment.keyFacts.direction}`)}`}>
+                  <DoorOpenIcon weight="duotone" className="w-4 h-4 text-primary shrink-0" />
+                  <span className="truncate">{t(`direction_${apartment.keyFacts.direction}`)}</span>
+                </div>
+              )}
+            </>
+          ) : (
+            // Default Apartment
+            <>
+              {apartment.keyFacts?.area && (
+                <div className="flex items-center gap-1.5">
+                  <ArrowsOutIcon weight="duotone" className="w-4 h-4" />
+                  {apartment.keyFacts.area} m²
+                </div>
+              )}
+              {apartment.keyFacts?.bedrooms && (
+                <div className="flex items-center gap-1.5">
+                  <BedIcon weight="duotone" className="w-4 h-4" />
+                  {apartment.keyFacts.bedrooms} PN
+                </div>
+              )}
+              {apartment.keyFacts?.bathrooms && (
+                <div className="flex items-center gap-1.5">
+                  <BathtubIcon weight="duotone" className="w-4 h-4" />
+                  {apartment.keyFacts.bathrooms} WC
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

@@ -39,6 +39,15 @@
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
+/* ─── Layout Utilities ──────────────────────────────────── */
+@utility container {
+  width: 100%;
+  max-width: 1280px; /* max-w-7xl */
+  margin-inline: auto;
+  padding-inline: 1rem; /* px-4 */
+}
+
+
 /* ─── Base ──────────────────────────────────────────────── */
 body {
   background-color: var(--background);

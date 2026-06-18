@@ -1,20 +1,18 @@
 "use client";
 
-import type { LandingPage, Media } from "@bds/shared/payload-types";
+import type { LandingPage, Media, Location } from "@bds/shared/payload-types";
 import Image from "next/image";
 import { env } from "@/env";
 import { motion } from "motion/react";
-import { ArrowRightIcon } from "@phosphor-icons/react";
-import { useTranslations } from "next-intl";
+import { SearchFunnel } from "@/components/home/SearchFunnel";
 
 export default function HeroBanner(
   props: Extract<
     NonNullable<LandingPage["blocks"]>[number],
     { blockType: "heroBanner" }
-  >,
+  > & { agentSlug?: string; locations?: Location[] }
 ) {
-  const { title, subtitle, backgroundImage } = props;
-  const t = useTranslations("hero");
+  const { title, subtitle, backgroundImage, agentSlug, locations = [] } = props;
 
   const bgImage = typeof backgroundImage === "object" ? (backgroundImage as Media) : null;
   const bgUrl = bgImage?.url 
@@ -48,7 +46,7 @@ export default function HeroBanner(
       </div>
 
       {/* Floating Text Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 flex flex-col items-center text-center mt-20">
+      <div className="relative z-10 w-full container flex flex-col items-center text-center mt-20">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -62,19 +60,14 @@ export default function HeroBanner(
             </h1>
           )}
           {subtitle && (
-            <p className="text-lg md:text-xl text-zinc-300 max-w-[42ch] font-light leading-relaxed mb-10">
+            <p className="text-lg md:text-xl text-zinc-300 max-w-[42ch] font-light leading-relaxed mb-10 text-center">
               {subtitle}
             </p>
           )}
 
-          <motion.button 
-            whileHover={{ scale: 0.98 }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-3 text-white font-medium px-8 py-4 bg-[var(--theme-primary)] hover:brightness-110 transition-all group"
-          >
-            {t('explore_now')}
-            <ArrowRightIcon weight="bold" className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </motion.button>
+          <div className="w-full max-w-4xl text-left">
+            <SearchFunnel agentSlug={agentSlug} locations={locations} />
+          </div>
         </motion.div>
       </div>
     </section>

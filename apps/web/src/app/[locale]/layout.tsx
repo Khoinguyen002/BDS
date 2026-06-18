@@ -4,10 +4,14 @@ import "../globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { CurrencySelect } from "@/components/CurrencySelect";
+import { Footer } from "@/components/layout/Footer";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n/request';
+import { cookies } from 'next/headers';
+import { CurrencyProvider } from '@/hooks/useCurrency';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +41,25 @@ export default async function RootLayout({
   }
 
   const messages = await getMessages();
+  const cookieStore = await cookies();
+  const initialCurrency = cookieStore.get("bds_currency")?.value || "VND";
+
+  let initialRates: Record<string, number> = { VND: 25400, THB: 36.5, USD: 1 };
+  try {
+    const res = await fetch("https://open.er-api.com/v6/latest/USD", { next: { revalidate: 300 } });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.rates) {
+        initialRates = {
+          VND: data.rates.VND || initialRates.VND,
+          THB: data.rates.THB || initialRates.THB,
+          USD: 1
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Failed to fetch exchange rate on server", error);
+  }
 
   return (
     <html
@@ -50,9 +73,15 @@ export default async function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <NextIntlClientProvider messages={messages}>
-            {children}
-            <ThemeToggle />
-            <LocaleSwitcher />
+            <CurrencyProvider initialCurrency={initialCurrency} initialRates={initialRates}>
+              {children}
+              <Footer />
+              <div className="fixed bottom-6 right-6 flex items-center gap-3 z-50">
+                <CurrencySelect />
+                <LocaleSwitcher />
+                <ThemeToggle />
+              </div>
+            </CurrencyProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

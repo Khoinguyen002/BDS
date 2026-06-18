@@ -31,21 +31,21 @@ export const CuratedCollections = ({ initialRent, initialSale }: CuratedCollecti
   const activeApartments = activeTab === "sale" ? initialSale : initialRent;
 
   return (
-    <section className="py-24 px-4 md:px-8 bg-background-subtle">
-      <div className="max-w-7xl mx-auto">
+    <section className="py-24 bg-background-subtle">
+      <div className="container">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
             <h2 className="text-3xl font-bold tracking-tight mb-4">{t('apartments.featured_collection')}</h2>
-            <div className="flex bg-background p-1 rounded-xl w-fit border border-border">
+            <div className="flex bg-background p-1 rounded-none w-fit border border-border">
               <button
                 onClick={() => setActiveTab("sale")}
-                className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "sale" ? "bg-primary text-primary-foreground shadow-sm" : "text-foreground-muted hover:text-foreground"}`}
+                className={`px-6 py-2 rounded-none text-sm font-medium transition-all ${activeTab === "sale" ? "bg-primary text-primary-foreground shadow-sm" : "text-foreground-muted hover:text-foreground"}`}
               >
                 {t("home.tab_sale")}
               </button>
               <button
                 onClick={() => setActiveTab("rent")}
-                className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "rent" ? "bg-primary text-primary-foreground shadow-sm" : "text-foreground-muted hover:text-foreground"}`}
+                className={`px-6 py-2 rounded-none text-sm font-medium transition-all ${activeTab === "rent" ? "bg-primary text-primary-foreground shadow-sm" : "text-foreground-muted hover:text-foreground"}`}
               >
                 {t("home.tab_rent")}
               </button>
@@ -57,7 +57,7 @@ export const CuratedCollections = ({ initialRent, initialSale }: CuratedCollecti
             {activeCollections.map((col, idx) => (
               <button 
                 key={col.id}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition-all ${idx === 0 ? "border-primary bg-primary/5 text-primary" : "border-border bg-background hover:border-primary/50 text-foreground"}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-none border text-sm transition-all ${idx === 0 ? "border-primary bg-primary/5 text-primary" : "border-border bg-background hover:border-primary/50 text-foreground"}`}
               >
                 {col.icon}
                 <span className="font-medium">{col.label}</span>

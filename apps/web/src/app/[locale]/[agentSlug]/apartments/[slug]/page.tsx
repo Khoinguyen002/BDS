@@ -1,16 +1,13 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { getDictionary, getApartmentBySlug, getApartmentsByOwner } from "@/lib/payload-fetcher";
+import { getTranslations } from "next-intl/server";
+import { getApartmentBySlug, getApartmentsByOwner } from "@/lib/payload-fetcher";
 import { Breadcrumbs } from "@/components/apartments/Breadcrumbs";
 import { MediaGallery } from "@/components/apartments/MediaGallery";
-import { KeyFactsGrid } from "@/components/apartments/KeyFactsGrid";
+import { DetailBody } from "@/components/apartments/DetailBody";
+import { AgentCard } from "@/components/apartments/AgentCard";
 import { PriceBreakdown } from "@/components/apartments/PriceBreakdown";
 import { SaveAndShare } from "@/components/apartments/SaveAndShare";
-import { PropertyDescription } from "@/components/apartments/PropertyDescription";
-import { DetailSpecsTable } from "@/components/apartments/DetailSpecsTable";
-import { LegalCard } from "@/components/apartments/LegalCard";
-import { AmenitiesGrid } from "@/components/apartments/AmenitiesGrid";
-import { AgentCard } from "@/components/apartments/AgentCard";
 import { StickyCTA } from "@/components/apartments/StickyCTA";
 import { InvestmentROI } from "@/components/apartments/InvestmentROI";
 import { SimilarListings } from "@/components/apartments/SimilarListings";
@@ -55,11 +52,7 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function ApartmentDetailPage({ params }: PageProps) {
   const { locale, agentSlug, slug } = await params;
-  const dict = await getDictionary(locale);
-  const t = (key: string): string => {
-    const val = dict[`apartments.${key}`] || dict[`agent.${key}`] || dict[`common.${key}`] || key;
-    return typeof val === 'string' ? val : key;
-  };
+  const t = await getTranslations();
 
   const apt = await getApartmentBySlug(slug, locale);
   if (!apt) notFound();
@@ -71,19 +64,46 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
   }
 
   // Fetch similar apartments
-  const allApartments = await getApartmentsByOwner(owner.id, locale, 5);
-  const similar = allApartments.filter(a => a.id !== apt.id).slice(0, 4);
+  const priceRange = 0.4; // 40% band
+  const priceMin = apt.price ? apt.price * (1 - priceRange) : undefined;
+  const priceMax = apt.price ? apt.price * (1 + priceRange) : undefined;
+  
+  const similar = await getApartmentsByOwner(owner.id, locale, {
+    propertyType: apt.propertyType || undefined,
+    listingType: apt.listingType || undefined,
+    priceMin,
+    priceMax,
+    excludeId: apt.id,
+    limit: 4
+  });
+
+  // Fallback: if not enough similar apartments, fetch without price constraint
+  if (similar.length < 4) {
+    const fallbackSimilar = await getApartmentsByOwner(owner.id, locale, {
+      propertyType: apt.propertyType || undefined,
+      listingType: apt.listingType || undefined,
+      excludeId: apt.id,
+      limit: 4 - similar.length
+    });
+    // Deduplicate
+    const existingIds = new Set(similar.map(a => a.id));
+    for (const fbApt of fallbackSimilar) {
+      if (!existingIds.has(fbApt.id)) {
+        similar.push(fbApt);
+      }
+    }
+  }
 
   const serverUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
   return (
     <>
       <main className="min-h-screen bg-background pb-24 md:pb-12">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-10">
+        <div className="container py-6 md:py-10">
           <Breadcrumbs
             items={[
-              { label: t("home"), href: `/${locale}/${agentSlug}` },
-              { label: t("apartments"), href: `/${locale}/${agentSlug}/apartments` },
+              { label: t("nav.home"), href: `/${locale}/${agentSlug}` },
+              { label: t("nav.apartments"), href: `/${locale}/${agentSlug}/apartments` },
               { label: apt.title },
             ]}
           />
@@ -106,66 +126,18 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
                       </p>
                     )}
                   </div>
-                  <SaveAndShare apartmentId={apt.id} t={t} />
+                  <SaveAndShare apartmentId={apt.id} />
                 </div>
                 <MediaGallery gallery={apt.gallery || []} tourUrl={apt.tourUrl} serverUrl={serverUrl} />
               </section>
 
-              {/* Key Facts */}
-              <section>
-                <h2 className="text-2xl font-bold mb-6">{t("key_facts")}</h2>
-                <KeyFactsGrid keyFacts={apt.keyFacts} t={t} />
-              </section>
-
               {/* Price Breakdown (Mobile Only) */}
               <div className="block lg:hidden">
-                <PriceBreakdown price={apt.price} priceBreakdown={apt.priceBreakdown} t={t} />
+                <PriceBreakdown price={apt.price} apartment={apt} />
               </div>
 
-              {/* Description */}
-              {(apt.details?.overview || apt.details?.highlights || apt.details?.landscape) && (
-                <section className="border-t border-border/50 pt-10">
-                  <h2 className="text-2xl font-bold mb-6">{t("overview")}</h2>
-                  <PropertyDescription details={apt.details} t={t} />
-                </section>
-              )}
-
-              {/* Detail Specs & Legal */}
-              <section className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-border/50 pt-10">
-                <div>
-                  <h2 className="text-2xl font-bold mb-6">{t("property_details")}</h2>
-                  <DetailSpecsTable keyFacts={apt.keyFacts} t={t} />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold mb-6">{t("legal_status")}</h2>
-                  <LegalCard legal={apt.legal} t={t} />
-                </div>
-              </section>
-
-              {/* Amenities */}
-              {apt.amenities && apt.amenities.length > 0 && (
-                <section className="border-t border-border/50 pt-10">
-                  <h2 className="text-2xl font-bold mb-6">{t("amenities")}</h2>
-                  <AmenitiesGrid amenities={apt.amenities} t={t} />
-                </section>
-              )}
-
-              {/* Location (Map Iframe) */}
-              {apt.location?.lat && apt.location?.lng && (
-                <section className="border-t border-border/50 pt-10">
-                  <h2 className="text-2xl font-bold mb-6">{t("location")}</h2>
-                  <div className="w-full h-80 rounded-3xl overflow-hidden bg-background-subtle">
-                    <iframe
-                      width="100%"
-                      height="100%"
-                      frameBorder="0"
-                      style={{ border: 0 }}
-                      src={`https://www.google.com/maps?q=${apt.location.lat},${apt.location.lng}&z=15&output=embed`}
-                      allowFullScreen
-                    ></iframe>
-                  </div>
-                </section>
-              )}
+              {/* Detail Body (Dynamic rendering based on profile) */}
+              <DetailBody apartment={apt} />
             </div>
 
             {/* RIGHT COLUMN: Sticky Sidebar */}
@@ -174,22 +146,24 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
                 
                 {/* Price Breakdown (Desktop) */}
                 <div className="hidden lg:block">
-                  <PriceBreakdown price={apt.price} priceBreakdown={apt.priceBreakdown} t={t} />
+                  <PriceBreakdown price={apt.price} apartment={apt} />
                 </div>
 
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <AgentCard owner={apt.owner as any} listingType={apt.listingType} t={t} />
-                <InvestmentROI rentalYield={apt.investment?.rentalYield} t={t} />
+                <AgentCard owner={apt.owner as any} listingType={apt.listingType} />
+                {apt.listingType === "sale" && (
+                  <InvestmentROI rentalYield={apt.investment?.rentalYield} />
+                )}
               </div>
             </div>
           </div>
 
-          <SimilarListings apartments={similar} agentSlug={agentSlug} t={t} />
+          <SimilarListings apartments={similar} agentSlug={agentSlug} propertyType={apt.propertyType} />
         </div>
       </main>
 
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <StickyCTA phoneNumber={(apt.owner as any)?.profile?.phoneNumber} listingType={apt.listingType} t={t} />
+      <StickyCTA phoneNumber={(apt.owner as any)?.profile?.phoneNumber} listingType={apt.listingType} />
 
       {/* Structured Data for SEO */}
       <script
@@ -202,7 +176,7 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
             "description": "Bất động sản chi tiết",
             "offers": {
               "@type": "Offer",
-              "price": apt.price || apt.priceBreakdown?.totalPrice,
+              "price": apt.price,
               "priceCurrency": "VND"
             }
           })

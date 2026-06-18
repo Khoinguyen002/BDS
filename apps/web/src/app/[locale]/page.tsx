@@ -1,5 +1,5 @@
 import React from "react";
-import { getFeaturedAgents, getCuratedApartments } from "@/lib/payload-fetcher";
+import { getFeaturedAgents, getCuratedApartments, getLocations } from "@/lib/payload-fetcher";
 import { HeroSearch } from "@/components/home/HeroSearch";
 import { CuratedCollections } from "@/components/home/CuratedCollections";
 import { MarketSnapshot } from "@/components/home/MarketSnapshot";
@@ -16,10 +16,11 @@ export default async function GlobalHomePage({ params }: PageProps) {
   const { locale } = await params;
 
   // Pre-fetch some data for SSR
-  const [featuredAgents, rentApartments, saleApartments] = await Promise.all([
+  const [featuredAgents, rentApartments, saleApartments, locations] = await Promise.all([
     getFeaturedAgents(4),
     getCuratedApartments("rent", locale, "", 3), // We can fetch basic curations here
-    getCuratedApartments("sale", locale, "", 3)
+    getCuratedApartments("sale", locale, "", 3),
+    getLocations(locale)
   ]);
 
   return (
@@ -27,7 +28,7 @@ export default async function GlobalHomePage({ params }: PageProps) {
       
       <main className="flex-1">
         {/* Block 1: Hero & Smart Search */}
-        <HeroSearch />
+        <HeroSearch locations={locations} />
         
         {/* Block 2: Curated Collections */}
         <CuratedCollections initialRent={rentApartments} initialSale={saleApartments} />

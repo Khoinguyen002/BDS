@@ -21,7 +21,7 @@ export default async function ListApartments(
       .map((ap) => (typeof ap === "object" ? ap : ({} as Apartment)))
       .filter((ap) => ap.id);
   } else if (owner) {
-    apartments = await getApartmentsByOwner(owner, locale, 6);
+    apartments = await getApartmentsByOwner(owner, locale, { limit: 6 });
   }
 
   return <ListApartmentsClient apartments={apartments} agentSlug={agentSlug} />;

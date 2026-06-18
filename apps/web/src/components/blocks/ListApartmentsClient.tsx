@@ -9,22 +9,26 @@ import { useTranslations, useLocale } from "next-intl";
 import { PropertyCard } from "./PropertyCard";
 
 export function ListApartmentsClient({
-  apartments,
+  apartments: initialApartments,
   agentSlug,
   hideHeader,
+  initialFilterType,
+  initialFilterListing,
 }: {
   apartments: Apartment[];
   agentSlug?: string;
   hideHeader?: boolean;
+  initialFilterType?: string;
+  initialFilterListing?: string;
 }) {
   const t = useTranslations("apartments");
   const locale = useLocale();
-
-  if (apartments.length === 0) return null;
+  
+  if (initialApartments.length === 0) return null;
 
   return (
-    <section className={`px-4 md:px-8 bg-background ${!hideHeader ? "py-24 border-t border-border" : ""}`}>
-      <div className="max-w-7xl mx-auto">
+    <section className={`bg-background ${!hideHeader ? "py-24 border-t border-border" : ""}`}>
+      <div className="container">
         {!hideHeader && (
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
             <div className="max-w-2xl">
@@ -45,8 +49,9 @@ export function ListApartmentsClient({
           </div>
         )}
 
-        <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
-          {apartments.map((apartment, i) => (
+        {initialApartments.length > 0 ? (
+          <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+            {initialApartments.map((apartment, i) => (
               <motion.li
                 key={apartment.id}
                 initial={{ opacity: 0, y: 24 }}
@@ -62,7 +67,12 @@ export function ListApartmentsClient({
                 <PropertyCard apartment={apartment} agentSlug={agentSlug} />
               </motion.li>
             ))}
-        </ul>
+          </ul>
+        ) : (
+          <div className="py-24 text-center border border-dashed border-border text-foreground-muted">
+            {t('no_properties')}
+          </div>
+        )}
       </div>
     </section>
   );

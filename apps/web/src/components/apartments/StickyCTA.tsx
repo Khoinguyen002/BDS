@@ -2,15 +2,18 @@
 
 import React, { useEffect, useState } from "react";
 import { PhoneIcon } from "@phosphor-icons/react/dist/ssr";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 
 type StickyCTAProps = {
   phoneNumber?: string | null;
   zaloNumber?: string | null;
   listingType?: "sale" | "rent" | null;
-  t: (key: string) => string;
 };
 
-export const StickyCTA = ({ phoneNumber, zaloNumber, listingType, t }: StickyCTAProps) => {
+export const StickyCTA = ({ phoneNumber, zaloNumber, listingType }: StickyCTAProps) => {
+  const t = useTranslations("apartments");
+  const tLead = useTranslations("lead");
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -33,39 +36,35 @@ export const StickyCTA = ({ phoneNumber, zaloNumber, listingType, t }: StickyCTA
         isVisible ? "translate-y-0" : "translate-y-full"
       }`}
     >
-      <div className="flex gap-3 max-w-md mx-auto">
+      <div className="flex gap-3 container max-w-md">
         {listingType === "rent" ? (
           <>
-            <a
-              href={`tel:${phoneNumber || ""}`}
-              className="flex-1 bg-primary text-primary-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2"
-            >
-              <PhoneIcon weight="fill" className="w-5 h-5" />
-              {t("call_now") || "Gọi điện"}
-            </a>
-            <a
-              href={`https://zalo.me/${zaloNumber || phoneNumber || ""}`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex-1 bg-blue-500 text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2"
-            >
-              Chat Zalo
-            </a>
+            <Button asChild size="lg" className="flex-1 font-bold">
+              <a href={`tel:${phoneNumber || ""}`}>
+                <PhoneIcon weight="fill" className="w-5 h-5 mr-2" />
+                {t("call_now") || "Gọi điện"}
+              </a>
+            </Button>
+            <Button asChild size="lg" className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold">
+              <a href={`https://zalo.me/${zaloNumber || phoneNumber || ""}`} target="_blank" rel="noreferrer">
+                Chat Zalo
+              </a>
+            </Button>
           </>
         ) : (
           <>
-            <button
+            <Button
+              size="lg"
+              className="flex-1 font-bold"
               onClick={() => alert("Mở form Nhận báo giá (Sẽ kết nối API Leads ở phase sau)")}
-              className="flex-1 bg-primary text-primary-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2"
             >
-              {t("form_title_sale") || "Nhận báo giá"}
-            </button>
-            <a
-              href={`tel:${phoneNumber || ""}`}
-              className="w-14 bg-background-subtle border border-border/50 text-foreground py-3.5 rounded-xl font-bold flex items-center justify-center shrink-0"
-            >
-              <PhoneIcon weight="duotone" className="w-5 h-5" />
-            </a>
+              {tLead("form_title_sale") || "Nhận báo giá"}
+            </Button>
+            <Button asChild variant="outline" size="icon" className="w-14 h-14 bg-background-subtle border-border/50 shrink-0">
+              <a href={`tel:${phoneNumber || ""}`}>
+                <PhoneIcon weight="duotone" className="w-5 h-5" />
+              </a>
+            </Button>
           </>
         )}
       </div>

@@ -1,18 +1,19 @@
 import React from "react";
-import { ShieldCheckIcon, BankIcon, FileTextIcon } from "@phosphor-icons/react/dist/ssr";
+import { ShieldCheck as ShieldCheckIcon, Bank as BankIcon, FileText as FileTextIcon, CheckCircle as CheckCircleIcon, WarningCircle as WarningCircleIcon, Warning as WarningIcon } from "@phosphor-icons/react/dist/ssr";
+import { useTranslations } from "next-intl";
 
 import { Apartment } from "@bds/shared/payload-types";
 
 type LegalCardProps = {
   legal?: Apartment["legal"];
-  t: (key: string) => string;
 };
 
-export const LegalCard = ({ legal, t }: LegalCardProps) => {
+export const LegalCard = ({ legal }: LegalCardProps) => {
+  const t = useTranslations("apartments");
   if (!legal) return null;
 
   return (
-    <div className="bg-primary/5 rounded-2xl border border-primary/20 p-6 flex flex-col gap-6">
+    <div className="bg-primary/5 rounded-none border border-primary/20 p-6 flex flex-col gap-6">
       <div className="flex items-center gap-3 border-b border-primary/10 pb-4">
         <ShieldCheckIcon weight="duotone" className="w-8 h-8 text-primary" />
         <div>
@@ -29,6 +30,26 @@ export const LegalCard = ({ legal, t }: LegalCardProps) => {
             <span className="font-medium">{legal.documentType ? t(`doc_${legal.documentType}`) : "-"}</span>
             {legal.ownershipTerm && (
               <span className="block text-sm text-success mt-1">({t(`term_${legal.ownershipTerm}`)})</span>
+            )}
+            {legal.isFullyPermitted !== undefined && legal.isFullyPermitted !== null && (
+              <span className={`block text-sm mt-3 flex items-center gap-1 ${legal.isFullyPermitted ? 'text-emerald-600' : 'text-amber-600'}`}>
+                {legal.isFullyPermitted ? <CheckCircleIcon weight="fill" /> : <WarningCircleIcon weight="fill" />}
+                {legal.isFullyPermitted ? (t("fully_permitted") || "Đã hoàn công") : (t("not_fully_permitted") || "Chưa hoàn công")}
+              </span>
+            )}
+            
+            {legal.hasZoningIssue && (
+              <span className="block text-sm mt-1.5 flex items-center gap-1 text-amber-600">
+                <WarningCircleIcon weight="fill" />
+                {t("has_zoning_issue") || "Vướng quy hoạch"}
+              </span>
+            )}
+            
+            {legal.hasDispute && (
+              <span className="block text-sm mt-1.5 flex items-center gap-1 text-rose-600">
+                <WarningIcon weight="fill" />
+                {t("has_dispute") || "Đang tranh chấp"}
+              </span>
             )}
           </div>
         </div>

@@ -1,34 +1,51 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import RichTextRenderer from "@/components/blocks/RichTextRenderer";
-import { CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react/dist/ssr";
+import { CaretDown as CaretDownIcon, CaretUp as CaretUpIcon } from "@phosphor-icons/react/dist/ssr";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 
 import { Apartment } from "@bds/shared/payload-types";
 
 type PropertyDescriptionProps = {
   details?: Apartment["details"];
-  t: (key: string) => string;
 };
 
-export const PropertyDescription = ({ details, t }: PropertyDescriptionProps) => {
+export const PropertyDescription = ({ details }: PropertyDescriptionProps) => {
+  const t = useTranslations("apartments");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  if (!details?.overview && !details?.highlights && !details?.landscape) {
+  useEffect(() => {
+    if (contentRef.current) {
+      setIsOverflowing(contentRef.current.scrollHeight > 400);
+    }
+  }, [details]);
+
+  if (!details) return null;
+
+  if (!details.overview && !details.highlights && !details.landscape) {
     return null;
   }
+
+  const hasMultipleSections = 
+    (details.overview ? 1 : 0) + 
+    (details.highlights ? 1 : 0) + 
+    (details.landscape ? 1 : 0) > 1;
 
   return (
     <div className="relative">
       <div
         className={`relative overflow-hidden transition-all duration-500 ease-in-out ${
-          isExpanded ? "max-h-[5000px]" : "max-h-[400px]"
+          !isOverflowing ? "max-h-none" : isExpanded ? "max-h-[5000px]" : "max-h-[400px]"
         }`}
       >
-        <div className="flex flex-col gap-8 pb-12">
+        <div ref={contentRef} className="flex flex-col gap-8 pb-12">
           {!!details.overview && (
             <div>
-              <h3 className="text-xl font-bold mb-4">{t("overview")}</h3>
+              {hasMultipleSections && <h3 className="text-xl font-bold mb-4">{t("overview")}</h3>}
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <RichTextRenderer content={details.overview as any} />
             </div>
@@ -50,25 +67,28 @@ export const PropertyDescription = ({ details, t }: PropertyDescriptionProps) =>
         </div>
         
         {/* Gradient Overlay for collapsed state */}
-        {!isExpanded && (
+        {isOverflowing && !isExpanded && (
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
         )}
       </div>
 
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center justify-center gap-2 w-full py-3 mt-2 text-primary font-medium hover:bg-primary/5 rounded-xl transition-colors"
-      >
-        {isExpanded ? (
-          <>
-            {t("show_less") || "Thu gọn"} <CaretUpIcon weight="bold" />
-          </>
-        ) : (
-          <>
-            {t("show_more") || "Xem thêm"} <CaretDownIcon weight="bold" />
-          </>
-        )}
-      </button>
+      {isOverflowing && (
+        <Button
+          variant="ghost"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center justify-center gap-2 w-full py-3 mt-2 text-primary font-medium"
+        >
+          {isExpanded ? (
+            <>
+              {t("show_less") || "Thu gọn"} <CaretUpIcon weight="bold" />
+            </>
+          ) : (
+            <>
+              {t("show_more") || "Xem thêm"} <CaretDownIcon weight="bold" />
+            </>
+          )}
+        </Button>
+      )}
     </div>
   );
 };

@@ -1,29 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 
-import { InfoIcon, CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react/dist/ssr";
+import { useCurrency } from "@/hooks/useCurrency";
+import { CaretDownIcon, CaretUpIcon,  InfoIcon } from "@phosphor-icons/react/dist/ssr";
+import { useTranslations } from "next-intl";
 
 import { Apartment } from "@bds/shared/payload-types";
 
 type PriceBreakdownProps = {
   price?: number | null;
-  priceBreakdown?: Apartment["priceBreakdown"];
-  t: (key: string) => string;
+  apartment: Apartment;
 };
 
-export const PriceBreakdown = ({ price, priceBreakdown, t }: PriceBreakdownProps) => {
+export const PriceBreakdown = ({ price, apartment }: PriceBreakdownProps) => {
+  const t = useTranslations("apartments");
+  const { formatCurrency } = useCurrency();
   const [isOpen, setIsOpen] = useState(false);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const priceBreakdown = apartment.priceBreakdown;
+  const rentPricing = apartment.rentPricing;
+  const isRent = apartment.listingType === "rent" || apartment.propertyType === "boarding_room";
 
-  const displayPrice = priceBreakdown?.totalPrice || price;
+  // Pricing thống nhất về apt.price (+ priceUnit). Không còn pricePerMonth/totalPrice.
+  const displayPrice = price ?? apartment.price;
 
   if (!displayPrice) {
     return (
@@ -34,64 +35,104 @@ export const PriceBreakdown = ({ price, priceBreakdown, t }: PriceBreakdownProps
   }
 
   return (
-    <div className="w-full bg-background-subtle rounded-2xl border border-border/50 p-4 md:p-6 transition-all duration-300">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
-        <div>
-          <span className="text-sm font-medium text-foreground-muted mb-1 block">
+    <div className="w-full bg-background-subtle rounded-none border border-border/50 p-4 md:p-6 transition-all duration-300">
+      <div className="flex flex-col gap-2 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+        <div className="flex items-start justify-between gap-4">
+          <span className="text-sm font-medium text-foreground-muted block mt-1">
             {t("total_price")}
           </span>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl md:text-4xl font-bold text-primary">
-              {formatCurrency(displayPrice)}
-            </span>
-            {priceBreakdown?.negotiable && (
-              <span className="text-sm text-success bg-success/10 px-2 py-0.5 rounded-full font-medium">
-                {t("negotiable")}
-              </span>
-            )}
+          <div className="flex items-center gap-1.5 text-primary hover:text-primary-dark transition-colors shrink-0">
+            <span className="text-sm font-medium">{t("price_breakdown")}</span>
+            {isOpen ? <CaretUpIcon weight="bold" /> : <CaretDownIcon weight="bold" />}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-primary hover:text-primary-dark transition-colors">
-          <span className="text-sm font-medium">{t("price_breakdown")}</span>
-          {isOpen ? <CaretUpIcon weight="bold" /> : <CaretDownIcon weight="bold" />}
+        <div className="flex items-baseline flex-wrap gap-x-3 gap-y-2">
+          <span className="text-3xl md:text-4xl font-bold text-primary break-all">
+            {formatCurrency(displayPrice)}
+          </span>
+          {priceBreakdown?.negotiable && (
+            <span className="text-sm text-success bg-success/10 px-2 py-0.5 rounded-none font-medium shrink-0">
+              {t("negotiable")}
+            </span>
+          )}
         </div>
       </div>
 
-      {isOpen && (
-        <div className="mt-6 pt-6 border-t border-border/50 grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 animate-in fade-in slide-in-from-top-4 duration-300">
-          {priceBreakdown?.pricePerSqm && (
-            <div className="flex justify-between items-center pb-2 border-b border-border/30">
-              <span className="text-foreground-muted">{t("price_per_sqm")}</span>
-              <span className="font-medium">{formatCurrency(priceBreakdown.pricePerSqm)}/m²</span>
-            </div>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="mt-6 pt-6 border-t border-border/50 grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+          {!isRent && priceBreakdown && (
+            <>
+              {priceBreakdown.pricePerSqm && (
+                <div className="flex flex-col gap-1.5 pb-3 border-b border-border/30">
+                  <span className="text-sm text-foreground-muted">{t("price_per_sqm")}</span>
+                  <span className="font-medium text-foreground">{formatCurrency(priceBreakdown.pricePerSqm)}/m²</span>
+                </div>
+              )}
+              
+              {priceBreakdown.transferFee && (
+                <div className="flex flex-col gap-1.5 pb-3 border-b border-border/30">
+                  <span className="text-sm text-foreground-muted flex items-center gap-1">
+                    {t("transfer_fee")}
+                    <InfoIcon weight="duotone" className="w-4 h-4" />
+                  </span>
+                  <span className="font-medium text-foreground">{priceBreakdown.transferFee}</span>
+                </div>
+              )}
+
+              {priceBreakdown.taxResponsibility && (
+                <div className="flex flex-col gap-1.5 pb-3 border-b border-border/30">
+                  <span className="text-sm text-foreground-muted">{t("tax_responsibility")}</span>
+                  <span className="font-medium text-foreground">{t(`tax_${priceBreakdown.taxResponsibility}`)}</span>
+                </div>
+              )}
+            </>
           )}
-          
-          {priceBreakdown?.transferFee && (
-            <div className="flex justify-between items-center pb-2 border-b border-border/30">
-              <span className="text-foreground-muted flex items-center gap-1">
-                {t("transfer_fee")}
-                <InfoIcon weight="duotone" className="w-4 h-4" />
+
+          {isRent && rentPricing && (
+            <>
+              {rentPricing.deposit && (
+                <div className="flex flex-col gap-1.5 pb-3 border-b border-border/30">
+                  <span className="text-sm text-foreground-muted">{t("deposit")}</span>
+                  <span className="font-medium text-foreground">{t(`deposit_${rentPricing.deposit}`)}</span>
+                </div>
+              )}
+              {rentPricing.minLeaseTerm && (
+                <div className="flex flex-col gap-1.5 pb-3 border-b border-border/30">
+                  <span className="text-sm text-foreground-muted">{t("min_lease_term")}</span>
+                  <span className="font-medium text-foreground">{rentPricing.minLeaseTerm} {t("months")}</span>
+                </div>
+              )}
+              {rentPricing.availableDate && (
+                <div className="flex flex-col gap-1.5 pb-3 border-b border-border/30">
+                  <span className="text-sm text-foreground-muted">{t("available_date")}</span>
+                  <span className="font-medium text-foreground">{new Date(rentPricing.availableDate).toLocaleDateString()}</span>
+                </div>
+              )}
+            </>
+          )}
+
+          {(priceBreakdown?.managementFee || rentPricing?.managementFeeIncluded !== undefined) && (
+            <div className="flex flex-col gap-1.5 pb-3 border-b border-border/30">
+              <span className="text-sm text-foreground-muted">{t("management_fee")}</span>
+              <span className="font-medium text-foreground">
+                {priceBreakdown?.managementFee ? `${formatCurrency(priceBreakdown.managementFee)} / ${t('month') || 'tháng'}` : 
+                 (rentPricing?.managementFeeIncluded ? t("included") : t("not_included"))}
               </span>
-              <span className="font-medium">{priceBreakdown.transferFee}</span>
             </div>
           )}
-
-          {priceBreakdown?.taxResponsibility && (
-            <div className="flex justify-between items-center pb-2 border-b border-border/30">
-              <span className="text-foreground-muted">{t("tax_responsibility")}</span>
-              <span className="font-medium">{t(`tax_${priceBreakdown.taxResponsibility}`)}</span>
             </div>
-          )}
-
-          {priceBreakdown?.managementFee && (
-            <div className="flex justify-between items-center pb-2 border-b border-border/30">
-              <span className="text-foreground-muted">{t("management_fee")}</span>
-              <span className="font-medium">{formatCurrency(priceBreakdown.managementFee)} / {t('month') || 'tháng'}</span>
-            </div>
-          )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

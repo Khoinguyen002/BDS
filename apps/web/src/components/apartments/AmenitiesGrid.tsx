@@ -2,15 +2,16 @@
 
 import React from "react";
 import * as Icons from "@phosphor-icons/react/dist/ssr";
-import { CheckCircleIcon } from "@phosphor-icons/react/dist/ssr";
-import { Amenity } from "@bds/shared/payload-types";
+import { CheckCircle as CheckCircleIcon } from "@phosphor-icons/react/dist/ssr";
+import { useTranslations } from "next-intl";
+import { Amenity, Apartment } from "@bds/shared/payload-types";
 
 type AmenitiesGridProps = {
-  amenities?: (number | Amenity)[] | null;
-  t: (key: string) => string;
+  amenities?: NonNullable<Apartment["amenities"]>;
 };
 
-export const AmenitiesGrid = ({ amenities, t }: AmenitiesGridProps) => {
+export const AmenitiesGrid = ({ amenities }: AmenitiesGridProps) => {
+  const t = useTranslations("apartments");
   if (!amenities || amenities.length === 0) return null;
 
   const validAmenities = amenities.filter((a): a is Amenity => typeof a === 'object' && a !== null);
@@ -27,7 +28,7 @@ export const AmenitiesGrid = ({ amenities, t }: AmenitiesGridProps) => {
         const IconComponent = (Icons as any)[amenity.icon] || CheckCircleIcon;
         return (
           <div key={idx} className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-background-subtle flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-none bg-background-subtle flex items-center justify-center shrink-0">
               <IconComponent weight="duotone" className="w-5 h-5 text-primary" />
             </div>
             <span className="text-sm font-medium">{amenity.title}</span>

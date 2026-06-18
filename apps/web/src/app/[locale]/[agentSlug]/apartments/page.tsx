@@ -1,13 +1,16 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ThemeInjector } from "@/components/ThemeInjector";
-import { getUserBySlug, getApartmentsByOwner } from "@/lib/payload-fetcher";
+import { getUserBySlug, getApartments, getLocations } from "@/lib/payload-fetcher";
 import { ListApartmentsClient } from "@/components/blocks/ListApartmentsClient";
 import { ArrowLeftIcon } from "@phosphor-icons/react/dist/ssr";
 import { getTranslations } from "next-intl/server";
+import { SearchFunnel } from "@/components/home/SearchFunnel";
+import { resolveLocationSlugsToWardIds } from "@/lib/location-utils";
 
 type Props = {
   params: Promise<{ locale: string; agentSlug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export async function generateMetadata({ params }: Props) {
@@ -20,18 +23,58 @@ export async function generateMetadata({ params }: Props) {
   }
 }
 
-export default async function ViewAllApartmentsPage({ params }: Props) {
+export default async function ViewAllApartmentsPage({ params, searchParams }: Props) {
   const { locale, agentSlug } = await params;
-  const tCommon = await getTranslations({ locale, namespace: "common" });
-  const t = await getTranslations({ locale, namespace: "apartments" });
+  const sp = await searchParams;
+  const tCommon = await getTranslations("common");
+  const t = await getTranslations("apartments");
 
   const owner = await getUserBySlug(agentSlug);
   if (!owner) {
     notFound();
   }
 
-  // Fetch all apartments for this agent (limit 100 for now)
-  const apartments = await getApartmentsByOwner(owner.id, locale, 100);
+  // ─── Parse URL params ──────────────────────────────────────
+  const toStr = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || "";
+  const toNum = (v: string | string[] | undefined) => {
+    const s = toStr(v);
+    const n = parseInt(s, 10);
+    return isNaN(n) ? undefined : n;
+  };
+
+  const q = toStr(sp.q);
+  const propertyType = toStr(sp.propertyType);
+  const listingType = toStr(sp.type);
+  const locationParam = toStr(sp.location);
+  const priceMin = toNum(sp.priceMin);
+  const priceMax = toNum(sp.priceMax);
+  const bedrooms = toNum(sp.bedrooms);
+
+  const locationSlugs = locationParam
+    ? locationParam.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  const allLocations = await getLocations(locale);
+  let wardIds: number[] = [];
+  if (locationSlugs.length > 0) {
+    wardIds = resolveLocationSlugsToWardIds(locationSlugs, allLocations);
+  }
+
+  // Fetch all apartments for this agent with filters
+  const apartments = await getApartments(
+    locale,
+    {
+      q: q || undefined,
+      propertyType: propertyType || undefined,
+      listingType: listingType || undefined,
+      wardIds: wardIds.length > 0 ? wardIds : undefined,
+      priceMin,
+      priceMax,
+      bedrooms,
+      ownerSlug: agentSlug,
+    },
+    100,
+  );
 
   return (
     <>
@@ -40,7 +83,7 @@ export default async function ViewAllApartmentsPage({ params }: Props) {
         
         {/* Navigation */}
         <nav className="w-full bg-background/90 backdrop-blur-sm border-b border-border py-4 px-6 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="container flex items-center justify-between">
             <Link
               href={`/${locale}/${agentSlug}`}
               className="group text-xs font-semibold uppercase tracking-widest text-foreground-muted hover:text-foreground flex items-center gap-2 transition-colors"
@@ -49,33 +92,23 @@ export default async function ViewAllApartmentsPage({ params }: Props) {
               {tCommon("back")}
             </Link>
             <div className="text-xs uppercase tracking-widest text-foreground-muted font-mono">
-              {owner.brandName}
+              {t('properties_found', { count: apartments.length })}
             </div>
           </div>
         </nav>
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
-          <div className="mb-12">
+        <div className="py-16">
+          <div className="container mb-12">
             <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground mb-4">
               {t('featured_collection')}
             </h1>
-            <p className="text-base text-foreground-secondary font-light">
+            <p className="text-lg text-foreground-muted">
               {t('managed_by', { brandName: owner.brandName })}
             </p>
           </div>
 
-          {/* Simple Filter UI Placeholder */}
-          <div className="w-full flex gap-4 mb-12 border-b border-border pb-6">
-            <select className="bg-background-subtle border border-border text-sm px-4 py-2 outline-none text-foreground">
-              <option value="">{t('status')}</option>
-              <option value="sale">{t('for_sale')}</option>
-              <option value="rent">{t('for_rent')}</option>
-            </select>
-            <select className="bg-background-subtle border border-border text-sm px-4 py-2 outline-none text-foreground">
-              <option value="">{t('price_range')}</option>
-              <option value="asc">{t('price_asc')}</option>
-              <option value="desc">{t('price_desc')}</option>
-            </select>
+          <div className="container mb-12">
+            <SearchFunnel locations={allLocations} agentSlug={agentSlug} />
           </div>
 
           {apartments.length > 0 ? (

@@ -1,7 +1,8 @@
 import type { LandingPage, User } from "@bds/shared/payload-types";
 import { getTranslations } from "next-intl/server";
-import { PhoneIcon, ShieldCheckIcon } from "@phosphor-icons/react/dist/ssr";
+import { ShieldCheckIcon, StarIcon, ChatCircleTextIcon, ClockIcon } from "@phosphor-icons/react/dist/ssr";
 import { AnimatedSection } from "@/components/AnimatedSection";
+import { Button } from "@/components/ui/button";
 
 export default async function ContactForm(
   props: Extract<
@@ -13,8 +14,8 @@ export default async function ContactForm(
   const t = await getTranslations("contact");
 
   return (
-    <section className="py-24 px-4 md:px-8 bg-background-subtle border-t border-border relative overflow-hidden">
-      <div className="relative max-w-5xl mx-auto">
+    <section className="py-24 bg-background-subtle border-t border-border relative overflow-hidden">
+      <div className="container relative max-w-5xl">
         <div className="bg-background border border-border p-8 md:p-16 flex flex-col md:flex-row gap-12 md:gap-16 items-start">
 
           {/* Text Content */}
@@ -28,28 +29,65 @@ export default async function ContactForm(
               </p>
             </div>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               <div className="flex items-center gap-4">
                 <div
-                  className="w-10 h-10 flex items-center justify-center text-white shrink-0"
-                  style={{ backgroundColor: "var(--theme-primary)" }}
+                  className="w-12 h-12 flex items-center justify-center text-white shrink-0 bg-primary"
                 >
-                  <PhoneIcon weight="regular" className="w-4 h-4" />
+                  <ClockIcon weight="fill" className="w-6 h-6" />
                 </div>
-                <span className="text-foreground-secondary text-sm font-medium">
-                  {t("support_247")}
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-foreground font-semibold">
+                    {t("response_time") || "Phản hồi trong 30 phút"}
+                  </span>
+                  <span className="text-foreground-muted text-sm">
+                    {t("support_247")}
+                  </span>
+                </div>
               </div>
+
               <div className="flex items-center gap-4">
                 <div
-                  className="w-10 h-10 flex items-center justify-center text-white shrink-0"
-                  style={{ backgroundColor: "var(--theme-primary)" }}
+                  className="w-12 h-12 flex items-center justify-center text-white shrink-0 bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900"
                 >
-                  <ShieldCheckIcon weight="regular" className="w-4 h-4" />
+                  <ShieldCheckIcon weight="fill" className="w-6 h-6" />
                 </div>
-                <span className="text-foreground-secondary text-sm font-medium">
-                  {t("security")}
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-foreground font-semibold">
+                    {t("security_title") || "Giao dịch an toàn"}
+                  </span>
+                  <span className="text-foreground-muted text-sm">
+                    {t("security")}
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-border/50">
+                <div className="flex items-center gap-2 mb-2 text-yellow-500">
+                  <StarIcon weight="fill" className="w-5 h-5" />
+                  <StarIcon weight="fill" className="w-5 h-5" />
+                  <StarIcon weight="fill" className="w-5 h-5" />
+                  <StarIcon weight="fill" className="w-5 h-5" />
+                  <StarIcon weight="fill" className="w-5 h-5" />
+                  <span className="text-foreground font-bold ml-1">5.0</span>
+                </div>
+                <p className="text-sm text-foreground-secondary">
+                  {t("rating_text") || "Từ hơn 120+ khách hàng đã giao dịch thành công."}
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button asChild className="bg-blue-500 hover:bg-blue-600 text-white h-9 px-4 text-sm font-semibold">
+                  <a href="https://zalo.me" target="_blank" rel="noreferrer">
+                    <ChatCircleTextIcon weight="fill" className="w-4 h-4 mr-2" />
+                    Zalo
+                  </a>
+                </Button>
+                <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 text-sm font-semibold">
+                  <a href="https://facebook.com" target="_blank" rel="noreferrer">
+                    Facebook
+                  </a>
+                </Button>
               </div>
             </div>
           </AnimatedSection>
@@ -102,13 +140,13 @@ export default async function ContactForm(
                 />
               </div>
 
-              <button
+              <Button
                 type="button"
-                className="w-full py-4 text-white text-sm font-semibold uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all duration-200 mt-2"
-                style={{ backgroundColor: "var(--theme-primary)" }}
+                size="lg"
+                className="w-full uppercase tracking-widest mt-2"
               >
                 {t("submit_button")}
-              </button>
+              </Button>
             </form>
           </AnimatedSection>
 

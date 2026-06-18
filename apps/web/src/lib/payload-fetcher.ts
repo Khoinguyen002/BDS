@@ -6,7 +6,7 @@
  * and cleaner code across Next.js components.
  */
 
-import type { User, LandingPage, Apartment } from "@bds/shared/payload-types";
+import type { User, LandingPage, Apartment, Location } from "@bds/shared/payload-types";
 import { getLocale } from 'next-intl/server';
 import { env } from "../env";
 
@@ -130,11 +130,37 @@ export const getApartmentBySlugOrId = async (
 export async function getApartmentsByOwner(
   ownerId: string | number,
   locale: string,
-  limit: number = 6,
+  options?: {
+    propertyType?: string;
+    listingType?: string;
+    priceMin?: number;
+    priceMax?: number;
+    excludeId?: string | number;
+    limit?: number;
+  }
 ): Promise<Apartment[]> {
+  const limit = options?.limit || 6;
+  let where = `where[owner][equals]=${ownerId}`;
+  
+  if (options?.propertyType) {
+    where += `&where[propertyType][equals]=${options.propertyType}`;
+  }
+  if (options?.listingType) {
+    where += `&where[listingType][equals]=${options.listingType}`;
+  }
+  if (options?.priceMin !== undefined) {
+    where += `&where[price][greater_than_equal]=${options.priceMin}`;
+  }
+  if (options?.priceMax !== undefined) {
+    where += `&where[price][less_than_equal]=${options.priceMax}`;
+  }
+  if (options?.excludeId) {
+    where += `&where[id][not_equals]=${options.excludeId}`;
+  }
+
   try {
     const data = await fetchAPI(
-      `/apartments?where[owner][equals]=${ownerId}&depth=1&limit=${limit}&locale=${locale}`,
+      `/apartments?${where}&depth=1&limit=${limit}&locale=${locale}`,
     );
     return data.docs || [];
   } catch (error) {
@@ -142,6 +168,91 @@ export async function getApartmentsByOwner(
     return [];
   }
 }
+
+// ─────────────────────────────────────────────────────────────
+// Apartment Filters
+// ─────────────────────────────────────────────────────────────
+export interface ApartmentFilters {
+  q?: string;                  // free-text: title OR address
+  propertyType?: string;       // apartment | boarding_room | land_house
+  listingType?: string;        // sale | rent
+  wardIds?: number[];          // resolved ward-level location IDs
+  priceMin?: number;           // only applied when listingType is also set
+  priceMax?: number;
+  ownerSlug?: string;          // filter by agent
+  bedrooms?: number;
+}
+
+export function buildApartmentWhere(filters: ApartmentFilters): string {
+  let where = "";
+
+  if (filters.q) {
+    // OR across title + address for free-text
+    where += `&where[or][0][title][like]=${encodeURIComponent(filters.q)}`;
+    where += `&where[or][1][address][like]=${encodeURIComponent(filters.q)}`;
+  }
+
+  if (filters.propertyType) {
+    where += `&where[propertyType][equals]=${filters.propertyType}`;
+  }
+
+  if (filters.listingType) {
+    where += `&where[listingType][equals]=${filters.listingType}`;
+  }
+
+  if (filters.ownerSlug) {
+    where += `&where[owner.agentSlug][equals]=${filters.ownerSlug}`;
+  }
+
+  if (filters.bedrooms !== undefined) {
+    where += `&where[keyFacts.bedrooms][equals]=${filters.bedrooms}`;
+  }
+
+  // Location: ward IDs resolved before this call
+  if (filters.wardIds && filters.wardIds.length > 0) {
+    filters.wardIds.forEach((id, i) => {
+      where += `&where[location.region][in][${i}]=${id}`;
+    });
+  }
+
+  // Price: ONLY apply when listingType is also provided
+  if (
+    filters.listingType &&
+    (filters.priceMin !== undefined || filters.priceMax !== undefined)
+  ) {
+    const priceUnit = filters.listingType === "sale" ? "total" : "per_month";
+    where += `&where[priceUnit][equals]=${priceUnit}`;
+    if (filters.priceMin !== undefined) {
+      where += `&where[price][greater_than_equal]=${filters.priceMin}`;
+    }
+    if (filters.priceMax !== undefined) {
+      where += `&where[price][less_than_equal]=${filters.priceMax}`;
+    }
+  }
+
+  return where;
+}
+
+export async function getApartments(
+  locale: string,
+  filtersOrExtraWhere: ApartmentFilters | string = {},
+  limit: number = 20,
+): Promise<Apartment[]> {
+  try {
+    const extraWhere =
+      typeof filtersOrExtraWhere === "string"
+        ? filtersOrExtraWhere
+        : buildApartmentWhere(filtersOrExtraWhere);
+    const data = await fetchAPI(
+      `/apartments?depth=1&limit=${limit}&locale=${locale}${extraWhere}`,
+    );
+    return data.docs || [];
+  } catch (error) {
+    console.error("Error in getApartments:", error);
+    return [];
+  }
+}
+
 
 export async function getApartmentBySlug(
   slug: string,
@@ -186,6 +297,18 @@ export async function getCuratedApartments(
     return data.docs || [];
   } catch (error) {
     console.error("Error in getCuratedApartments:", error);
+    return [];
+  }
+}
+
+export async function getLocations(locale: string): Promise<Location[]> {
+  try {
+    const data = await fetchAPI(
+      `/locations?limit=500&depth=1&locale=${locale}`
+    );
+    return data.docs || [];
+  } catch (error) {
+    console.error("Error in getLocations:", error);
     return [];
   }
 }

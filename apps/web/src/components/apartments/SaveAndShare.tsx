@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { HeartIcon, ShareNetworkIcon } from "@phosphor-icons/react/dist/ssr";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 
 type SaveAndShareProps = {
   apartmentId: string | number;
-  t: (key: string) => string;
 };
 
-export const SaveAndShare = ({ apartmentId, t }: SaveAndShareProps) => {
+export const SaveAndShare = ({ apartmentId }: SaveAndShareProps) => {
+  const t = useTranslations("apartments");
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
@@ -48,24 +50,28 @@ export const SaveAndShare = ({ apartmentId, t }: SaveAndShareProps) => {
 
   return (
     <div className="flex items-center gap-2">
-      <button
+      <Button
+        variant="outline"
+        size="icon"
         onClick={handleShare}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-background-subtle hover:bg-background-muted transition-colors text-foreground"
+        className="w-10 h-10 bg-background-subtle border-border/50 hover:bg-background-muted text-foreground"
         aria-label={t("share")}
         title={t("share")}
       >
         <ShareNetworkIcon weight="duotone" className="w-5 h-5" />
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
         onClick={toggleSave}
-        className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
-          isSaved ? "bg-red-500/10 text-red-500 hover:bg-red-500/20" : "bg-background-subtle text-foreground hover:bg-background-muted"
+        className={`w-10 h-10 border-border/50 ${
+          isSaved ? "bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-600 border-red-500/20" : "bg-background-subtle text-foreground hover:bg-background-muted"
         }`}
         aria-label={isSaved ? t("saved") : t("save")}
         title={isSaved ? t("saved") : t("save")}
       >
         <HeartIcon weight={isSaved ? "fill" : "duotone"} className="w-5 h-5" />
-      </button>
+      </Button>
     </div>
   );
 };

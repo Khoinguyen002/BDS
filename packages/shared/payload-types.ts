@@ -75,6 +75,7 @@ export interface Config {
     templates: Template;
     translations: Translation;
     amenities: Amenity;
+    locations: Location;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +91,7 @@ export interface Config {
     templates: TemplatesSelect<false> | TemplatesSelect<true>;
     translations: TranslationsSelect<false> | TranslationsSelect<true>;
     amenities: AmenitiesSelect<false> | AmenitiesSelect<true>;
+    locations: LocationsSelect<false> | LocationsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -212,6 +214,12 @@ export interface LandingPage {
               [k: string]: unknown;
             } | null;
             avatar?: (number | null) | Media;
+            agentName?: string | null;
+            agentTitle?: string | null;
+            phoneNumber?: string | null;
+            zaloLink?: string | null;
+            experienceYears?: number | null;
+            successfulDeals?: number | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'aboutAgent';
@@ -268,6 +276,12 @@ export interface Template {
               [k: string]: unknown;
             } | null;
             avatar?: (number | null) | Media;
+            agentName?: string | null;
+            agentTitle?: string | null;
+            phoneNumber?: string | null;
+            zaloLink?: string | null;
+            experienceYears?: number | null;
+            successfulDeals?: number | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'aboutAgent';
@@ -315,7 +329,11 @@ export interface Media {
  */
 export interface Apartment {
   id: number;
-  listingType: 'sale' | 'rent';
+  propertyType: 'boarding_room' | 'apartment' | 'land_house';
+  /**
+   * Tự động là Cho thuê đối với Phòng trọ
+   */
+  listingType?: ('sale' | 'rent') | null;
   title: string;
   address?: string | null;
   gallery?: (number | Media)[] | null;
@@ -368,21 +386,45 @@ export interface Apartment {
     } | null;
   };
   keyFacts?: {
-    direction?: string | null;
-    balconyDirection?: string | null;
-    floorLevel?: ('low' | 'mid' | 'high') | null;
     area?: number | null;
     bedrooms?: number | null;
     bathrooms?: number | null;
-    furnitureStatus?: ('empty' | 'basic' | 'full') | null;
-    petFriendly?: boolean | null;
-    freeHours?: boolean | null;
+    hasMezzanine?: boolean | null;
+    direction?: ('e' | 'w' | 's' | 'n' | 'se' | 'ne' | 'sw' | 'nw') | null;
+    balconyDirection?: ('e' | 'w' | 's' | 'n' | 'se' | 'ne' | 'sw' | 'nw') | null;
+    landArea?: number | null;
+    usableArea?: number | null;
+    frontageWidth?: number | null;
+    depth?: number | null;
+    alleyWidth?: number | null;
+    floorLevel?: ('low' | 'mid' | 'high') | null;
+    numFloors?: number | null;
+    numBasements?: number | null;
+    structureType?: ('cap_4' | 'nha_pho' | 'biet_thu') | null;
     handoverYear?: number | null;
     buildingQuality?: ('new' | 'renovated' | 'old') | null;
+    furnitureStatus?: ('bare' | 'empty' | 'basic' | 'full') | null;
+    bathroomType?: ('private' | 'shared') | null;
+    curfewTime?: string | null;
+    petFriendly?: boolean | null;
+    freeHours?: boolean | null;
+    sharedLandlord?: boolean | null;
+    hasNightCurfew?: boolean | null;
+    cookingAllowed?: boolean | null;
+    hasElevator?: boolean | null;
+    hasKeyCard?: boolean | null;
+    hasSecurity24h?: boolean | null;
+    hasBasementParking?: boolean | null;
+    hasRooftop?: boolean | null;
+    isMainRoad?: boolean | null;
+    isBusinessFacade?: boolean | null;
   };
   price?: number | null;
+  /**
+   * Auto-synced from Listing Type (Sale = total, Rent = per_month)
+   */
+  priceUnit?: ('total' | 'per_month') | null;
   priceBreakdown?: {
-    totalPrice?: number | null;
     pricePerSqm?: number | null;
     transferFee?: string | null;
     taxResponsibility?: ('buyer' | 'seller' | 'negotiated') | null;
@@ -390,21 +432,32 @@ export interface Apartment {
     negotiable?: boolean | null;
   };
   rentPricing?: {
-    pricePerMonth?: number | null;
     deposit?: ('1_month' | '2_months' | '3_months' | 'other') | null;
     utilitiesPrice?: ('state' | 'business' | 'negotiated') | null;
     minLeaseTerm?: number | null;
+    electricityPrice?: string | null;
+    waterPrice?: string | null;
+    trashFee?: number | null;
+    wifiFee?: number | null;
+    parkingFee?: number | null;
     availableDate?: string | null;
     managementFeeIncluded?: boolean | null;
     negotiable?: boolean | null;
   };
   legal?: {
-    documentType?: ('pink_book' | 'sale_contract' | 'other') | null;
+    documentType?: ('pink_book' | 'red_book' | 'sale_contract' | 'other') | null;
     ownershipTerm?: ('long_term' | '50_years') | null;
     bankMortgaged?: boolean | null;
     bankSupportPercentage?: number | null;
+    isFullyPermitted?: boolean | null;
+    hasZoningIssue?: boolean | null;
+    hasDispute?: boolean | null;
   };
   location?: {
+    /**
+     * Chọn phường/xã cụ thể (VD: Thảo Điền, Phường 1...)
+     */
+    region?: (number | null) | Location;
     lat?: number | null;
     lng?: number | null;
   };
@@ -414,6 +467,20 @@ export interface Apartment {
   };
   slug?: string | null;
   owner: number | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locations".
+ */
+export interface Location {
+  id: number;
+  title: string;
+  level: 'city' | 'district' | 'ward';
+  parent?: (number | null) | Location;
+  slug?: string | null;
+  image?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -523,6 +590,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'amenities';
         value: number | Amenity;
+      } | null)
+    | ({
+        relationTo: 'locations';
+        value: number | Location;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -643,6 +714,12 @@ export interface LandingPagesSelect<T extends boolean = true> {
           | {
               content?: T;
               avatar?: T;
+              agentName?: T;
+              agentTitle?: T;
+              phoneNumber?: T;
+              zaloLink?: T;
+              experienceYears?: T;
+              successfulDeals?: T;
               id?: T;
               blockName?: T;
             };
@@ -688,6 +765,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "apartments_select".
  */
 export interface ApartmentsSelect<T extends boolean = true> {
+  propertyType?: T;
   listingType?: T;
   title?: T;
   address?: T;
@@ -703,23 +781,44 @@ export interface ApartmentsSelect<T extends boolean = true> {
   keyFacts?:
     | T
     | {
-        direction?: T;
-        balconyDirection?: T;
-        floorLevel?: T;
         area?: T;
         bedrooms?: T;
         bathrooms?: T;
-        furnitureStatus?: T;
-        petFriendly?: T;
-        freeHours?: T;
+        hasMezzanine?: T;
+        direction?: T;
+        balconyDirection?: T;
+        landArea?: T;
+        usableArea?: T;
+        frontageWidth?: T;
+        depth?: T;
+        alleyWidth?: T;
+        floorLevel?: T;
+        numFloors?: T;
+        numBasements?: T;
+        structureType?: T;
         handoverYear?: T;
         buildingQuality?: T;
+        furnitureStatus?: T;
+        bathroomType?: T;
+        curfewTime?: T;
+        petFriendly?: T;
+        freeHours?: T;
+        sharedLandlord?: T;
+        hasNightCurfew?: T;
+        cookingAllowed?: T;
+        hasElevator?: T;
+        hasKeyCard?: T;
+        hasSecurity24h?: T;
+        hasBasementParking?: T;
+        hasRooftop?: T;
+        isMainRoad?: T;
+        isBusinessFacade?: T;
       };
   price?: T;
+  priceUnit?: T;
   priceBreakdown?:
     | T
     | {
-        totalPrice?: T;
         pricePerSqm?: T;
         transferFee?: T;
         taxResponsibility?: T;
@@ -729,10 +828,14 @@ export interface ApartmentsSelect<T extends boolean = true> {
   rentPricing?:
     | T
     | {
-        pricePerMonth?: T;
         deposit?: T;
         utilitiesPrice?: T;
         minLeaseTerm?: T;
+        electricityPrice?: T;
+        waterPrice?: T;
+        trashFee?: T;
+        wifiFee?: T;
+        parkingFee?: T;
         availableDate?: T;
         managementFeeIncluded?: T;
         negotiable?: T;
@@ -744,10 +847,14 @@ export interface ApartmentsSelect<T extends boolean = true> {
         ownershipTerm?: T;
         bankMortgaged?: T;
         bankSupportPercentage?: T;
+        isFullyPermitted?: T;
+        hasZoningIssue?: T;
+        hasDispute?: T;
       };
   location?:
     | T
     | {
+        region?: T;
         lat?: T;
         lng?: T;
       };
@@ -803,6 +910,12 @@ export interface TemplatesSelect<T extends boolean = true> {
           | {
               content?: T;
               avatar?: T;
+              agentName?: T;
+              agentTitle?: T;
+              phoneNumber?: T;
+              zaloLink?: T;
+              experienceYears?: T;
+              successfulDeals?: T;
               id?: T;
               blockName?: T;
             };
@@ -844,6 +957,19 @@ export interface AmenitiesSelect<T extends boolean = true> {
   title?: T;
   icon?: T;
   category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locations_select".
+ */
+export interface LocationsSelect<T extends boolean = true> {
+  title?: T;
+  level?: T;
+  parent?: T;
+  slug?: T;
+  image?: T;
   updatedAt?: T;
   createdAt?: T;
 }

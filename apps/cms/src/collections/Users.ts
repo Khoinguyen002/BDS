@@ -21,7 +21,7 @@ export const Users: CollectionConfig = {
       name: 'brandName',
       type: 'text',
       required: true,
-      label: 'Brand Name',
+      label: { vi: "Tên thương hiệu (Brand Name)", en: "Brand Name" },
     },
     {
       name: 'agentSlug',
@@ -39,7 +39,7 @@ export const Users: CollectionConfig = {
     {
       name: 'verified',
       type: 'checkbox',
-      label: 'Verified Agent Badge',
+      label: { vi: "Huy hiệu xác thực", en: "Verified Agent Badge" },
       defaultValue: false,
       access: {
         create: ({ req: { user } }) => user?.role === 'admin',
@@ -50,12 +50,12 @@ export const Users: CollectionConfig = {
     {
       name: 'profile',
       type: 'group',
-      label: 'Agent Profile',
+      label: { vi: "Hồ sơ cá nhân", en: "Agent Profile" },
       fields: [
-        { name: 'experienceYears', type: 'number', label: 'Years of Experience' },
-        { name: 'successfulTransactions', type: 'number', label: 'Successful Transactions' },
-        { name: 'phoneNumber', type: 'text', label: 'Phone Number' },
-        { name: 'zaloUrl', type: 'text', label: 'Zalo URL (e.g., https://zalo.me/0123456789)' },
+        { name: 'experienceYears', type: 'number', label: { vi: "Số năm kinh nghiệm", en: "Years of Experience" } },
+        { name: 'successfulTransactions', type: 'number', label: { vi: "Số giao dịch thành công", en: "Successful Transactions" } },
+        { name: 'phoneNumber', type: 'text', label: { vi: "Số điện thoại", en: "Phone Number" } },
+        { name: 'zaloUrl', type: 'text', label: { vi: "Link Zalo (VD: https://zalo.me/...)", en: "Zalo URL" } },
       ]
     },
     {
@@ -95,6 +95,7 @@ export const Users: CollectionConfig = {
     {
       name: 'theme',
       type: 'group',
+      label: { vi: "Giao diện (Theme)", en: "Theme" },
       admin: {
         condition: (data, siblingData, { user }) => Boolean(user),
       },
@@ -103,20 +104,21 @@ export const Users: CollectionConfig = {
           name: 'primaryColor', 
           type: 'text', 
           defaultValue: '#2563eb', 
-          label: 'Brand Primary Color',
+          label: { vi: "Màu chủ đạo (Primary Color)", en: "Brand Primary Color" },
           admin: {
             components: {
               Field: '@/components/ColorPickerField#ColorPickerField',
             }
           }
         },
-        { name: 'borderRadius', type: 'select', options: ['none', 'sm', 'md', 'lg', 'full'], defaultValue: 'lg' },
-        { name: 'fontFamily', type: 'select', options: ['sans', 'serif'], defaultValue: 'sans' },
+        { name: 'borderRadius', type: 'select', options: ['none', 'sm', 'md', 'lg', 'full'], defaultValue: 'lg', label: { vi: "Bo góc", en: "Border Radius" } },
+        { name: 'fontFamily', type: 'select', options: ['sans', 'serif'], defaultValue: 'sans', label: { vi: "Phông chữ", en: "Font Family" } },
       ]
     },
     {
       name: 'usage',
       type: 'group',
+      label: { vi: "Mức sử dụng", en: "Usage" },
       admin: {
         condition: (data, siblingData, { user }) => {
           if (!user) return false; // Ẩn ở trang Onboarding

@@ -14,6 +14,7 @@ import { Leads } from "./collections/Leads";
 import { Templates } from "./collections/Templates";
 import { Translations } from "./collections/Translations";
 import { Amenities } from "./collections/Amenities";
+import { Locations } from "./collections/Locations";
 import { registerHandler } from "./endpoints/register";
 import { env } from "./env";
 
@@ -44,7 +45,7 @@ export default buildConfig({
     ),
   },
   secret: env.PAYLOAD_SECRET,
-  collections: [Users, LandingPages, Media, Apartments, Leads, Templates, Translations, Amenities],
+  collections: [Users, LandingPages, Media, Apartments, Leads, Templates, Translations, Amenities, Locations],
   plugins: [
     ...(env.S3_BUCKET
       ? [
