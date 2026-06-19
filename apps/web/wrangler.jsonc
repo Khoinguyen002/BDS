@@ -1,0 +1,65 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bds-web",
+  "main": ".open-next/worker.js",
+  // Khớp với workerd binary đang cài (@cloudflare/workerd 1.20260617).
+  "compatibility_date": "2026-06-17",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // CF Account ID — lấy từ CF Dashboard → Overview (góc phải)
+  "account_id": "15138a3f987329db586acc2b0060e599",
+
+  // Custom domain — zone dounus.id.vn phải nằm trong account này.
+  // CF tự cấp cert + tạo DNS record cho hostname.
+  "routes": [
+    {
+      "pattern": "bds.dounus.id.vn",
+      "custom_domain": true,
+    },
+  ],
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+
+  // Env vars — mirror từ .env
+  // KHÔNG để secret ở đây, dùng `wrangler secret put` cho production
+  "vars": {
+    // NEXT_PUBLIC_SERVER_URL = URL Payload CMS (fetcher + ảnh). Lưu ý: vì là
+    // NEXT_PUBLIC_, giá trị client được bake lúc BUILD — prod phải build với
+    // biến này = URL thật (xem ghi chú deploy).
+    "NEXT_PUBLIC_SERVER_URL": "https://cms.dounus.id.vn",
+    "NEXT_PUBLIC_APP_URL": "https://bds.dounus.id.vn",
+    "ALLOWED_IMAGE_HOSTNAMES": "images.unsplash.com,cms.dounus.id.vn",
+  },
+
+  // ── Cache layer ──────────────────────────────────────────────
+  // KV: Next.js Data Cache + ISR (incrementalCache).
+  //   Tạo: wrangler kv namespace create bds-inc-cache
+  //   → copy "id" trả về vào đây.
+  // ⚠ binding PHẢI là "NEXT_INC_CACHE_KV" — adapter hardcode tên này.
+  "kv_namespaces": [
+    {
+      "binding": "NEXT_INC_CACHE_KV",
+      "id": "9005e714cd0642a18b8b678edfec12df",
+    },
+  ],
+
+  // D1: tag cache cho revalidateTag / revalidatePath (strongly consistent).
+  //   Tạo: wrangler d1 create bds-tag-cache
+  //   → copy "database_id" trả về vào đây.
+  //   Rồi tạo bảng: wrangler d1 execute bds-tag-cache --remote --file=./migrations/0001_revalidations.sql
+  "d1_databases": [
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "bds-tag-cache",
+      "database_id": "e4e73b07-c310-4300-8e02-995478e49101",
+    },
+  ],
+
+  // Observability (optional nhưng hữu ích)
+  "observability": {
+    "enabled": true,
+  },
+}

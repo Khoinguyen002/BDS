@@ -11,6 +11,7 @@ import { notFound } from 'next/navigation';
 import { locales } from '@/i18n/request';
 import { cookies } from 'next/headers';
 import { CurrencyProvider } from '@/hooks/useCurrency';
+import { getExchangeRates } from '@/lib/exchange-rate';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,22 +44,7 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const initialCurrency = cookieStore.get("bds_currency")?.value || "VND";
 
-  let initialRates: Record<string, number> = { VND: 25400, THB: 36.5, USD: 1 };
-  try {
-    const res = await fetch("https://open.er-api.com/v6/latest/USD", { next: { revalidate: 300 } });
-    if (res.ok) {
-      const data = await res.json();
-      if (data?.rates) {
-        initialRates = {
-          VND: data.rates.VND || initialRates.VND,
-          THB: data.rates.THB || initialRates.THB,
-          USD: 1
-        };
-      }
-    }
-  } catch (error) {
-    console.error("Failed to fetch exchange rate on server", error);
-  }
+  const initialRates = await getExchangeRates();
 
   return (
     <html

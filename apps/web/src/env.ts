@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  PAYLOAD_PUBLIC_SERVER_URL: z.string()/* eslint-disable-next-line deprecation/deprecation */
-  .url().default("http://localhost:3001"),
+  // URL của Payload CMS — dùng cho cả server (fetcher) lẫn client (ảnh).
+  // Phải là NEXT_PUBLIC_ để client bundle thấy được khi build.
   NEXT_PUBLIC_SERVER_URL: z.string()/* eslint-disable-next-line deprecation/deprecation */
   .url().default("http://localhost:3001"),
   NEXT_PUBLIC_APP_URL: z.string()/* eslint-disable-next-line deprecation/deprecation */
@@ -16,7 +16,6 @@ const envSchema = z.object({
 });
 
 export const env = envSchema.parse({
-  PAYLOAD_PUBLIC_SERVER_URL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
   NEXT_PUBLIC_SERVER_URL: process.env.NEXT_PUBLIC_SERVER_URL,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,

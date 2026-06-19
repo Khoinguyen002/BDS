@@ -16,7 +16,7 @@ export default function HeroBanner(
 
   const bgImage = typeof backgroundImage === "object" ? (backgroundImage as Media) : null;
   const bgUrl = bgImage?.url 
-    ? (bgImage.url.startsWith("http") ? bgImage.url : `${env.PAYLOAD_PUBLIC_SERVER_URL}${bgImage.url}`)
+    ? (bgImage.url.startsWith("http") ? bgImage.url : `${env.NEXT_PUBLIC_SERVER_URL}${bgImage.url}`)
     : "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2000&q=80";
 
   return (

@@ -32,6 +32,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "*.config.mjs",
     "*.mjs",
+    // Cloudflare adapter generated output:
+    ".open-next/**",
+    ".wrangler/**",
   ]),
 ]);
 

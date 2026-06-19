@@ -4,7 +4,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
-const payloadUrl = new URL(env.PAYLOAD_PUBLIC_SERVER_URL);
+const payloadUrl = new URL(env.NEXT_PUBLIC_SERVER_URL);
 
 const allowedHostnames = env.ALLOWED_IMAGE_HOSTNAMES
   ? env.ALLOWED_IMAGE_HOSTNAMES.split(",")
@@ -30,3 +30,7 @@ const nextConfig: NextConfig = {
 };
 
 export default withNextIntl(nextConfig);
+
+// Cloudflare: khởi tạo platform proxy + bindings cho `next dev`.
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+initOpenNextCloudflareForDev();

@@ -1,6 +1,6 @@
 import { CollectionConfig, APIError } from "payload";
 import { getEffectiveTier, TIERS } from "@bds/shared";
-import { triggerRevalidatePaths } from "../utils/revalidate";
+import { triggerRevalidateTag } from "../utils/revalidate";
 import { formatSlug } from "../utils/formatSlug";
 
 export const Apartments: CollectionConfig = {
@@ -620,63 +620,15 @@ export const Apartments: CollectionConfig = {
       }
     ],
     afterChange: [
-      async ({ doc, req }) => {
-        if (doc.owner) {
-          const ownerId =
-            typeof doc.owner === "object" ? doc.owner.id : doc.owner;
-          const userDoc = await req.payload.findByID({
-            collection: "users",
-            id: ownerId as number,
-            req,
-          });
-          if (userDoc?.agentSlug) {
-            const paths = [
-              `/vi`,
-              `/en`,
-              `/vi/search`,
-              `/en/search`,
-              `/vi/${userDoc.agentSlug}`,
-              `/en/${userDoc.agentSlug}`,
-              `/vi/${userDoc.agentSlug}/apartments`,
-              `/en/${userDoc.agentSlug}/apartments`,
-            ];
-            if (doc.slug) {
-              paths.push(`/vi/${userDoc.agentSlug}/apartments/${doc.slug}`);
-              paths.push(`/en/${userDoc.agentSlug}/apartments/${doc.slug}`);
-            }
-            await triggerRevalidatePaths(paths);
-          }
-        }
+      async ({ req }) => {
+        // Tag "apartments" bao mọi trang fetch apartment (home, search, agent,
+        // list, detail). Không cần liệt kê path hay query owner nữa.
+        await triggerRevalidateTag({ tag: "apartments", req });
       },
     ],
     afterDelete: [
-      async ({ doc, req }) => {
-        if (doc.owner) {
-          const ownerId =
-            typeof doc.owner === "object" ? doc.owner.id : doc.owner;
-          const userDoc = await req.payload.findByID({
-            collection: "users",
-            id: ownerId as number,
-            req,
-          });
-          if (userDoc?.agentSlug) {
-            const paths = [
-              `/vi`,
-              `/en`,
-              `/vi/search`,
-              `/en/search`,
-              `/vi/${userDoc.agentSlug}`,
-              `/en/${userDoc.agentSlug}`,
-              `/vi/${userDoc.agentSlug}/apartments`,
-              `/en/${userDoc.agentSlug}/apartments`,
-            ];
-            if (doc.slug) {
-              paths.push(`/vi/${userDoc.agentSlug}/apartments/${doc.slug}`);
-              paths.push(`/en/${userDoc.agentSlug}/apartments/${doc.slug}`);
-            }
-            await triggerRevalidatePaths(paths);
-          }
-        }
+      async ({ req }) => {
+        await triggerRevalidateTag({ tag: "apartments", req });
       },
     ],
   },

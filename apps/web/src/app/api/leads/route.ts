@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     let cmsSuccess = false;
 
     try {
-      const cmsRes = await fetch(`${env.PAYLOAD_PUBLIC_SERVER_URL}/api/leads`, {
+      const cmsRes = await fetch(`${env.NEXT_PUBLIC_SERVER_URL}/api/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cmsPayload),

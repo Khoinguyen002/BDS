@@ -25,7 +25,7 @@ export default async function AboutAgent(
   const t = await getTranslations("agent");
   const avatarImage = typeof avatar === "object" ? (avatar as Media) : null;
   const avatarUrl = avatarImage?.url 
-    ? (avatarImage.url.startsWith("http") ? avatarImage.url : `${env.PAYLOAD_PUBLIC_SERVER_URL}${avatarImage.url}`)
+    ? (avatarImage.url.startsWith("http") ? avatarImage.url : `${env.NEXT_PUBLIC_SERVER_URL}${avatarImage.url}`)
     : "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80";
 
   return (

@@ -32,7 +32,7 @@ export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
     const url = apartment.gallery[0].url as string;
     imageUrl = url.startsWith("http")
       ? url
-      : `${env.PAYLOAD_PUBLIC_SERVER_URL || "http://localhost:3001"}${url}`;
+      : `${env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}${url}`;
   }
 
   const resolvedAgentSlug = agentSlug || (typeof apartment.owner === 'object' && apartment.owner?.agentSlug);

@@ -10,7 +10,7 @@ import type { User, LandingPage, Apartment, Location } from "@bds/shared/payload
 import { getLocale } from 'next-intl/server';
 import { env } from "../env";
 
-const SERVER_URL = env.PAYLOAD_PUBLIC_SERVER_URL;
+const SERVER_URL = env.NEXT_PUBLIC_SERVER_URL;
 const REVALIDATE_TIME = false; // Infinite cache
 
 async function fetchAPI(endpoint: string, options?: RequestInit) {
@@ -26,9 +26,19 @@ async function fetchAPI(endpoint: string, options?: RequestInit) {
     url.searchParams.set('locale', locale);
   }
 
+  // Auto-tag theo collection (segment đầu của endpoint) để revalidateTag từ
+  // CMS hoạt động: /apartments?... → "apartments", /landing-pages → "landing-pages",
+  // /locations → "locations", /translations → "translations", /users → "users".
+  // Caller vẫn có thể override qua options.next.tags.
+  const collection = endpoint.replace(/^\//, "").split(/[/?]/)[0];
+
   const res = await fetch(url.toString(), {
     ...options,
-    next: { revalidate: REVALIDATE_TIME, ...options?.next },
+    next: {
+      revalidate: REVALIDATE_TIME,
+      ...(collection ? { tags: [collection] } : {}),
+      ...options?.next,
+    },
   });
   if (!res.ok) {
     throw new Error(`Failed to fetch API: ${url.toString()} - Status: ${res.status}`);

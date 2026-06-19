@@ -1,6 +1,6 @@
 import { CollectionConfig, APIError } from "payload";
 import { getEffectiveTier, TIERS } from "@bds/shared";
-import { triggerRevalidatePaths } from "../utils/revalidate";
+import { triggerRevalidateTag } from "../utils/revalidate";
 
 import { pageBlocks } from "./blocks/pageBlocks";
 
@@ -111,18 +111,8 @@ export const LandingPages: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ doc, req }) => {
-        if (doc.owner) {
-          const ownerId = typeof doc.owner === 'object' ? doc.owner.id : doc.owner;
-          const userDoc = await req.payload.findByID({
-            collection: 'users',
-            id: ownerId as number,
-            req,
-          });
-          if (userDoc?.agentSlug) {
-            await triggerRevalidatePaths([`/vi/${userDoc.agentSlug}`, `/en/${userDoc.agentSlug}`]);
-          }
-        }
+      async ({ req }) => {
+        await triggerRevalidateTag({ tag: 'landing-pages', req });
       },
     ],
   },

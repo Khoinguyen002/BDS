@@ -8,7 +8,10 @@ const intlMiddleware = createMiddleware({
   defaultLocale: 'vi',
 });
 
-export const proxy = intlMiddleware;
+// NOTE: Phải là `middleware.ts` (không phải `proxy.ts`) để chạy Edge runtime.
+// Next.js 16 ép `proxy.ts` về Node.js runtime, mà @opennextjs/cloudflare
+// chỉ hỗ trợ Edge middleware.
+export default intlMiddleware;
 
 export const config = {
   // Match only internationalized pathnames
