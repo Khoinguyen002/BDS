@@ -17,7 +17,7 @@ type PropertyCardProps = {
 export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
   const locale = useLocale();
   const t = useTranslations("apartments");
-  const { formatCurrency } = useCurrency();
+  const { formatUSD, formatVND } = useCurrency();
 
   const fallbackImage = "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80";
   let imageUrl = fallbackImage;
@@ -43,7 +43,9 @@ export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
     : `/${locale}/apartments/${apartment.slug || apartment.id}`;
 
   const price = apartment.price;
-  const displayPrice = (!price || price < 1000000) ? t("negotiable") : formatCurrency(price);
+  const hasPrice = price && price >= 1000000;
+  const displayVND = hasPrice ? formatVND(price) : t("negotiable");
+  const displayUSD = hasPrice ? formatUSD(price) : null;
 
   return (
     <Link href={href} className="group flex flex-col h-full bg-background-subtle rounded-none overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
@@ -57,16 +59,16 @@ export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
         />
         <div className="absolute top-4 left-4 flex gap-2">
           {apartment.propertyType && (
-            <div className="bg-background/90 backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-wider font-bold text-foreground">
+            <div className="bg-background/90 backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-widest font-light text-foreground">
               {t(`type_${apartment.propertyType}`)}
             </div>
           )}
           {apartment.listingType === "sale" ? (
-            <div className="bg-primary/90 text-primary-foreground backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-wider font-bold">
+            <div className="bg-primary/90 text-primary-foreground backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-widest font-light">
               {t("for_sale") || "Đang Bán"}
             </div>
           ) : (
-            <div className="bg-primary/90 text-primary-foreground backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-wider font-bold">
+            <div className="bg-primary/90 text-primary-foreground backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-widest font-light">
               {t("for_rent") || "Cho Thuê"}
             </div>
           )}
@@ -80,9 +82,16 @@ export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
           </h3>
         </div>
 
-        <span className="text-xl font-bold text-primary tabular-nums">
-          {displayPrice}
-        </span>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-xl font-bold text-primary tabular-nums font-mono">
+            {displayVND}
+          </span>
+          {displayUSD && (
+            <span className="text-xs text-foreground-muted tabular-nums font-mono">
+              {displayUSD}
+            </span>
+          )}
+        </div>
 
         <div className="text-foreground-muted flex items-center gap-2 text-sm font-light mt-1 mb-2 line-clamp-1">
           <MapPinIcon weight="fill" className="w-4 h-4 shrink-0 text-primary/70" />

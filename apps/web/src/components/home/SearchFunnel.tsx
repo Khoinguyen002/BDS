@@ -9,6 +9,8 @@ import {
   MapPinIcon,
   XCircleIcon,
   ArrowsCounterClockwiseIcon,
+  KeyIcon,
+  TagIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -201,8 +203,9 @@ export const SearchFunnel = ({ agentSlug, locations = [] }: SearchFunnelProps) =
                if (propertyType === "land_house") setPropertyType("apartment");
                setPrice("");
              }}
-             className={`pb-2 border-b-2 font-medium text-base transition-colors ${listingType === 'rent' ? 'border-primary text-primary' : 'border-transparent text-foreground-muted hover:text-foreground'}`}
+             className={`pb-2 border-b-2 font-medium text-base transition-colors flex items-center gap-1.5 ${listingType === 'rent' ? 'border-primary text-primary' : 'border-transparent text-foreground-muted hover:text-foreground'}`}
           >
+             <KeyIcon weight={listingType === 'rent' ? 'fill' : 'regular'} className="w-4 h-4" />
              {t("apartments.for_rent")}
           </button>
           <button
@@ -213,8 +216,9 @@ export const SearchFunnel = ({ agentSlug, locations = [] }: SearchFunnelProps) =
                if (propertyType === "boarding_room") setPropertyType("apartment");
                setPrice("");
              }}
-             className={`pb-2 border-b-2 font-medium text-base transition-colors ${listingType === 'sale' ? 'border-primary text-primary' : 'border-transparent text-foreground-muted hover:text-foreground'}`}
+             className={`pb-2 border-b-2 font-medium text-base transition-colors flex items-center gap-1.5 ${listingType === 'sale' ? 'border-primary text-primary' : 'border-transparent text-foreground-muted hover:text-foreground'}`}
           >
+             <TagIcon weight={listingType === 'sale' ? 'fill' : 'regular'} className="w-4 h-4" />
              {t("apartments.for_sale")}
           </button>
         </div>
@@ -248,7 +252,7 @@ export const SearchFunnel = ({ agentSlug, locations = [] }: SearchFunnelProps) =
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder={currentPlaceholder}
-              className="w-full h-14 pl-12 pr-5 bg-transparent border-none focus:outline-none focus:ring-0 text-foreground text-base placeholder:text-foreground-muted"
+              className="w-full h-14 pl-12 pr-5 bg-transparent border-none focus:outline-none focus:ring-0 text-foreground text-sm placeholder:text-foreground-muted"
             />
           </div>
 
@@ -285,7 +289,7 @@ export const SearchFunnel = ({ agentSlug, locations = [] }: SearchFunnelProps) =
             </AnimatePresence>
             <Button
               type="submit"
-              className="h-full min-h-[48px] px-8 text-base font-medium flex items-center justify-center gap-2"
+              className="h-full min-h-[48px] px-8 flex items-center justify-center gap-2"
             >
               <MagnifyingGlassIcon className="w-5 h-5" />
               {t("home.search_btn")}
@@ -373,7 +377,7 @@ export const SearchFunnel = ({ agentSlug, locations = [] }: SearchFunnelProps) =
         <div className="flex md:hidden w-full flex-col gap-2 mt-2">
           <Button
             type="submit"
-            className="w-full h-12 text-base font-medium flex items-center justify-center gap-2"
+            className="w-full h-12 flex items-center justify-center gap-2"
           >
             <MagnifyingGlassIcon className="w-5 h-5" />
             {t("home.search_btn")}

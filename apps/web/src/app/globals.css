@@ -90,3 +90,10 @@ h1, h2, h3, h4, h5, h6 {
   outline: 2px solid var(--theme-primary, #059669);
   outline-offset: 2px;
 }
+
+/* ─── Input Placeholder Ellipsis ────────────────────────── */
+input::placeholder {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}

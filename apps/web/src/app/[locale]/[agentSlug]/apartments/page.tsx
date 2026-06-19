@@ -91,7 +91,7 @@ export default async function ViewAllApartmentsPage({ params, searchParams }: Pr
               <ArrowLeftIcon weight="bold" className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
               {tCommon("back")}
             </Link>
-            <div className="text-xs uppercase tracking-widest text-foreground-muted font-mono">
+            <div className="text-xs uppercase tracking-widest text-foreground-muted font-light">
               {t('properties_found', { count: apartments.length })}
             </div>
           </div>

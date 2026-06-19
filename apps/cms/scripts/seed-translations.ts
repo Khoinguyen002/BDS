@@ -363,6 +363,7 @@ export async function seedTranslations() {
       en: "There are currently no properties available.",
     },
     // ── Detail Page New Keys ───────────────────────────────
+    { key: "apartments.property_details", namespace: "apartments", vi: "Chi tiết bất động sản", en: "Property Details" },
     { key: "apartments.overview", namespace: "apartments", vi: "Tổng quan", en: "Overview" },
     { key: "apartments.highlights", namespace: "apartments", vi: "Điểm nhấn", en: "Highlights" },
     { key: "apartments.landscape", namespace: "apartments", vi: "Cảnh quan", en: "Landscape" },

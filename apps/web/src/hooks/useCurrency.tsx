@@ -9,6 +9,8 @@ interface CurrencyContextValue {
   currency: Currency;
   setCurrency: (c: Currency) => void;
   formatCurrency: (amount?: number | null) => string;
+  formatUSD: (amount?: number | null) => string;
+  formatVND: (amount?: number | null) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
@@ -58,8 +60,27 @@ export function CurrencyProvider({
     }).format(targetAmount);
   };
 
+  const formatVND = (amount?: number | null): string => {
+    if (amount === undefined || amount === null) return t("price_contact") || "Liên hệ";
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const formatUSD = (amount?: number | null): string => {
+    if (amount === undefined || amount === null) return "";
+    const usdAmount = amount / rates.VND;
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: usdAmount >= 1000 ? 0 : 2,
+    }).format(usdAmount);
+  };
+
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, formatCurrency }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency, formatCurrency, formatUSD, formatVND }}>
       {children}
     </CurrencyContext.Provider>
   );

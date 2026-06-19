@@ -4,7 +4,6 @@ import "../globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
-import { CurrencySelect } from "@/components/CurrencySelect";
 import { Footer } from "@/components/layout/Footer";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
@@ -77,7 +76,6 @@ export default async function RootLayout({
               {children}
               <Footer />
               <div className="fixed bottom-6 right-6 flex items-center gap-3 z-50">
-                <CurrencySelect />
                 <LocaleSwitcher />
                 <ThemeToggle />
               </div>
