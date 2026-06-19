@@ -1,4 +1,3 @@
-import fs from "fs";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 import { Translation } from "@bds/shared/payload-types";
@@ -621,8 +620,6 @@ export async function seedTranslations() {
     en: string;
   }[];
 
-  const results = [];
-
   for (const t of translations) {
     try {
       const existing = await payload.find({
@@ -633,7 +630,7 @@ export async function seedTranslations() {
 
       if (existing.docs.length > 0) {
         // Key already exists – skip to avoid overriding manually-set values
-        results.push({ key: t.key, status: "skipped (already exists)" });
+        console.log(`[skip] ${t.key}`);
       } else {
         // Create vi first
         const newDoc = await payload.create({
@@ -652,19 +649,14 @@ export async function seedTranslations() {
           data: { value: t.en },
           locale: "en",
         });
-        results.push({ key: t.key, status: "created" });
+        console.log(`[created] ${t.key}`);
       }
     } catch (e) {
-      results.push({
-        key: t.key,
-        status: "error",
-        error: (e as Error).message,
-      });
+      console.error(`[error] ${t.key}:`, (e as Error).message);
     }
   }
 
   console.log("Seeding translations completed successfully");
-  fs.writeFileSync("output.json", JSON.stringify(results, null, 2));
 }
 
 seedTranslations().then(() => {
