@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  DATABASE_URI: z.string().url().default("postgres://postgres:postgres@127.0.0.1:5432/bds"),
+  DATABASE_URI: z
+    .string()
+    .url()
+    .default("postgres://postgres:postgres@127.0.0.1:5432/bds"),
   PAYLOAD_SECRET: z.string().default("supersecret_bds_2026"),
   PAYLOAD_PUBLIC_SERVER_URL: z.string().url().default("http://localhost:3001"),
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),

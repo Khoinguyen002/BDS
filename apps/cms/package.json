@@ -9,10 +9,10 @@
     "start": "next start",
     "lint": "eslint",
     "generate:types": "payload generate:types",
-    "seed:translations": "tsx scripts/seed-translations.ts",
-    "seed:templates": "tsx scripts/seed-templates.ts",
-    "seed:apartments": "tsx scripts/seed-apartments.ts",
-    "seed:locations": "tsx scripts/seed-locations.ts"
+    "seed:translations": "tsx --env-file=.env scripts/seed-translations.ts",
+    "seed:templates": "tsx --env-file=.env scripts/seed-templates.ts",
+    "seed:apartments": "tsx --env-file=.env scripts/seed-apartments.ts",
+    "seed:locations": "tsx --env-file=.env scripts/seed-locations.ts"
   },
   "dependencies": {
     "@bds/shared": "workspace:*",
