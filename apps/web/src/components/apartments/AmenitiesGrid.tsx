@@ -2,12 +2,12 @@
 
 import React from "react";
 import * as Icons from "@phosphor-icons/react/dist/ssr";
-import { CheckCircle as CheckCircleIcon } from "@phosphor-icons/react/dist/ssr";
+import { CheckCircleIcon } from "@phosphor-icons/react/dist/ssr";
 import { useTranslations } from "next-intl";
-import { Amenity, Apartment } from "@bds/shared/payload-types";
+import { Amenity } from "@bds/shared/payload-types";
 
 type AmenitiesGridProps = {
-  amenities?: NonNullable<Apartment["amenities"]>;
+  amenities?: (number | Amenity)[] | null;
 };
 
 export const AmenitiesGrid = ({ amenities }: AmenitiesGridProps) => {
@@ -18,8 +18,8 @@ export const AmenitiesGrid = ({ amenities }: AmenitiesGridProps) => {
   
   if (validAmenities.length === 0) return null;
 
-  const internal = validAmenities.filter(a => a.category === 'internal');
-  const external = validAmenities.filter(a => a.category === 'external');
+  const internal = validAmenities.filter((a: Amenity) => a.category === 'internal');
+  const external = validAmenities.filter((a: Amenity) => a.category === 'external');
 
   const renderGrid = (items: Amenity[]) => (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

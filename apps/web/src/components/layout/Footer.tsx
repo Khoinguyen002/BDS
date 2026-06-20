@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { FacebookLogo, LinkedinLogo, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
+import { FacebookLogoIcon, LinkedinLogoIcon, YoutubeLogoIcon } from "@phosphor-icons/react/dist/ssr";
 
 export function Footer() {
   const tNav = useTranslations("nav");
@@ -12,21 +12,21 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
           {/* Brand & About */}
           <div className="col-span-1 md:col-span-2">
-            <h3 className="text-xl font-bold tracking-tight mb-4">BDS Platform</h3>
-            <p className="text-foreground-secondary mb-6 max-w-sm">
+            <h3 className="text-lg font-bold tracking-tight mb-4">BDS Platform</h3>
+            <p className="text-foreground-secondary text-sm mb-6 max-w-sm">
               {tFooter("brand_desc")}
             </p>
             <div className="flex items-center gap-4 text-foreground-secondary">
-              <a href="#" aria-label="Facebook" className="hover:text-foreground transition-colors"><FacebookLogo size={24} weight="fill" /></a>
-              <a href="#" aria-label="LinkedIn" className="hover:text-foreground transition-colors"><LinkedinLogo size={24} weight="fill" /></a>
-              <a href="#" aria-label="YouTube" className="hover:text-foreground transition-colors"><YoutubeLogo size={24} weight="fill" /></a>
+              <a href="#" aria-label="Facebook" className="hover:text-foreground transition-colors"><FacebookLogoIcon size={20} weight="fill" /></a>
+              <a href="#" aria-label="LinkedIn" className="hover:text-foreground transition-colors"><LinkedinLogoIcon size={20} weight="fill" /></a>
+              <a href="#" aria-label="YouTube" className="hover:text-foreground transition-colors"><YoutubeLogoIcon size={20} weight="fill" /></a>
             </div>
           </div>
 
           {/* Links */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-foreground-muted">{tFooter("category")}</h4>
-            <ul className="space-y-3">
+            <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider text-foreground-muted">{tFooter("category")}</h4>
+            <ul className="space-y-3 text-sm">
               <li><Link href="/" className="text-foreground-secondary hover:text-foreground transition-colors">{tNav("home")}</Link></li>
               <li><Link href="/apartments" className="text-foreground-secondary hover:text-foreground transition-colors">{tNav("apartments")}</Link></li>
               <li><Link href="/contact" className="text-foreground-secondary hover:text-foreground transition-colors">{tNav("contact")}</Link></li>
@@ -35,8 +35,8 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-foreground-muted">{tFooter("contact")}</h4>
-            <ul className="space-y-3 text-foreground-secondary">
+            <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider text-foreground-muted">{tFooter("contact")}</h4>
+            <ul className="space-y-3 text-sm text-foreground-secondary">
               <li>Email: contact@bds.vn</li>
               <li>Hotline: 1900 9999</li>
               <li>{tFooter("address_label")}</li>
@@ -44,7 +44,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-border text-center text-sm text-foreground-muted">
+        <div className="mt-12 pt-8 border-t border-border text-center text-xs text-foreground-muted">
           <p>{tFooter("copyright")} © {new Date().getFullYear()} BDS Platform.</p>
         </div>
       </div>

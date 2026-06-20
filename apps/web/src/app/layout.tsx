@@ -34,7 +34,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body
-        className="min-h-full flex flex-col bg-background text-foreground selection:bg-[var(--theme-primary)] selection:text-white"
+        className="min-h-full flex flex-col bg-background text-foreground selection:bg-(--theme-primary) selection:text-white"
         suppressHydrationWarning
       >
         {/* Chặn FOUC theme + set lang đồng bộ TRƯỚC khi body paint. */}

@@ -1,5 +1,6 @@
 import { CollectionConfig } from 'payload';
 import { triggerRevalidateTag } from '../utils/revalidate';
+import { COLLECTION_TAGS } from '@bds/shared/cache-tags';
 import { formatSlug } from '../utils/formatSlug';
 
 export const Locations: CollectionConfig = {
@@ -67,12 +68,12 @@ export const Locations: CollectionConfig = {
   hooks: {
     afterChange: [
       ({ req }) => {
-        triggerRevalidateTag({ tag: 'locations', req });
+        triggerRevalidateTag({ tag: COLLECTION_TAGS.locations, req });
       }
     ],
     afterDelete: [
       ({ req }) => {
-        triggerRevalidateTag({ tag: 'locations', req });
+        triggerRevalidateTag({ tag: COLLECTION_TAGS.locations, req });
       }
     ]
   }

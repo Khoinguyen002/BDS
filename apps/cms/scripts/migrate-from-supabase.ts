@@ -39,12 +39,13 @@ type PropertyImage = {
   order_index: number;
 };
 
-const TYPE_MAP: Record<string, "apartment" | "land_house"> = {
-  villa: "land_house",
-  biet_thu: "land_house",
-  chung_cu: "apartment",
-  can_ho_dich_vu: "apartment",
-  penthouse: "apartment",
+// `propertyType` cũ (Payload đã bỏ field này) → tạo/ghép Tag tương ứng.
+const TYPE_TAG: Record<string, string> = {
+  villa: "Villa",
+  biet_thu: "Biệt thự",
+  chung_cu: "Chung cư",
+  can_ho_dich_vu: "Căn hộ dịch vụ",
+  penthouse: "Penthouse",
 };
 const SALE_STATUS = new Set(["selling", "sold"]);
 const CITY_LABEL: Record<string, string> = {
@@ -116,12 +117,33 @@ async function importImage(payload: Payload, im: PropertyImage, owner: number): 
   return doc.id as number;
 }
 
+// Upsert Tag theo title (vi). Cache trong process để khỏi query lặp.
+const tagCache = new Map<string, number>();
+async function getOrCreateTag(payload: Payload, label: string): Promise<number> {
+  const cached = tagCache.get(label);
+  if (cached) return cached;
+  const existing = await payload.find({
+    collection: "tags",
+    where: { title: { equals: label } },
+    limit: 1,
+    locale: "vi",
+  });
+  const id = (existing.docs.length
+    ? existing.docs[0].id
+    : (await payload.create({ collection: "tags", data: { title: label } as never, locale: "vi", overrideAccess: true })).id) as number;
+  tagCache.set(label, id);
+  return id;
+}
+
 async function migrateOne(payload: Payload, p: Property, imgs: PropertyImage[], owner: number) {
   const listingType = SALE_STATUS.has(p.status) ? "sale" : "rent";
-  const propertyType = TYPE_MAP[p.type] ?? "apartment";
   const address = [p.address, p.district, CITY_LABEL[p.city] ?? p.city].filter(Boolean).join(", ");
   const title = p.name?.trim() || `Property ${p.id}`;
   const overview = textToLexical(p.description);
+
+  // type cũ → Tag (relationship). Bỏ propertyType.
+  const tagLabel = TYPE_TAG[p.type] ?? "Khác";
+  const tagId = await getOrCreateTag(payload, tagLabel);
 
   const galleryIds: number[] = [];
   for (const im of imgs.sort((a, b) => a.order_index - b.order_index)) {
@@ -131,8 +153,8 @@ async function migrateOne(payload: Payload, p: Property, imgs: PropertyImage[], 
 
   const data: Record<string, unknown> = {
     title,
-    propertyType,
     listingType,
+    tags: [tagId],
     address,
     price: p.price ?? undefined,
     owner,
@@ -141,7 +163,9 @@ async function migrateOne(payload: Payload, p: Property, imgs: PropertyImage[], 
       bedrooms: p.bedrooms && p.bedrooms > 0 ? p.bedrooms : undefined,
     },
     gallery: galleryIds,
-    ...(overview ? { details: { overview } } : {}),
+    thumbnail: galleryIds.length > 0 ? galleryIds[0] : undefined,
+    // description cũ → 1 section {title, body}. `details.overview` đã bị bỏ.
+    ...(overview ? { sections: [{ title: "Mô tả", body: overview }] } : {}),
   };
 
   const existing = await payload.find({
@@ -182,8 +206,8 @@ async function main() {
   if (!COMMIT) {
     for (const p of properties) {
       const listingType = SALE_STATUS.has(p.status) ? "sale" : "rent";
-      const propertyType = TYPE_MAP[p.type] ?? "apartment";
-      console.log(`- ${p.id} "${p.name?.trim()}" → ${propertyType}/${listingType} price=${p.price} area=${p.area_sqm} bed=${p.bedrooms} imgs=${(imgsByProp.get(p.id) ?? []).length}`);
+      const tagLabel = TYPE_TAG[p.type] ?? "Khác";
+      console.log(`- ${p.id} "${p.name?.trim()}" → tag:${tagLabel}/${listingType} price=${p.price} area=${p.area_sqm} bed=${p.bedrooms} imgs=${(imgsByProp.get(p.id) ?? []).length}`);
     }
     console.log(`\n=== DRY-RUN xong (không ghi gì). Chạy lại với --commit để ghi thật. ===`);
     return;

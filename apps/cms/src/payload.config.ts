@@ -15,6 +15,7 @@ import { Leads } from "./collections/Leads";
 import { Templates } from "./collections/Templates";
 import { Translations } from "./collections/Translations";
 import { Amenities } from "./collections/Amenities";
+import { Tags } from "./collections/Tags";
 import { Locations } from "./collections/Locations";
 import { registerHandler } from "./endpoints/register";
 import { env } from "./env";
@@ -22,6 +23,82 @@ import { env } from "./env";
 export default buildConfig({
   i18n: {
     supportedLanguages: { vi, en },
+    translations: {
+      vi: {
+        custom: {
+          apartmentPicker: {
+            quickSelect: "⚡ Chọn nhanh",
+            clearAll: "✕ Xóa tất cả",
+            modalTitle: "Chọn nhanh căn hộ",
+            searchPlaceholder: "Tìm theo tên...",
+            allTypes: "Tất cả loại",
+            sale: "Bán",
+            rent: "Cho thuê",
+            allTags: "Tất cả tag",
+            apartments: "căn hộ",
+            selected: "đã chọn",
+            selectAll: "Chọn tất cả",
+            allSelected: "✓ Đã chọn hết",
+            deselectFiltered: "Bỏ chọn lọc",
+            clearSelection: "Xóa hết",
+            loading: "Đang tải...",
+            noResults: "Không tìm thấy căn hộ nào",
+            cancel: "Hủy",
+            confirm: "Xác nhận",
+            unit: "căn",
+          },
+          locationPicker: {
+            label: "Phường / Xã",
+            placeholder: "Chọn phường/xã...",
+            title: "Chọn Phường / Xã",
+            close: "Đóng",
+            searchPlaceholder: "Tìm kiếm phường/xã...",
+            noResults: "Không tìm thấy",
+            district: "Quận/Huyện",
+            ward: "Phường/Xã",
+            selectDistrictFirst: "Chọn quận trước",
+            noWards: "Không có phường/xã",
+          },
+        },
+      },
+      en: {
+        custom: {
+          apartmentPicker: {
+            quickSelect: "⚡ Quick Select",
+            clearAll: "✕ Clear All",
+            modalTitle: "Quick Select Apartments",
+            searchPlaceholder: "Search by name...",
+            allTypes: "All types",
+            sale: "Sale",
+            rent: "Rent",
+            allTags: "All tags",
+            apartments: "apartments",
+            selected: "selected",
+            selectAll: "Select All",
+            allSelected: "✓ All Selected",
+            deselectFiltered: "Deselect Filtered",
+            clearSelection: "Clear All",
+            loading: "Loading...",
+            noResults: "No apartments found",
+            cancel: "Cancel",
+            confirm: "Confirm",
+            unit: "items",
+          },
+          locationPicker: {
+            label: "Ward",
+            placeholder: "Select ward...",
+            title: "Select Ward",
+            close: "Close",
+            searchPlaceholder: "Search ward...",
+            noResults: "No results found",
+            district: "District",
+            ward: "Ward",
+            selectDistrictFirst: "Select a district first",
+            noWards: "No wards available",
+          },
+        },
+      },
+    },
   },
   localization: {
     locales: ["vi", "en"],
@@ -46,7 +123,7 @@ export default buildConfig({
     ),
   },
   secret: env.PAYLOAD_SECRET,
-  collections: [Users, LandingPages, Media, Apartments, Leads, Templates, Translations, Amenities, Locations],
+  collections: [Users, LandingPages, Media, Apartments, Leads, Templates, Translations, Amenities, Tags, Locations],
   plugins: [
     // Ưu tiên Cloudinary nếu có cấu hình; fallback S3; nếu không có cả hai → local storage.
     ...(env.CLOUDINARY_CLOUD_NAME

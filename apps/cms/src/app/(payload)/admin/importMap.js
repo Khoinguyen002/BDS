@@ -22,6 +22,10 @@ import { StrikethroughFeatureClient as StrikethroughFeatureClient_e70f5e05f09f93
 import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { ApartmentPickerField as ApartmentPickerField_8fdfed51a6ebb461a60ba8bf645afb12 } from '@/components/ApartmentPickerField'
+import { default as default_1bb38cf0dd3266c4565294ea0b228da5 } from '@/components/SectionDivider'
+import { LocationPickerField as LocationPickerField_c2172835f37410ccd59133bb5abc3986 } from '@/components/LocationPickerField'
+import { SectionRowLabel as SectionRowLabel_ae1c4365d5ae4136760591ff946aa806 } from '@/components/SectionRowLabel'
 import { TranslationActions as TranslationActions_c215208c47c179add42056341eba8ccb } from '@/components/TranslationActions'
 import { IconPickerField as IconPickerField_96fa91b3a1147f26fe9c9a414cfa6358 } from '@/components/IconPickerField'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -52,6 +56,10 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/components/ApartmentPickerField#ApartmentPickerField": ApartmentPickerField_8fdfed51a6ebb461a60ba8bf645afb12,
+  "@/components/SectionDivider#default": default_1bb38cf0dd3266c4565294ea0b228da5,
+  "@/components/LocationPickerField#LocationPickerField": LocationPickerField_c2172835f37410ccd59133bb5abc3986,
+  "@/components/SectionRowLabel#SectionRowLabel": SectionRowLabel_ae1c4365d5ae4136760591ff946aa806,
   "@/components/TranslationActions#TranslationActions": TranslationActions_c215208c47c179add42056341eba8ccb,
   "@/components/IconPickerField#IconPickerField": IconPickerField_96fa91b3a1147f26fe9c9a414cfa6358,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

@@ -3,6 +3,7 @@ import React from "react";
 type ThemeConfig = {
   primaryColor?: string | null;
   secondaryColor?: string | null;
+  secondaryForegroundColor?: string | null;
   borderRadius?: string | null;
   fontFamily?: string | null;
 };
@@ -12,6 +13,7 @@ export function ThemeInjector({ theme }: { theme?: ThemeConfig | null }) {
 
   const primary = theme.primaryColor || "#059669"; // default emerald – matches globals.css
   const secondary = theme.secondaryColor || "#475569"; // default slate-600 – matches globals.css
+  const secondaryFg = theme.secondaryForegroundColor || "#ffffff"; // default white
   const radius =
     theme.borderRadius === "none"
       ? "0"
@@ -33,6 +35,7 @@ export function ThemeInjector({ theme }: { theme?: ThemeConfig | null }) {
         :root {
           --theme-primary: ${primary};
           --theme-secondary: ${secondary};
+          --theme-secondary-foreground: ${secondaryFg};
           --theme-radius: ${radius};
         }
         body {

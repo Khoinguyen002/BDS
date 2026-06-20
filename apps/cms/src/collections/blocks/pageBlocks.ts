@@ -52,6 +52,11 @@ export const pageBlocks: Block[] = [
         relationTo: "apartments",
         label: { vi: "Chọn các căn hộ hiển thị (Để trống sẽ hiện tất cả)", en: "Filter Apartments" },
         hasMany: true,
+        admin: {
+          components: {
+            Field: "@/components/ApartmentPickerField#ApartmentPickerField",
+          },
+        },
         filterOptions: ({ data, siblingData }): Where => {
           const owner =
             (data as Partial<LandingPage>)?.owner ||

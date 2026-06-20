@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { env } from "@/env";
 
+// Cache CHỈ invalidate qua tag — không còn revalidatePath. Mỗi fetch tự khai
+// tag tường minh (xem @bds/shared/cache-tags), nên CMS chỉ cần gửi đúng tag.
 export async function POST(req: NextRequest) {
   const token = req.headers.get("authorization");
   if (token !== `Bearer ${env.REVALIDATE_SECRET}`) {
@@ -11,26 +13,22 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Chấp nhận cả dạng đơn (path/tag) lẫn dạng batch (paths/tags) trong 1 request.
-    const paths: string[] = [
-      ...(body.path ? [body.path] : []),
-      ...(Array.isArray(body.paths) ? body.paths : []),
-    ];
+    // Chấp nhận cả dạng đơn (tag) lẫn dạng batch (tags) trong 1 request.
     const tags: string[] = [
       ...(body.tag ? [body.tag] : []),
       ...(Array.isArray(body.tags) ? body.tags : []),
     ];
 
-    if (paths.length === 0 && tags.length === 0)
-      return NextResponse.json({ error: "Path or tag required" }, { status: 400 });
+    if (tags.length === 0)
+      return NextResponse.json({ error: "Tag required" }, { status: 400 });
 
-    for (const p of paths) revalidatePath(p);
-    // { expire: 0 } = hết hạn NGAY: request kế tiếp là cache miss, fetch tươi
-    // (blocking). Đây là pattern Next khuyến nghị cho webhook/3rd-party gọi
-    // Route Handler cần thấy data mới ngay. ("max" là SWR → còn thấy bản cũ 1 lượt.)
-    for (const t of tags) revalidateTag(t, { expire: 0 });
+    // Next 16: revalidateTag yêu cầu profile thứ 2. Dạng 1 tham số đã deprecated.
+    // Dùng "max" (stale-while-revalidate): user đầu tiên sau purge VẪN nhận data
+    // cũ ngay (không chờ origin fetch), data mới được refetch ở background và
+    // phục vụ từ request kế tiếp. Trễ 1 nhịp nhưng không ai phải block.
+    for (const t of tags) revalidateTag(t, "max");
 
-    return NextResponse.json({ revalidated: true, paths: paths.length, tags: tags.length });
+    return NextResponse.json({ revalidated: true, tags: tags.length });
   } catch {
     return NextResponse.json(
       { error: "Invalid JSON payload" },

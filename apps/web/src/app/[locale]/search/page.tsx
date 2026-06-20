@@ -1,6 +1,6 @@
 import React from "react";
 import { ThemeInjector } from "@/components/ThemeInjector";
-import { getApartments, getLocations } from "@/lib/payload-fetcher";
+import { getApartments, getLocations, getTags } from "@/lib/payload-fetcher";
 import { resolveLocationSlugsToWardIds } from "@/lib/location-utils";
 import { SearchFunnel } from "@/components/home/SearchFunnel";
 import { ListApartmentsClient } from "@/components/blocks/ListApartmentsClient";
@@ -36,7 +36,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
 
   // ─── Parse URL params ──────────────────────────────────────
   const q = toStr(sp.q);
-  const propertyType = toStr(sp.propertyType); // apartment | boarding_room | land_house
+  const tagSlug = toStr(sp.tag);
   const listingType = toStr(sp.type);           // sale | rent
   const locationParam = toStr(sp.location);     // "slug1,slug2,slug3"
   const priceMin = toNum(sp.priceMin);
@@ -48,18 +48,21 @@ export default async function SearchPage({ params, searchParams }: Props) {
     ? locationParam.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
 
-  const allLocations = await getLocations(locale);
+  const [allLocations, allTags] = await Promise.all([getLocations(locale), getTags(locale)]);
   let wardIds: number[] = [];
   if (locationSlugs.length > 0) {
     wardIds = resolveLocationSlugsToWardIds(locationSlugs, allLocations);
   }
+
+  const tagId = tagSlug ? allTags.find((tg) => tg.slug === tagSlug)?.id : undefined;
+  const tagOptions = allTags.map((tg) => ({ slug: tg.slug as string, title: tg.title as string }));
 
   // ─── Fetch apartments ──────────────────────────────────────
   const apartments = await getApartments(
     locale,
     {
       q: q || undefined,
-      propertyType: propertyType || undefined,
+      tagIds: tagId ? [tagId] : undefined,
       listingType: listingType || undefined,
       wardIds: wardIds.length > 0 ? wardIds : undefined,
       priceMin,
@@ -73,7 +76,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
     <>
       <ThemeInjector />
       <SiteHeader brandName="Bất Động Sản" homeHref={`/${locale}`} />
-      <main className="min-h-screen bg-background pt-10 pb-16">
+      <main className="min-h-screen bg-background pt-24 pb-16">
         <div className="container">
           <div className="mb-8">
             <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground mb-4">
@@ -84,15 +87,14 @@ export default async function SearchPage({ params, searchParams }: Props) {
             </p>
           </div>
 
-          <div className="mb-12 sticky md:static top-[64px] z-40">
-            <SearchFunnel locations={allLocations} />
+          <div className="mb-12">
+            <SearchFunnel locations={allLocations} tags={tagOptions} compactMobile />
           </div>
 
           <ListApartmentsClient
             apartments={apartments}
-            initialFilterListing={listingType || "all"}
-            initialFilterType={propertyType || "all"}
-            hideHeader={true}
+            hideHeader
+            layout="grid"
           />
         </div>
       </main>

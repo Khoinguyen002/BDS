@@ -12,19 +12,20 @@ export function ListApartmentsClient({
   apartments: initialApartments,
   agentSlug,
   hideHeader,
-  initialFilterType,
-  initialFilterListing,
+  layout = "carousel",
 }: {
   apartments: Apartment[];
   agentSlug?: string;
   hideHeader?: boolean;
-  initialFilterType?: string;
-  initialFilterListing?: string;
+  /** 'grid' = vertical grid, 'carousel' = horizontal scroll (desktop only, mobile falls back to grid) */
+  layout?: "grid" | "carousel";
 }) {
   const t = useTranslations("apartments");
   const locale = useLocale();
   
   if (initialApartments.length === 0) return null;
+
+  const isGrid = layout === "grid";
 
   return (
     <section className={`bg-background ${!hideHeader ? "py-24 border-t border-border" : ""}`}>
@@ -41,7 +42,7 @@ export function ListApartmentsClient({
             </div>
             <Link 
               href={agentSlug ? `/${locale}/${agentSlug}/apartments` : `/${locale}/apartments`} 
-              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-foreground-muted hover:text-[var(--theme-primary)] transition-colors"
+              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-foreground-muted hover:text-(--theme-primary) transition-colors"
             >
               {t('view_all')}
               <ArrowUpRightIcon weight="bold" className="w-4 h-4" />
@@ -50,19 +51,24 @@ export function ListApartmentsClient({
         )}
 
         {initialApartments.length > 0 ? (
-          <ul className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 hide-scrollbar">
+          <ul className={isGrid
+            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            : "grid grid-cols-1 gap-6 md:flex md:overflow-x-auto md:snap-x md:snap-mandatory md:gap-6 md:pb-8 md:hide-scrollbar"
+          }>
             {initialApartments.map((apartment, i) => (
               <motion.li
                 key={apartment.id}
                 initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.1 }}
+                {...(isGrid
+                  ? { whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: 0.1 } }
+                  : { animate: { opacity: 1, y: 0 } }
+                )}
                 transition={{
                   duration: 0.6,
                   delay: (i % 3) * 0.1,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="w-[85vw] shrink-0 snap-start md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
+                className={isGrid ? "" : "md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] md:shrink-0 md:snap-start"}
               >
                 <PropertyCard apartment={apartment} agentSlug={agentSlug} />
               </motion.li>

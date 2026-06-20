@@ -1,7 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useTranslations } from "next-intl";
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import { useTranslations, useLocale } from "next-intl";
 
 type Currency = "VND" | "USD" | "THB";
 
@@ -34,16 +34,22 @@ export function CurrencyProvider({
     document.cookie = `bds_currency=${newCurrency}; path=/; max-age=31536000`;
   };
 
+  const localeStr = useLocale();
+
   const formatCompactVND = (amount: number): string => {
+    const isEn = localeStr === "en";
+    const numFormatLocale = isEn ? "en-US" : "vi-VN";
     if (amount >= 1e9) {
       const value = amount / 1e9;
-      return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(value)} tỷ`;
+      const formattedNum = new Intl.NumberFormat(numFormatLocale, { maximumFractionDigits: 2 }).format(value);
+      return isEn ? `${formattedNum}B VND` : `${formattedNum} tỷ`;
     }
     if (amount >= 1e6) {
       const value = amount / 1e6;
-      return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(value)} triệu`;
+      const formattedNum = new Intl.NumberFormat(numFormatLocale, { maximumFractionDigits: 2 }).format(value);
+      return isEn ? `${formattedNum}M VND` : `${formattedNum} triệu`;
     }
-    return new Intl.NumberFormat("vi-VN", {
+    return new Intl.NumberFormat(numFormatLocale, {
       style: "currency",
       currency: "VND",
       maximumFractionDigits: 0,
@@ -80,11 +86,12 @@ export function CurrencyProvider({
   const formatUSD = (amount?: number | null): string => {
     if (amount === undefined || amount === null) return "";
     const usdAmount = amount / rates.VND;
-    return new Intl.NumberFormat("en-US", {
+    const formatted = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       maximumFractionDigits: usdAmount >= 1000 ? 0 : 2,
     }).format(usdAmount);
+    return `${formatted} USD`;
   };
 
   return (

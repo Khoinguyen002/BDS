@@ -6,6 +6,8 @@
  * CF Cache API thủ công nữa.
  */
 
+import { EXCHANGE_RATE_TAG } from "@bds/shared/cache-tags";
+
 const EXCHANGE_RATE_URL = "https://open.er-api.com/v6/latest/USD";
 const CACHE_TTL = 300; // 5 phút
 
@@ -25,7 +27,7 @@ const DEFAULT_RATES: ExchangeRates = {
 export async function getExchangeRates(): Promise<ExchangeRates> {
   try {
     const res = await fetch(EXCHANGE_RATE_URL, {
-      next: { revalidate: CACHE_TTL, tags: ["exchange-rate"] },
+      next: { revalidate: CACHE_TTL, tags: [EXCHANGE_RATE_TAG] },
     });
     if (!res.ok) throw new Error(`Exchange rate fetch failed: ${res.status}`);
     const data = (await res.json()) as { rates?: Record<string, number> };

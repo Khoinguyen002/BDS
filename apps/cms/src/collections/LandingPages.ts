@@ -1,6 +1,7 @@
 import { CollectionConfig, APIError } from "payload";
 import { getEffectiveTier, TIERS } from "@bds/shared";
 import { triggerRevalidateTag } from "../utils/revalidate";
+import { COLLECTION_TAGS, landingPageByOwnerTag } from "@bds/shared/cache-tags";
 
 import { pageBlocks } from "./blocks/pageBlocks";
 
@@ -111,8 +112,12 @@ export const LandingPages: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ req }) => {
-        await triggerRevalidateTag({ tag: 'landing-pages', req });
+      async ({ doc, req }) => {
+        // owner là relationship → ở afterChange thường là id (number).
+        const ownerId = typeof doc.owner === 'object' ? doc.owner?.id : doc.owner;
+        const tags: string[] = [COLLECTION_TAGS.landingPages];
+        if (ownerId != null) tags.push(landingPageByOwnerTag(ownerId));
+        await triggerRevalidateTag({ tag: tags, req });
       },
     ],
   },

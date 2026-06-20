@@ -5,9 +5,15 @@
   "types": "tiers.ts",
   "exports": {
     ".": "./tiers.ts",
-    "./payload-types": "./payload-types.ts"
+    "./payload-types": "./payload-types.ts",
+    "./cache-tags": "./cache-tags.ts",
+    "./hooks/useLocationPanel": "./hooks/useLocationPanel.ts"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
-    "payload": "^3.85.1"
+    "payload": "^3.85.1",
+    "@types/react": "^18.0.0 || ^19.0.0"
   }
 }

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload';
 import { triggerRevalidateTag } from '../utils/revalidate';
+import { COLLECTION_TAGS } from '@bds/shared/cache-tags';
 
 export const Translations: CollectionConfig = {
   slug: 'translations',
@@ -19,12 +20,12 @@ export const Translations: CollectionConfig = {
   hooks: {
     afterChange: [
       ({ req }) => {
-        triggerRevalidateTag({ tag: 'translations', req });
+        triggerRevalidateTag({ tag: COLLECTION_TAGS.translations, req });
       }
     ],
     afterDelete: [
       ({ req }) => {
-        triggerRevalidateTag({ tag: 'translations', req });
+        triggerRevalidateTag({ tag: COLLECTION_TAGS.translations, req });
       }
     ],
   },

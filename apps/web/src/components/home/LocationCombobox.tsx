@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { XIcon, CheckIcon, CaretRightIcon } from "@phosphor-icons/react/dist/ssr";
 import type { Location } from "@bds/shared/payload-types";
-import { getDisabledLocationIds } from "@/lib/location-utils";
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -22,23 +21,6 @@ interface LocationPanelProps {
   value: SelectedLocation[];
   onChange: (selected: SelectedLocation[]) => void;
   onClose: () => void;
-}
-
-function getParentId(loc: Location): number | null {
-  if (!loc.parent) return null;
-  if (typeof loc.parent === "number") return loc.parent;
-  if (typeof loc.parent === "object" && loc.parent !== null)
-    return (loc.parent as Location).id;
-  return null;
-}
-
-function toSelected(loc: Location): SelectedLocation {
-  return {
-    id: loc.id,
-    slug: loc.slug as string,
-    title: loc.title as string,
-    level: loc.level as "city" | "district" | "ward",
-  };
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -120,6 +102,8 @@ function ColumnItem({
 // ─────────────────────────────────────────────────────────────
 // Main Panel
 // ─────────────────────────────────────────────────────────────
+import { useLocationPanel } from "@bds/shared/hooks/useLocationPanel";
+
 export const LocationPanel = ({
   allLocations,
   value,
@@ -127,10 +111,26 @@ export const LocationPanel = ({
   onClose,
 }: LocationPanelProps) => {
   const t = useTranslations();
-  const [searchQuery, setSearchQuery] = useState("");
-  const searchLower = searchQuery.toLowerCase().trim();
-  // Focused = which item in each column is currently highlighted (for navigation)
-  const [focusedDistrictId, setFocusedDistrictId] = useState<number | null>(null);
+  
+  const {
+    searchQuery,
+    setSearchQuery,
+    searchLower,
+    focusedDistrictId,
+    setFocusedDistrictId,
+    selectedIds,
+    disabledIds,
+    partialDistrictIds,
+    districts,
+    activeWards,
+    hasWardChildren,
+    toggle,
+    selectedDistricts,
+    selectedWards,
+    searchResults,
+    cityForDistricts,
+    getParentId
+  } = useLocationPanel({ allLocations, value, onChange });
 
   useEffect(() => {
     // Lock body scroll when panel is open
@@ -140,86 +140,6 @@ export const LocationPanel = ({
       document.body.style.overflow = originalOverflow;
     };
   }, []);
-
-  const selectedIds = useMemo(() => new Set(value.map((v) => v.id)), [value]);
-  const disabledIds = useMemo(
-    () => getDisabledLocationIds(value, allLocations),
-    [value, allLocations],
-  );
-
-  // Districts that have at least one ward selected (but district itself not selected)
-  const partialDistrictIds = useMemo(() => {
-    const partial = new Set<number>();
-    for (const sel of value) {
-      const loc = allLocations.find((l) => l.id === sel.id);
-      if (loc?.level === "ward") {
-        const parentId = getParentId(loc);
-        if (parentId !== null && !selectedIds.has(parentId)) {
-          partial.add(parentId);
-        }
-      }
-    }
-    return partial;
-  }, [value, allLocations, selectedIds]);
-
-  // Build location maps
-  const cities = useMemo(() => allLocations.filter((l) => l.level === "city"), [allLocations]);
-  const districts = useMemo(() => allLocations.filter((l) => l.level === "district"), [allLocations]);
-  const wards = useMemo(() => allLocations.filter((l) => l.level === "ward"), [allLocations]);
-
-  // Wards shown in column 2: those belonging to the focused district
-  const activeWards = useMemo(() => {
-    if (!focusedDistrictId) return [];
-    return wards.filter((w) => getParentId(w) === focusedDistrictId);
-  }, [wards, focusedDistrictId]);
-
-  // Quick lookup: does a location have children?
-  const districtIds = useMemo(() => new Set(districts.map((d) => d.id)), [districts]);
-  const hasWardChildren = useCallback(
-    (districtId: number) => wards.some((w) => getParentId(w) === districtId),
-    [wards],
-  );
-
-  // Toggle selection
-  const toggle = useCallback(
-    (loc: Location) => {
-      if (disabledIds.has(loc.id)) return;
-
-      const locSelected = toSelected(loc);
-      if (selectedIds.has(loc.id)) {
-        // Deselect
-        onChange(value.filter((v) => v.id !== loc.id));
-      } else {
-        // Select — if district, remove any of its wards already selected
-        let newValue = [...value];
-        if (loc.level === "district") {
-          newValue = newValue.filter((v) => {
-            const ward = allLocations.find((l) => l.id === v.id);
-            return !(ward && ward.level === "ward" && getParentId(ward) === loc.id);
-          });
-        }
-        onChange([...newValue, locSelected]);
-      }
-    },
-    [value, onChange, selectedIds, disabledIds, allLocations],
-  );
-
-  // Auto-focus first district when city is selected/focused
-  const cityForDistricts = cities[0]; // TP.HCM (only 1 city)
-
-  // Count selected per column for summary
-  const selectedDistricts = value.filter((v) => districtIds.has(v.id));
-  const selectedWards = value.filter((v) => {
-    const loc = allLocations.find((l) => l.id === v.id);
-    return loc?.level === "ward";
-  });
-
-  const searchResults = useMemo(() => {
-    if (!searchLower) return [];
-    return allLocations.filter(
-      (loc) => (loc.title as string).toLowerCase().includes(searchLower) && loc.level !== "city"
-    );
-  }, [searchLower, allLocations]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
@@ -295,7 +215,7 @@ export const LocationPanel = ({
                   Không tìm thấy khu vực nào phù hợp
                 </div>
               ) : (
-                searchResults.map((loc) => {
+                searchResults.map((loc: Location) => {
                   let parentName = "";
                   if (loc.level === "ward") {
                     const parentId = getParentId(loc);
@@ -346,7 +266,7 @@ export const LocationPanel = ({
                   {t("apartments.district")}
                 </span>
               </div>
-              {districts.map((d) => (
+              {districts.map((d: Location) => (
                 <ColumnItem
                   key={d.id}
                   loc={d}
@@ -381,7 +301,7 @@ export const LocationPanel = ({
                     Không có phường/xã
                   </div>
                 ) : (
-                  activeWards.map((w) => (
+                  activeWards.map((w: Location) => (
                     <ColumnItem
                       key={w.id}
                       loc={w}

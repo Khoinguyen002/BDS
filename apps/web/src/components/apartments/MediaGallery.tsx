@@ -2,16 +2,21 @@
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
-import type { Media } from "@bds/shared/payload-types";
+import type { Media, Tag } from "@bds/shared/payload-types";
 import { VirtualRealityIcon, CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react/dist/ssr";
+import { useTranslations } from "next-intl";
+import { DragScrollContainer } from "@/components/ui/DragScrollContainer";
 
 type MediaGalleryProps = {
   gallery: (number | Media)[];
   tourUrl?: string | null;
   serverUrl: string;
+  tags?: (number | Tag)[] | null;
+  listingType?: "rent" | "sale" | null;
 };
 
-export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
+export const MediaGallery = ({ gallery, tourUrl, tags, listingType }: MediaGalleryProps) => {
+  const t = useTranslations("apartments");
   const [showTour, setShowTour] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -20,14 +25,10 @@ export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Thumbnails dragging and focus
+  // Thumbnail container ref for scroll-into-view
   const thumbsRef = useRef<HTMLDivElement>(null);
-  const [isThumbDragging, setIsThumbDragging] = useState(false);
-  const thumbDragStartX = useRef(0);
-  const thumbDragScrollLeft = useRef(0);
-  const thumbDragDelta = useRef(0);
 
-  const images = gallery.filter((item): item is Media => typeof item === "object" && item !== null);
+  const images = gallery.filter((item): item is Media => typeof item === "object" && item !== null && typeof item.url === "string" && item.url.length > 0);
   const total = images.length;
 
   const goTo = useCallback(
@@ -80,29 +81,7 @@ export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
     setDragOffset(0);
   };
 
-  const onThumbPointerDown = (e: React.PointerEvent) => {
-    thumbDragStartX.current = e.clientX;
-    thumbDragScrollLeft.current = thumbsRef.current?.scrollLeft || 0;
-    thumbDragDelta.current = 0;
-    setIsThumbDragging(true);
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  };
 
-  const onThumbPointerMove = (e: React.PointerEvent) => {
-    if (!isThumbDragging || !thumbsRef.current) return;
-    const delta = e.clientX - thumbDragStartX.current;
-    thumbDragDelta.current = Math.abs(delta);
-    // disable snap while dragging for smoother feel
-    thumbsRef.current.style.scrollSnapType = 'none';
-    thumbsRef.current.scrollLeft = thumbDragScrollLeft.current - delta;
-  };
-
-  const onThumbPointerUp = () => {
-    setIsThumbDragging(false);
-    if (thumbsRef.current) {
-      thumbsRef.current.style.scrollSnapType = '';
-    }
-  };
 
   // Scroll active thumbnail into view
   useEffect(() => {
@@ -130,7 +109,7 @@ export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div ref={containerRef} className="relative w-full aspect-[4/3] md:aspect-video overflow-hidden bg-black group select-none">
+      <div ref={containerRef} className="relative w-full aspect-4/3 md:aspect-video overflow-hidden bg-black group select-none">
         {showTour && tourUrl ? (
           <iframe
             src={tourUrl}
@@ -153,6 +132,7 @@ export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
+              onPointerLeave={onPointerUp}
               onPointerCancel={onPointerUp}
             >
               {images.map((img, idx) => (
@@ -167,6 +147,29 @@ export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
                   />
                 </div>
               ))}
+            </div>
+
+            {/* Tags and Listing Type Badges */}
+            <div className="absolute top-4 left-4 flex gap-2 z-10 pointer-events-none">
+              {tags && tags.map((tag, idx) => {
+                if (typeof tag === "object" && tag !== null && tag.title) {
+                  return (
+                    <div key={idx} className="bg-background/90 backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-widest font-light text-foreground">
+                      {tag.title}
+                    </div>
+                  );
+                }
+                return null;
+              })}
+              {listingType === "sale" ? (
+                <div className="bg-emerald-600 text-white px-3 py-1.5 rounded-none text-xs uppercase tracking-widest shadow-lg">
+                  {t("for_sale")}
+                </div>
+              ) : listingType === "rent" ? (
+                <div className="bg-amber-500 text-black px-3 py-1.5 rounded-none text-xs uppercase tracking-widest shadow-lg">
+                  {t("for_rent")}
+                </div>
+              ) : null}
             </div>
 
             {/* Prev Arrow */}
@@ -195,7 +198,7 @@ export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
             {total > 1 && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
                 {/* Dot indicators */}
-                <div className="flex gap-1.5 bg-black/40 px-3 py-1.5 hidden md:flex">
+                <div className="hidden md:flex gap-1.5 bg-black/40 px-3 py-1.5">
                   {images.map((_, idx) => (
                     <button
                       key={idx}
@@ -235,25 +238,18 @@ export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
 
       {/* Thumbnail Gallery */}
       {!showTour && total > 1 && (
-        <div 
+        <DragScrollContainer
           ref={thumbsRef}
-          className={`flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 hide-scrollbar ${isThumbDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-          onPointerDown={onThumbPointerDown}
-          onPointerMove={onThumbPointerMove}
-          onPointerUp={onThumbPointerUp}
-          onPointerCancel={onThumbPointerUp}
+          className="flex gap-2 overflow-x-auto snap-x snap-mandatory py-1 hide-scrollbar"
         >
           {images.map((img, idx) => (
             <button
               key={img.id ?? idx}
-              onClick={() => {
-                if (thumbDragDelta.current > 5) return;
-                goTo(idx);
-              }}
-              className={`relative h-16 md:h-20 aspect-video flex-shrink-0 snap-center overflow-hidden transition-all ${
+              onClick={() => goTo(idx)}
+              className={`relative h-16 md:h-20 aspect-video shrink-0 snap-center overflow-hidden transition-all border-2 ${
                 idx === activeIndex
-                  ? "ring-2 ring-primary opacity-100"
-                  : "opacity-60 hover:opacity-100"
+                  ? "border-primary opacity-100"
+                  : "border-transparent opacity-60 hover:opacity-100"
               }`}
               aria-label={`Thumbnail ${idx + 1}`}
             >
@@ -261,12 +257,13 @@ export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
                 src={`${img.url}`}
                 alt={img.filename || `Thumbnail ${idx + 1}`}
                 fill
+                draggable={false}
                 className="object-cover pointer-events-none"
                 sizes="(max-width: 768px) 64px, 80px"
               />
             </button>
           ))}
-        </div>
+        </DragScrollContainer>
       )}
     </div>
   );

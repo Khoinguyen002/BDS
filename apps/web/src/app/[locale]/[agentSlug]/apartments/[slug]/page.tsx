@@ -8,7 +8,6 @@ import { DetailBody } from "@/components/apartments/DetailBody";
 import { PriceBreakdown } from "@/components/apartments/PriceBreakdown";
 import { SaveAndShare } from "@/components/apartments/SaveAndShare";
 import { StickyCTA } from "@/components/apartments/StickyCTA";
-import { InvestmentROI } from "@/components/apartments/InvestmentROI";
 import { SimilarListings } from "@/components/apartments/SimilarListings";
 import { User } from "@bds/shared/payload-types";
 import { MapPinIcon } from "@phosphor-icons/react/dist/ssr";
@@ -66,9 +65,14 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
   const priceRange = 0.4; // 40% band
   const priceMin = apt.price ? apt.price * (1 - priceRange) : undefined;
   const priceMax = apt.price ? apt.price * (1 + priceRange) : undefined;
-  
+
+  // "Similar" giờ dựa trên tags chung thay vì propertyType cứng.
+  const tagIds = Array.isArray(apt.tags)
+    ? apt.tags.map((x) => (typeof x === "object" && x ? x.id : x)).filter((x): x is number => typeof x === "number")
+    : [];
+
   const similar = await getApartmentsByOwner(owner.id, locale, {
-    propertyType: apt.propertyType || undefined,
+    tagIds: tagIds.length > 0 ? tagIds : undefined,
     listingType: apt.listingType || undefined,
     priceMin,
     priceMax,
@@ -79,7 +83,7 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
   // Fallback: if not enough similar apartments, fetch without price constraint
   if (similar.length < 4) {
     const fallbackSimilar = await getApartmentsByOwner(owner.id, locale, {
-      propertyType: apt.propertyType || undefined,
+      tagIds: tagIds.length > 0 ? tagIds : undefined,
       listingType: apt.listingType || undefined,
       excludeId: apt.id,
       limit: 4 - similar.length
@@ -97,7 +101,7 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
 
   return (
     <>
-      <main className="min-h-screen bg-background pb-24 md:pb-12">
+      <main className="min-h-screen bg-background pt-16 pb-12 md:pb-12">
         <div className="container py-6 md:py-10">
           <Breadcrumbs
             items={[
@@ -109,25 +113,31 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
 
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
             {/* LEFT COLUMN: Main Info */}
-            <div className="flex-1 min-w-0 flex flex-col gap-10">
+            <div className="flex-1 min-w-0 flex flex-col gap-6">
               
               {/* Media Gallery */}
               <section>
                 <div className="flex justify-between items-start mb-6">
                   <div>
-                    <h1 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight mb-2">
+                    <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight mb-2">
                       {apt.title}
                     </h1>
                     {apt.address && (
-                      <p className="text-foreground-secondary flex items-center gap-1.5 text-lg">
-                        <MapPinIcon weight="fill" className="text-primary w-5 h-5" />
+                      <p className="text-foreground-secondary flex items-center gap-1.5 text-sm md:text-base mt-2">
+                        <MapPinIcon weight="fill" className="text-primary w-4 h-4 shrink-0" />
                         {apt.address}
                       </p>
                     )}
                   </div>
                   <SaveAndShare apartmentId={apt.id} />
                 </div>
-                <MediaGallery gallery={apt.gallery || []} tourUrl={apt.tourUrl} serverUrl={serverUrl} />
+                <MediaGallery 
+                  gallery={apt.gallery || []} 
+                  tourUrl={apt.tourUrl} 
+                  serverUrl={serverUrl} 
+                  tags={apt.tags}
+                  listingType={apt.listingType}
+                />
               </section>
 
               {/* Price Breakdown (Mobile Only) */}
@@ -140,22 +150,18 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
             </div>
 
             {/* RIGHT COLUMN: Sticky Sidebar */}
-            <div className="w-full lg:w-96 flex-shrink-0 flex flex-col gap-6">
+            <div className="w-full lg:w-96 shrink-0 flex flex-col gap-6">
               <div className="sticky top-24 flex flex-col gap-6">
                 
                 {/* Price Breakdown (Desktop) */}
                 <div className="hidden lg:block">
                   <PriceBreakdown price={apt.price} apartment={apt} />
                 </div>
-
-                {apt.listingType === "sale" && (
-                  <InvestmentROI rentalYield={apt.investment?.rentalYield} />
-                )}
               </div>
             </div>
           </div>
 
-          <SimilarListings apartments={similar} agentSlug={agentSlug} propertyType={apt.propertyType} />
+          <SimilarListings apartments={similar} agentSlug={agentSlug} />
         </div>
       </main>
 

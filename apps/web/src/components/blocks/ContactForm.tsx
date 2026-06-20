@@ -77,13 +77,13 @@ export default async function ContactForm(
               </div>
 
               <div className="flex gap-3 pt-2">
-                <Button asChild className="bg-blue-500 hover:bg-blue-600 text-white h-9 px-4 text-sm font-semibold">
+                <Button asChild className="bg-secondary hover:bg-secondary/90 text-secondary-foreground h-8 px-3 text-xs font-medium uppercase tracking-wider">
                   <a href="https://zalo.me" target="_blank" rel="noreferrer">
-                    <ChatCircleTextIcon weight="fill" className="w-4 h-4 mr-2" />
+                    <ChatCircleTextIcon weight="fill" className="w-4 h-4 mr-1.5" />
                     Zalo
                   </a>
                 </Button>
-                <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 text-sm font-semibold">
+                <Button asChild className="bg-secondary hover:bg-secondary/90 text-secondary-foreground h-8 px-3 text-xs font-medium uppercase tracking-wider">
                   <a href="https://facebook.com" target="_blank" rel="noreferrer">
                     Facebook
                   </a>
@@ -105,7 +105,7 @@ export default async function ContactForm(
                 <input
                   type="text"
                   id="contact-name"
-                  className="w-full px-4 py-3.5 border border-border bg-background outline-none transition-all focus:border-[var(--theme-primary)] text-foreground placeholder:text-foreground-muted text-sm"
+                  className="w-full px-4 py-3.5 border border-border bg-background outline-none transition-all focus:border-(--theme-primary) text-foreground placeholder:text-foreground-muted text-sm"
                   placeholder={t("full_name_placeholder")}
                 />
               </div>
@@ -120,7 +120,7 @@ export default async function ContactForm(
                 <input
                   type="tel"
                   id="contact-phone"
-                  className="w-full px-4 py-3.5 border border-border bg-background outline-none transition-all focus:border-[var(--theme-primary)] text-foreground placeholder:text-foreground-muted text-sm"
+                  className="w-full px-4 py-3.5 border border-border bg-background outline-none transition-all focus:border-(--theme-primary) text-foreground placeholder:text-foreground-muted text-sm"
                   placeholder={t("phone_placeholder")}
                 />
               </div>
@@ -135,15 +135,14 @@ export default async function ContactForm(
                 <input
                   type="email"
                   id="contact-email"
-                  className="w-full px-4 py-3.5 border border-border bg-background outline-none transition-all focus:border-[var(--theme-primary)] text-foreground placeholder:text-foreground-muted text-sm"
+                  className="w-full px-4 py-3.5 border border-border bg-background outline-none transition-all focus:border-(--theme-primary) text-foreground placeholder:text-foreground-muted text-sm"
                   placeholder={t("email_placeholder")}
                 />
               </div>
 
               <Button
                 type="button"
-                size="lg"
-                className="w-full uppercase tracking-widest mt-2"
+                className="w-full text-sm uppercase tracking-wider mt-2 py-6"
               >
                 {t("submit_button")}
               </Button>

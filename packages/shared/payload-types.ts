@@ -75,6 +75,7 @@ export interface Config {
     templates: Template;
     translations: Translation;
     amenities: Amenity;
+    tags: Tag;
     locations: Location;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -91,6 +92,7 @@ export interface Config {
     templates: TemplatesSelect<false> | TemplatesSelect<true>;
     translations: TranslationsSelect<false> | TranslationsSelect<true>;
     amenities: AmenitiesSelect<false> | AmenitiesSelect<true>;
+    tags: TagsSelect<false> | TagsSelect<true>;
     locations: LocationsSelect<false> | LocationsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -155,6 +157,7 @@ export interface User {
   theme?: {
     primaryColor?: string | null;
     secondaryColor?: string | null;
+    secondaryForegroundColor?: string | null;
     borderRadius?: ('none' | 'sm' | 'md' | 'lg' | 'full') | null;
     fontFamily?: ('sans' | 'serif') | null;
   };
@@ -333,144 +336,74 @@ export interface Media {
  */
 export interface Apartment {
   id: number;
-  propertyType: 'boarding_room' | 'apartment' | 'land_house';
+  listingType: 'sale' | 'rent';
   /**
-   * Tự động là Cho thuê đối với Phòng trọ
+   * Free-form type & labels
    */
-  listingType?: ('sale' | 'rent') | null;
+  tags?: (number | Tag)[] | null;
   title: string;
   address?: string | null;
   gallery?: (number | Media)[] | null;
+  /**
+   * Auto-filled from first gallery image if left empty
+   */
+  thumbnail?: (number | null) | Media;
   tourUrl?: string | null;
-  details?: {
-    overview?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    highlights?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    landscape?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-  };
   keyFacts?: {
     area?: number | null;
     bedrooms?: number | null;
     bathrooms?: number | null;
-    hasMezzanine?: boolean | null;
-    direction?: ('e' | 'w' | 's' | 'n' | 'se' | 'ne' | 'sw' | 'nw') | null;
-    balconyDirection?: ('e' | 'w' | 's' | 'n' | 'se' | 'ne' | 'sw' | 'nw') | null;
-    landArea?: number | null;
-    usableArea?: number | null;
-    frontageWidth?: number | null;
-    depth?: number | null;
-    alleyWidth?: number | null;
-    floorLevel?: ('low' | 'mid' | 'high') | null;
-    numFloors?: number | null;
-    numBasements?: number | null;
-    structureType?: ('cap_4' | 'nha_pho' | 'biet_thu') | null;
-    handoverYear?: number | null;
-    buildingQuality?: ('new' | 'renovated' | 'old') | null;
-    furnitureStatus?: ('bare' | 'empty' | 'basic' | 'full') | null;
-    bathroomType?: ('private' | 'shared') | null;
-    curfewTime?: string | null;
-    petFriendly?: boolean | null;
-    freeHours?: boolean | null;
-    sharedLandlord?: boolean | null;
-    hasNightCurfew?: boolean | null;
-    cookingAllowed?: boolean | null;
-    hasElevator?: boolean | null;
-    hasKeyCard?: boolean | null;
-    hasSecurity24h?: boolean | null;
-    hasBasementParking?: boolean | null;
-    hasRooftop?: boolean | null;
-    isMainRoad?: boolean | null;
-    isBusinessFacade?: boolean | null;
   };
   price?: number | null;
   /**
-   * Auto-synced from Listing Type (Sale = total, Rent = per_month)
+   * Auto-synced from Listing Type (Sale = total, Rent = per month)
    */
   priceUnit?: ('total' | 'per_month') | null;
-  priceBreakdown?: {
-    pricePerSqm?: number | null;
-    transferFee?: string | null;
-    taxResponsibility?: ('buyer' | 'seller' | 'negotiated') | null;
-    managementFee?: number | null;
-    negotiable?: boolean | null;
-  };
-  rentPricing?: {
-    deposit?: ('1_month' | '2_months' | '3_months' | 'other') | null;
-    utilitiesPrice?: ('state' | 'business' | 'negotiated') | null;
-    minLeaseTerm?: number | null;
-    electricityPrice?: string | null;
-    waterPrice?: string | null;
-    trashFee?: number | null;
-    wifiFee?: number | null;
-    parkingFee?: number | null;
-    availableDate?: string | null;
-    managementFeeIncluded?: boolean | null;
-    negotiable?: boolean | null;
-  };
-  legal?: {
-    documentType?: ('pink_book' | 'red_book' | 'sale_contract' | 'other') | null;
-    ownershipTerm?: ('long_term' | '50_years') | null;
-    bankMortgaged?: boolean | null;
-    bankSupportPercentage?: number | null;
-    isFullyPermitted?: boolean | null;
-    hasZoningIssue?: boolean | null;
-    hasDispute?: boolean | null;
-  };
   location?: {
     /**
      * Chọn phường/xã cụ thể (VD: Thảo Điền, Phường 1...)
      */
     region?: (number | null) | Location;
-    lat?: number | null;
-    lng?: number | null;
+    /**
+     * Dán link embed từ Google Maps (VD: https://www.google.com/maps/embed?pb=...)
+     */
+    mapEmbedUrl?: string | null;
+    amenities?: (number | Amenity)[] | null;
   };
-  amenities?: (number | Amenity)[] | null;
-  investment?: {
-    rentalYield?: number | null;
-  };
+  sections?:
+    | {
+        title: string;
+        body?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
   slug?: string | null;
   owner: number | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags".
+ */
+export interface Tag {
+  id: number;
+  title: string;
+  slug?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -596,6 +529,10 @@ export interface PayloadLockedDocument {
         value: number | Amenity;
       } | null)
     | ({
+        relationTo: 'tags';
+        value: number | Tag;
+      } | null)
+    | ({
         relationTo: 'locations';
         value: number | Location;
       } | null);
@@ -670,6 +607,7 @@ export interface UsersSelect<T extends boolean = true> {
     | {
         primaryColor?: T;
         secondaryColor?: T;
+        secondaryForegroundColor?: T;
         borderRadius?: T;
         fontFamily?: T;
       };
@@ -773,104 +711,35 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "apartments_select".
  */
 export interface ApartmentsSelect<T extends boolean = true> {
-  propertyType?: T;
   listingType?: T;
+  tags?: T;
   title?: T;
   address?: T;
   gallery?: T;
+  thumbnail?: T;
   tourUrl?: T;
-  details?:
-    | T
-    | {
-        overview?: T;
-        highlights?: T;
-        landscape?: T;
-      };
   keyFacts?:
     | T
     | {
         area?: T;
         bedrooms?: T;
         bathrooms?: T;
-        hasMezzanine?: T;
-        direction?: T;
-        balconyDirection?: T;
-        landArea?: T;
-        usableArea?: T;
-        frontageWidth?: T;
-        depth?: T;
-        alleyWidth?: T;
-        floorLevel?: T;
-        numFloors?: T;
-        numBasements?: T;
-        structureType?: T;
-        handoverYear?: T;
-        buildingQuality?: T;
-        furnitureStatus?: T;
-        bathroomType?: T;
-        curfewTime?: T;
-        petFriendly?: T;
-        freeHours?: T;
-        sharedLandlord?: T;
-        hasNightCurfew?: T;
-        cookingAllowed?: T;
-        hasElevator?: T;
-        hasKeyCard?: T;
-        hasSecurity24h?: T;
-        hasBasementParking?: T;
-        hasRooftop?: T;
-        isMainRoad?: T;
-        isBusinessFacade?: T;
       };
   price?: T;
   priceUnit?: T;
-  priceBreakdown?:
-    | T
-    | {
-        pricePerSqm?: T;
-        transferFee?: T;
-        taxResponsibility?: T;
-        managementFee?: T;
-        negotiable?: T;
-      };
-  rentPricing?:
-    | T
-    | {
-        deposit?: T;
-        utilitiesPrice?: T;
-        minLeaseTerm?: T;
-        electricityPrice?: T;
-        waterPrice?: T;
-        trashFee?: T;
-        wifiFee?: T;
-        parkingFee?: T;
-        availableDate?: T;
-        managementFeeIncluded?: T;
-        negotiable?: T;
-      };
-  legal?:
-    | T
-    | {
-        documentType?: T;
-        ownershipTerm?: T;
-        bankMortgaged?: T;
-        bankSupportPercentage?: T;
-        isFullyPermitted?: T;
-        hasZoningIssue?: T;
-        hasDispute?: T;
-      };
   location?:
     | T
     | {
         region?: T;
-        lat?: T;
-        lng?: T;
+        mapEmbedUrl?: T;
+        amenities?: T;
       };
-  amenities?: T;
-  investment?:
+  sections?:
     | T
     | {
-        rentalYield?: T;
+        title?: T;
+        body?: T;
+        id?: T;
       };
   slug?: T;
   owner?: T;
@@ -965,6 +834,16 @@ export interface AmenitiesSelect<T extends boolean = true> {
   title?: T;
   icon?: T;
   category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags_select".
+ */
+export interface TagsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
 }

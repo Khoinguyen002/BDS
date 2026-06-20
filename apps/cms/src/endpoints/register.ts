@@ -1,5 +1,5 @@
 import type { PayloadHandler } from 'payload'
-import { headersWithCors } from '@payloadcms/next/utilities'
+import { headersWithCors } from 'payload'
 import { generateUniqueSlug } from '../utils/slug'
 
 export const registerHandler: PayloadHandler = async (req) => {

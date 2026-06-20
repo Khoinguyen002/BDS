@@ -4,6 +4,7 @@
 
 /* ─── Light Mode Tokens ─────────────────────────────────── */
 :root {
+  --header-h: 4rem;                /* 64px – header height, used in sticky/fixed positioning */
   --background: #ffffff;
   --background-subtle: #f4f4f5;   /* zinc-100 – alternate section bg */
   --foreground: #09090b;          /* zinc-950 */

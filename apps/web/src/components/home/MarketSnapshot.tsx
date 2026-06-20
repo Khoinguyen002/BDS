@@ -51,9 +51,9 @@ export const MarketSnapshot = () => {
           </div>
         </div>
 
-        <div className="flex-1 w-full aspect-video md:aspect-[4/3] rounded-none bg-background-subtle border border-border flex items-center justify-center overflow-hidden relative">
+        <div className="flex-1 w-full aspect-video md:aspect-4/3 rounded-none bg-background-subtle border border-border flex items-center justify-center overflow-hidden relative">
           {/* Abstract Chart Representation */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-secondary/5 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-tr from-secondary/5 to-transparent" />
           <svg className="w-full h-full text-secondary/20" viewBox="0 0 100 100" preserveAspectRatio="none">
             <path d="M0,100 L0,80 Q25,90 50,60 T100,20 L100,100 Z" fill="currentColor" />
             <path d="M0,80 Q25,90 50,60 T100,20" fill="none" stroke="var(--theme-secondary, var(--secondary))" strokeWidth="2" strokeLinecap="round" />

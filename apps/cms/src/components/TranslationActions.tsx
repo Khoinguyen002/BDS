@@ -69,7 +69,7 @@ export const TranslationActions: React.FC = () => {
         }
       };
       reader.readAsText(file);
-    } catch (_err) {
+    } catch {
       toast.error('Failed to read file');
       setIsImporting(false);
     }

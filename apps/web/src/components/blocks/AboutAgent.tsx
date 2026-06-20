@@ -23,6 +23,7 @@ export default async function AboutAgent(
     successfulDeals
   } = props as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   const t = await getTranslations("agent");
+  const tApt = await getTranslations("apartments");
   const avatarImage = typeof avatar === "object" ? (avatar as Media) : null;
   const avatarUrl = avatarImage?.url 
     ? (avatarImage.url.startsWith("http") ? avatarImage.url : `${env.NEXT_PUBLIC_SERVER_URL}${avatarImage.url}`)
@@ -35,13 +36,13 @@ export default async function AboutAgent(
         {/* Sticky Avatar Section */}
         <AnimatedSection direction="up" className="w-full md:w-[40%] md:sticky md:top-32 flex flex-col">
           <div className="inline-flex items-center gap-4 mb-8">
-            <span className="w-12 h-[1px] bg-border-strong" />
+            <span className="w-12 h-px bg-border-strong" />
             <span className="text-xs font-semibold uppercase tracking-widest text-foreground-secondary">
               {agentTitle || t('consultant')}
             </span>
           </div>
 
-          <div className="relative w-full aspect-[3/4] bg-background-subtle border border-border/50 p-2">
+          <div className="relative w-full aspect-3/4 bg-background-subtle border border-border/50 p-2">
             {avatarUrl && (
               <Image
                 src={avatarUrl}
@@ -63,11 +64,11 @@ export default async function AboutAgent(
             </h2>
           )}
 
-          <div className="prose prose-lg dark:prose-invert max-w-[55ch] prose-zinc prose-p:font-light prose-p:leading-relaxed prose-headings:font-medium prose-headings:tracking-tight prose-a:text-[var(--theme-primary)] prose-a:no-underline hover:prose-a:underline">
+          <div className="prose prose-lg dark:prose-invert max-w-[55ch] prose-zinc prose-p:font-light prose-p:leading-relaxed prose-headings:font-medium prose-headings:tracking-tight prose-a:text-(--theme-primary) prose-a:no-underline hover:prose-a:underline">
             {content ? (
               <RichTextRenderer content={content} />
             ) : (
-              <p className="text-2xl font-light text-foreground-muted">{t('updating_info')}</p>
+              <p className="text-base font-light text-foreground-muted">{t('updating_info')}</p>
             )}
           </div>
 
@@ -77,13 +78,13 @@ export default async function AboutAgent(
               {experienceYears && (
                 <div className="flex flex-col gap-1">
                   <span className="text-3xl font-bold tabular-nums text-foreground">{experienceYears}+</span>
-                  <span className="text-sm font-medium uppercase tracking-wider text-foreground-muted">Năm kinh nghiệm</span>
+                  <span className="text-sm font-medium uppercase tracking-wider text-foreground-muted">{t('experience_years')}</span>
                 </div>
               )}
               {successfulDeals && (
                 <div className="flex flex-col gap-1">
                   <span className="text-3xl font-bold tabular-nums text-foreground">{successfulDeals}</span>
-                  <span className="text-sm font-medium uppercase tracking-wider text-foreground-muted">Giao dịch thành công</span>
+                  <span className="text-sm font-medium uppercase tracking-wider text-foreground-muted">{t('transactions')}</span>
                 </div>
               )}
             </div>
@@ -91,14 +92,14 @@ export default async function AboutAgent(
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mt-12">
-            <Button asChild size="lg" className="min-w-[200px]">
+            <Button asChild className="w-full sm:w-auto min-w-[160px]">
               <a href={`tel:${phoneNumber || ""}`}>
-                Gọi ngay
+                {tApt("call_now") || "Gọi điện"}
               </a>
             </Button>
-            <Button asChild variant="outline" size="lg" className="min-w-[200px]">
+            <Button asChild variant="secondary" className="w-full sm:w-auto min-w-[160px]">
               <a href={zaloLink || `https://zalo.me/${phoneNumber || ""}`} target="_blank" rel="noreferrer">
-                Nhắn tin Zalo
+                Chat Zalo
               </a>
             </Button>
           </div>

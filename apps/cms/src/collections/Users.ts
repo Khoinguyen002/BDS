@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload';
 import { formatSlug } from '../utils/formatSlug';
 import { triggerRevalidateTag } from '../utils/revalidate';
+import { COLLECTION_TAGS, userTag } from '@bds/shared/cache-tags';
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -123,6 +124,17 @@ export const Users: CollectionConfig = {
             }
           }
         },
+        { 
+          name: 'secondaryForegroundColor', 
+          type: 'text', 
+          defaultValue: '#ffffff', 
+          label: { vi: "Màu chữ phụ (Secondary Foreground Color)", en: "Secondary Foreground Color" },
+          admin: {
+            components: {
+              Field: '@/components/ColorPickerField#ColorPickerField',
+            }
+          }
+        },
         { name: 'borderRadius', type: 'select', options: ['none', 'sm', 'md', 'lg', 'full'], defaultValue: 'lg', label: { vi: "Bo góc", en: "Border Radius" } },
         { name: 'fontFamily', type: 'select', options: ['sans', 'serif'], defaultValue: 'sans', label: { vi: "Phông chữ", en: "Font Family" } },
       ]
@@ -165,13 +177,22 @@ export const Users: CollectionConfig = {
       }
     ],
     afterChange: [
-      async ({ req }) => {
-        triggerRevalidateTag({ tag: 'users', req });
+      async ({ doc, previousDoc, req }) => {
+        // Collection tag: list (vd featured agents). Per-doc tag: trang agent
+        // theo agentSlug. Đổi agentSlug thì purge cả slug cũ.
+        const tags: string[] = [COLLECTION_TAGS.users];
+        if (doc.agentSlug) tags.push(userTag(doc.agentSlug));
+        if (previousDoc?.agentSlug && previousDoc.agentSlug !== doc.agentSlug) {
+          tags.push(userTag(previousDoc.agentSlug));
+        }
+        triggerRevalidateTag({ tag: tags, req });
       }
     ],
     afterDelete: [
-      async ({ req }) => {
-        triggerRevalidateTag({ tag: 'users', req });
+      async ({ doc, req }) => {
+        const tags: string[] = [COLLECTION_TAGS.users];
+        if (doc.agentSlug) tags.push(userTag(doc.agentSlug));
+        triggerRevalidateTag({ tag: tags, req });
       }
     ],
   }

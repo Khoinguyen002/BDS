@@ -499,7 +499,7 @@ export async function seedTranslations() {
     { key: "apartments.more_locations", namespace: "apartments", vi: "+{count} khu vực", en: "+{count} locations" },
     { key: "apartments.properties_found", namespace: "apartments", vi: "Tìm thấy {count} bất động sản phù hợp", en: "Found {count} matching properties" },
     { key: "apartments.filter_property_type", namespace: "apartments", vi: "Loại hình", en: "Property Type" },
-    { key: "apartments.filter_all", namespace: "apartments", vi: "Tất cả", en: "All" },
+    { key: "apartments.filter_all", namespace: "apartments", vi: "Tất cả loại hình", en: "All types" },
 
     // New Fields
     { key: "apartments.electricity_price", namespace: "apartments", vi: "Giá điện", en: "Electricity Price" },
