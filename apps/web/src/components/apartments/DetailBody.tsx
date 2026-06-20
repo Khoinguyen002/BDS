@@ -26,7 +26,7 @@ export const DetailBody = async ({ apartment }: { apartment: Apartment }) => {
     <div className="flex flex-col divide-y divide-border/50">
       {coreFacts.length > 0 && (
         <section className="pb-8">
-          <h2 className="text-xl font-bold mb-4">{t("key_facts")}</h2>
+          <h3 className="font-bold mb-4">{t("key_facts")}</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {coreFacts.map((fact, idx) => (
               <div key={idx} className="flex items-center gap-3 p-4 bg-background-subtle border border-border/50">
@@ -45,7 +45,7 @@ export const DetailBody = async ({ apartment }: { apartment: Apartment }) => {
 
       {sections.map((s, idx) => (
         <section key={s.id || idx} className="py-8">
-          {s.title && <h2 className="text-xl font-bold mb-4">{s.title}</h2>}
+          {s.title && <h3 className="font-bold mb-4">{s.title}</h3>}
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {s.body && <RichTextRenderer content={s.body as any} />}
         </section>
@@ -53,14 +53,14 @@ export const DetailBody = async ({ apartment }: { apartment: Apartment }) => {
 
       {hasAmenities && (
         <section className="py-8">
-          <h2 className="text-xl font-bold mb-4">{t("amenities")}</h2>
+          <h3 className="font-bold mb-4">{t("amenities")}</h3>
           <AmenitiesGrid amenities={apartment.location!.amenities!} />
         </section>
       )}
 
       {apartment.location?.mapEmbedUrl && (
         <section className="py-8">
-          <h2 className="text-xl font-bold mb-4">{t("location")}</h2>
+          <h3 className="font-bold mb-4">{t("location")}</h3>
           <div className="w-full h-80 overflow-hidden bg-background-subtle">
             <iframe
               width="100%"

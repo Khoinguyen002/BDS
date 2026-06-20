@@ -74,7 +74,7 @@ export default function HeroBanner(props: HeroBannerProps) {
             }}
             className="max-w-4xl w-full flex flex-col items-center"
           >
-            <h1 className="text-3xl md:text-6xl lg:text-7xl font-semibold tracking-tighter text-white leading-[1.1] mb-4 md:mb-6">
+            <h1 className="text-[clamp(2.25rem,1.5rem+4vw,4.5rem)]! tracking-tighter text-white mb-4 md:mb-6">
               {displayTitle}
             </h1>
             {subtitle && (

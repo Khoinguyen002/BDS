@@ -13,6 +13,7 @@ const allowedHostnames = env.ALLOWED_IMAGE_HOSTNAMES
   : [];
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["192.168.101.18"],
   images: {
     unoptimized: true,
     remotePatterns: [

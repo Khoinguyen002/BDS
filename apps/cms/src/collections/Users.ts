@@ -7,7 +7,14 @@ export const Users: CollectionConfig = {
   slug: 'users',
   auth: true,
   access: {
-    read: () => true, // Allow public reading of users to resolve agent slugs
+    read: ({ req: { user } }) => {
+      if (user?.role === 'admin') return true;
+      return {
+        role: {
+          equals: 'agent',
+        },
+      };
+    },
     update: ({ req: { user } }) => {
       if (user?.role === 'admin') return true;
       return { id: { equals: user?.id } };
@@ -24,6 +31,15 @@ export const Users: CollectionConfig = {
       type: 'text',
       required: true,
       label: { vi: "Tên thương hiệu (Brand Name)", en: "Brand Name" },
+    },
+    {
+      name: 'logo',
+      type: 'upload',
+      relationTo: 'media',
+      label: { vi: "Logo thương hiệu", en: "Brand Logo" },
+      admin: {
+        description: { vi: "Logo sẽ hiển thị thay cho chữ cái viết tắt", en: "Logo to display instead of initials" }
+      }
     },
     {
       name: 'agentSlug',

@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import type { Media, Tag } from "@bds/shared/payload-types";
-import { VirtualRealityIcon, CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react/dist/ssr";
+import {
+  VirtualRealityIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
+} from "@phosphor-icons/react/dist/ssr";
 import { useTranslations } from "next-intl";
-import { DragScrollContainer } from "@/components/ui/DragScrollContainer";
+import { Swiper, SwiperSlide } from "swiper/react";
+import type { Swiper as SwiperClass } from "swiper";
+import "swiper/css";
 
 type MediaGalleryProps = {
   gallery: (number | Media)[];
@@ -15,101 +21,68 @@ type MediaGalleryProps = {
   listingType?: "rent" | "sale" | null;
 };
 
-export const MediaGallery = ({ gallery, tourUrl, tags, listingType }: MediaGalleryProps) => {
+export const MediaGallery = ({
+  gallery,
+  tourUrl,
+  tags,
+  listingType,
+}: MediaGalleryProps) => {
   const t = useTranslations("apartments");
   const [showTour, setShowTour] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState(0);
-  const dragStartX = useRef(0);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [swiper, setSwiper] = useState<SwiperClass | null>(null);
 
-  // Thumbnail container ref for scroll-into-view
-  const thumbsRef = useRef<HTMLDivElement>(null);
-
-  const images = gallery.filter((item): item is Media => typeof item === "object" && item !== null && typeof item.url === "string" && item.url.length > 0);
+  const images = gallery.filter(
+    (item): item is Media =>
+      typeof item === "object" &&
+      item !== null &&
+      typeof item.url === "string" &&
+      item.url.length > 0,
+  );
   const total = images.length;
 
+  const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
   const goTo = useCallback(
-    (index: number) => {
-      const clamped = Math.max(0, Math.min(index, total - 1));
-      setActiveIndex(clamped);
+    (idx: number) => {
+      swiper?.slideTo(idx);
     },
-    [total],
+    [swiper],
   );
 
-  const next = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
-  const prev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
-
-  // Keyboard navigation
+  // Cuộn thumbnail active vào giữa khi đổi ảnh.
   useEffect(() => {
+    thumbRefs.current[activeIndex]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, [activeIndex]);
+
+  // Keyboard navigation toàn cục (giữ hành vi cũ).
+  useEffect(() => {
+    if (!swiper) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") next();
-      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") swiper.slideNext();
+      if (e.key === "ArrowLeft") swiper.slidePrev();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [next, prev]);
-
-  // Touch/mouse swipe - image follows cursor in realtime
-  const onPointerDown = (e: React.PointerEvent) => {
-    dragStartX.current = e.clientX;
-    setDragOffset(0);
-    setIsDragging(true);
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
-    const delta = e.clientX - dragStartX.current;
-    // Resist dragging past first/last slide (rubber-band effect)
-    if ((activeIndex === 0 && delta > 0) || (activeIndex === total - 1 && delta < 0)) {
-      setDragOffset(delta * 0.3);
-    } else {
-      setDragOffset(delta);
-    }
-  };
-
-  const onPointerUp = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    const containerWidth = containerRef.current?.offsetWidth || 1;
-    const threshold = containerWidth * 0.15; // 15% of container width
-    if (dragOffset < -threshold) next();
-    else if (dragOffset > threshold) prev();
-    setDragOffset(0);
-  };
-
-
-
-  // Scroll active thumbnail into view
-  useEffect(() => {
-    if (!thumbsRef.current) return;
-    const container = thumbsRef.current;
-    const activeThumb = container.children[activeIndex] as HTMLElement;
-    if (activeThumb) {
-      const containerWidth = container.clientWidth;
-      const thumbOffsetLeft = activeThumb.offsetLeft;
-      const thumbWidth = activeThumb.clientWidth;
-      container.scrollTo({
-        left: thumbOffsetLeft - containerWidth / 2 + thumbWidth / 2,
-        behavior: "smooth",
-      });
-    }
-  }, [activeIndex]);
+  }, [swiper]);
 
   if (images.length === 0 && !tourUrl) {
     return (
       <div className="w-full aspect-video bg-background-subtle flex items-center justify-center">
-        <span className="text-foreground-muted text-sm">No media available</span>
+        <span className="text-foreground-muted text-sm">
+          No media available
+        </span>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-2">
-      <div ref={containerRef} className="relative w-full aspect-4/3 md:aspect-video overflow-hidden bg-black group select-none">
+      <div className="relative w-full aspect-4/3 md:aspect-video overflow-hidden bg-black group select-none">
         {showTour && tourUrl ? (
           <iframe
             src={tourUrl}
@@ -119,48 +92,46 @@ export const MediaGallery = ({ gallery, tourUrl, tags, listingType }: MediaGalle
           />
         ) : (
           <>
-            {/* Slide track */}
-            <div
-              ref={trackRef}
-              className="flex w-full h-full"
-              style={{
-                transform: `translateX(calc(-${activeIndex * 100}% + ${dragOffset}px))`,
-                transition: isDragging ? "none" : "transform 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                willChange: "transform",
-                cursor: isDragging ? "grabbing" : "grab",
-              }}
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={onPointerUp}
-              onPointerLeave={onPointerUp}
-              onPointerCancel={onPointerUp}
+            {/* Main carousel — Swiper */}
+            <Swiper
+              onSwiper={setSwiper}
+              onSlideChange={(s) => setActiveIndex(s.activeIndex)}
+              slidesPerView={1}
+              spaceBetween={0}
+              grabCursor
+              className="w-full h-full"
             >
               {images.map((img, idx) => (
-                <div key={img.id ?? idx} className="w-full h-full shrink-0 relative">
+                <SwiperSlide key={img.id ?? idx} className="relative">
                   <Image
                     src={`${img.url}`}
                     alt={img.filename || `Apartment image ${idx + 1}`}
                     fill
+                    draggable={false}
                     className="object-cover pointer-events-none"
                     priority={idx === 0}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
                   />
-                </div>
+                </SwiperSlide>
               ))}
-            </div>
+            </Swiper>
 
             {/* Tags and Listing Type Badges */}
             <div className="absolute top-4 left-4 flex gap-2 z-10 pointer-events-none">
-              {tags && tags.map((tag, idx) => {
-                if (typeof tag === "object" && tag !== null && tag.title) {
-                  return (
-                    <div key={idx} className="bg-background/90 backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-widest font-light text-foreground">
-                      {tag.title}
-                    </div>
-                  );
-                }
-                return null;
-              })}
+              {tags &&
+                tags.map((tag, idx) => {
+                  if (typeof tag === "object" && tag !== null && tag.title) {
+                    return (
+                      <div
+                        key={idx}
+                        className="bg-background/90 backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-widest font-light text-foreground"
+                      >
+                        {tag.title}
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
               {listingType === "sale" ? (
                 <div className="bg-emerald-600 text-white px-3 py-1.5 rounded-none text-xs uppercase tracking-widest shadow-lg">
                   {t("for_sale")}
@@ -175,7 +146,7 @@ export const MediaGallery = ({ gallery, tourUrl, tags, listingType }: MediaGalle
             {/* Prev Arrow */}
             {total > 1 && activeIndex > 0 && (
               <button
-                onClick={prev}
+                onClick={() => swiper?.slidePrev()}
                 className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/75 text-white p-2.5 transition-colors z-10 hidden md:flex items-center justify-center"
                 aria-label="Previous image"
               >
@@ -186,7 +157,7 @@ export const MediaGallery = ({ gallery, tourUrl, tags, listingType }: MediaGalle
             {/* Next Arrow */}
             {total > 1 && activeIndex < total - 1 && (
               <button
-                onClick={next}
+                onClick={() => swiper?.slideNext()}
                 className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/75 text-white p-2.5 transition-colors z-10 hidden md:flex items-center justify-center"
                 aria-label="Next image"
               >
@@ -197,7 +168,6 @@ export const MediaGallery = ({ gallery, tourUrl, tags, listingType }: MediaGalle
             {/* Counter + Dots */}
             {total > 1 && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
-                {/* Dot indicators */}
                 <div className="hidden md:flex gap-1.5 bg-black/40 px-3 py-1.5">
                   {images.map((_, idx) => (
                     <button
@@ -228,25 +198,30 @@ export const MediaGallery = ({ gallery, tourUrl, tags, listingType }: MediaGalle
                 onClick={() => setShowTour(true)}
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-4 md:p-6 transition-all flex flex-col items-center gap-2 z-10 group-hover:scale-105"
               >
-                <VirtualRealityIcon weight="duotone" className="w-8 h-8 md:w-12 md:h-12" />
-                <span className="text-xs md:text-sm font-medium tracking-wide uppercase">360 Tour</span>
+                <VirtualRealityIcon
+                  weight="duotone"
+                  className="w-8 h-8 md:w-12 md:h-12"
+                />
+                <span className="text-xs md:text-sm font-medium tracking-wide uppercase">
+                  360 Tour
+                </span>
               </button>
             )}
           </>
         )}
       </div>
 
-      {/* Thumbnail Gallery */}
+      {/* Thumbnail strip — scroll native, click để chuyển ảnh */}
       {!showTour && total > 1 && (
-        <DragScrollContainer
-          ref={thumbsRef}
-          className="flex gap-2 overflow-x-auto snap-x snap-mandatory py-1 hide-scrollbar"
-        >
+        <div className="flex gap-2 py-1 overflow-x-auto hide-scrollbar">
           {images.map((img, idx) => (
             <button
               key={img.id ?? idx}
+              ref={(el) => {
+                thumbRefs.current[idx] = el;
+              }}
               onClick={() => goTo(idx)}
-              className={`relative h-16 md:h-20 aspect-video shrink-0 snap-center overflow-hidden transition-all border-2 ${
+              className={`relative h-16 md:h-20 aspect-video shrink-0 overflow-hidden transition-all border-2 ${
                 idx === activeIndex
                   ? "border-primary opacity-100"
                   : "border-transparent opacity-60 hover:opacity-100"
@@ -263,7 +238,7 @@ export const MediaGallery = ({ gallery, tourUrl, tags, listingType }: MediaGalle
               />
             </button>
           ))}
-        </DragScrollContainer>
+        </div>
       )}
     </div>
   );

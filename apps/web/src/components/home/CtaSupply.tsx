@@ -13,7 +13,7 @@ export const CtaSupply = () => {
           <HouseLineIcon weight="duotone" className="w-8 h-8 text-secondary" />
         </div>
         
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">{t("cta_supply_title")}</h2>
+        <h2 className="font-bold mb-6">{t("cta_supply_title")}</h2>
         <p className="text-lg text-background/80 mb-10 max-w-2xl">
           {t("cta_supply_desc")}
         </p>

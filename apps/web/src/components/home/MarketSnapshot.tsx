@@ -10,7 +10,7 @@ export const MarketSnapshot = () => {
     <section className="py-24 border-y border-border">
       <div className="container flex flex-col md:flex-row items-center gap-12">
         <div className="flex-1 space-y-6">
-          <h2 className="text-3xl font-bold tracking-tight">{t("market_snapshot_title")}</h2>
+          <h2 className="font-bold">{t("market_snapshot_title")}</h2>
           <p className="text-foreground-muted text-lg">
             {t("market_snapshot_description")}
           </p>

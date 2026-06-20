@@ -65,10 +65,37 @@ body {
   transition: background-color 0.25s ease, color 0.15s ease;
 }
 
-/* ─── Typography ────────────────────────────────────────── */
-h1, h2, h3, h4, h5, h6 {
-  letter-spacing: -0.025em;
-  font-feature-settings: "ss01", "ss02";
+@layer base {
+  /* ─── Typography ────────────────────────────────────────── */
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.025em;
+    font-feature-settings: "ss01", "ss02";
+    line-height: 1.15;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  /* Fluid type scale — clamp(mobile, preferred, desktop)
+     h1: 30px → 48px  (page-level heading)
+     h2: 24px → 36px  (section heading)
+     h3: 18px → 24px  (card/subsection heading)
+     h4: 16px → 20px  (small subsection)
+     h5: 16px fixed   (label-weight heading)
+     h6: 14px fixed   (smallest heading)                    */
+  h1 { font-size: clamp(1.875rem, 1.2rem + 2.5vw, 3rem); }
+  h2 { font-size: clamp(1.5rem, 1rem + 2vw, 2.25rem); }
+  h3 { font-size: clamp(1.125rem, 0.95rem + 0.75vw, 1.5rem); }
+  h4 { font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem); }
+  h5 { font-size: 1rem; }
+  h6 { font-size: 0.875rem; }
+}
+
+/* ─── Caption Utility ───────────────────────────────────── */
+@utility caption {
+  font-size: 0.75rem;       /* 12px */
+  line-height: 1.5;
+  letter-spacing: 0.025em;
+  color: var(--foreground-muted);
 }
 
 /* ─── Selection ─────────────────────────────────────────── */

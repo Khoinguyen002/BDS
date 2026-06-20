@@ -82,7 +82,7 @@ export default async function ViewAllApartmentsPage({ params, searchParams }: Pr
       <main className="min-h-screen bg-background">
         <div className="pt-24 pb-16 md:pt-28">
           <div className="container mb-12">
-            <h1 className="text-2xl md:text-5xl font-medium tracking-tight text-foreground mb-2 md:mb-4">
+            <h1 className="mb-2 md:mb-4">
               {t('featured_collection')}
             </h1>
             <p className="text-sm md:text-lg text-foreground-muted">

@@ -140,6 +140,10 @@ export interface UserAuthOperations {
 export interface User {
   id: number;
   brandName: string;
+  /**
+   * Logo to display instead of initials
+   */
+  logo?: (number | null) | Media;
   agentSlug: string;
   verified?: boolean | null;
   profile?: {
@@ -182,6 +186,28 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  owner: number | User;
+  cloudinaryPublicId?: string | null;
+  cloudinaryURL?: string | null;
+  cloudinaryResourceType?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -307,28 +333,6 @@ export interface Template {
     | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  owner: number | User;
-  cloudinaryPublicId?: string | null;
-  cloudinaryURL?: string | null;
-  cloudinaryResourceType?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -584,6 +588,7 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   brandName?: T;
+  logo?: T;
   agentSlug?: T;
   verified?: T;
   profile?:

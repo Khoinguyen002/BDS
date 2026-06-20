@@ -77,9 +77,9 @@ export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
 
       <div className="p-5 flex flex-col gap-3 grow">
         <div className="flex justify-between items-start gap-4">
-          <h3 className="text-lg font-medium tracking-tight text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+          <h4 className="font-medium line-clamp-1 group-hover:text-primary transition-colors">
             {apartment.title}
-          </h3>
+          </h4>
         </div>
 
         <div className="flex items-baseline gap-2 flex-wrap">

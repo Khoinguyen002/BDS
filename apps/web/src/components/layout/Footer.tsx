@@ -12,7 +12,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
           {/* Brand & About */}
           <div className="col-span-1 md:col-span-2">
-            <h3 className="text-lg font-bold tracking-tight mb-4">BDS Platform</h3>
+            <h3 className="font-bold mb-4">BDS Platform</h3>
             <p className="text-foreground-secondary text-sm mb-6 max-w-sm">
               {tFooter("brand_desc")}
             </p>

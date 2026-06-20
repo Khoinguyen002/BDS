@@ -6,7 +6,6 @@ import { Breadcrumbs } from "@/components/apartments/Breadcrumbs";
 import { MediaGallery } from "@/components/apartments/MediaGallery";
 import { DetailBody } from "@/components/apartments/DetailBody";
 import { PriceBreakdown } from "@/components/apartments/PriceBreakdown";
-import { SaveAndShare } from "@/components/apartments/SaveAndShare";
 import { StickyCTA } from "@/components/apartments/StickyCTA";
 import { SimilarListings } from "@/components/apartments/SimilarListings";
 import { User } from "@bds/shared/payload-types";
@@ -117,19 +116,16 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
               
               {/* Media Gallery */}
               <section>
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight mb-2">
-                      {apt.title}
-                    </h1>
-                    {apt.address && (
-                      <p className="text-foreground-secondary flex items-center gap-1.5 text-sm md:text-base mt-2">
-                        <MapPinIcon weight="fill" className="text-primary w-4 h-4 shrink-0" />
-                        {apt.address}
-                      </p>
-                    )}
-                  </div>
-                  <SaveAndShare apartmentId={apt.id} />
+                <div className="mb-6">
+                  <h2 className="font-bold mb-2">
+                    {apt.title}
+                  </h2>
+                  {apt.address && (
+                    <p className="text-foreground-secondary flex items-center gap-1.5 text-sm md:text-base mt-2">
+                      <MapPinIcon weight="fill" className="text-primary w-4 h-4 shrink-0" />
+                      {apt.address}
+                    </p>
+                  )}
                 </div>
                 <MediaGallery 
                   gallery={apt.gallery || []} 
@@ -154,8 +150,16 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
               <div className="sticky top-24 flex flex-col gap-6">
                 
                 {/* Price Breakdown (Desktop) */}
-                <div className="hidden lg:block">
+                <div className="hidden lg:flex flex-col gap-6">
                   <PriceBreakdown price={apt.price} apartment={apt} />
+                  
+                  <StickyCTA 
+                    owner={owner} 
+                    phoneNumber={owner?.profile?.phoneNumber} 
+                    zaloUrl={owner?.profile?.zaloUrl} 
+                    listingType={apt.listingType} 
+                    isDesktop 
+                  />
                 </div>
               </div>
             </div>
@@ -165,8 +169,15 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
         </div>
       </main>
 
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <StickyCTA owner={apt.owner as any} phoneNumber={(apt.owner as any)?.profile?.phoneNumber} zaloNumber={(apt.owner as any)?.profile?.zaloNumber} listingType={apt.listingType} />
+      {/* Sticky CTA (Mobile Only) */}
+      <div className="block lg:hidden">
+        <StickyCTA 
+          owner={owner} 
+          phoneNumber={owner?.profile?.phoneNumber} 
+          zaloUrl={owner?.profile?.zaloUrl} 
+          listingType={apt.listingType} 
+        />
+      </div>
 
       {/* Structured Data for SEO */}
       <script

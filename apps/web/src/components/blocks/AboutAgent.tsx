@@ -59,7 +59,7 @@ export default async function AboutAgent(
         <AnimatedSection delay={0.2} direction="up" className="w-full md:w-[60%] flex flex-col pt-8 md:pt-0">
           
           {agentName && (
-            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground mb-8">
+            <h2 className="mb-8">
               {agentName}
             </h2>
           )}

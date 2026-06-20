@@ -33,7 +33,7 @@ export function ListApartmentsClient({
         {!hideHeader && (
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
             <div className="max-w-2xl">
-              <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-foreground mb-4">
+              <h2 className="mb-4">
                 {t('featured_collection')}
               </h2>
               <p className="text-base text-foreground-secondary font-light">

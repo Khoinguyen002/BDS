@@ -42,13 +42,13 @@ export const AmenitiesGrid = ({ amenities }: AmenitiesGridProps) => {
     <div className="flex flex-col gap-8">
       {internal.length > 0 && (
         <div>
-          <h4 className="text-lg font-bold mb-4">{t("internal_amenities")}</h4>
+          <h4 className="font-bold mb-4">{t("internal_amenities")}</h4>
           {renderGrid(internal)}
         </div>
       )}
       {external.length > 0 && (
         <div>
-          <h4 className="text-lg font-bold mb-4">{t("external_amenities")}</h4>
+          <h4 className="font-bold mb-4">{t("external_amenities")}</h4>
           {renderGrid(external)}
         </div>
       )}

@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { User as UserType } from "@bds/shared/payload-types";
+import { User as UserType, Media } from "@bds/shared/payload-types";
 import { SealCheckIcon, HandshakeIcon, StarIcon, PhoneIcon } from "@phosphor-icons/react/dist/ssr";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 type AgentCardProps = {
   owner: UserType;
@@ -18,12 +19,16 @@ export const AgentCard = ({ owner, listingType }: AgentCardProps) => {
   return (
     <div className="bg-background-subtle rounded-none p-6 border border-border/50 flex flex-col gap-6">
       <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0 text-2xl font-bold uppercase">
-          {owner.brandName.substring(0, 2)}
+        <div className="relative w-16 h-16 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0 text-2xl font-bold uppercase overflow-hidden">
+          {owner.logo && typeof owner.logo === 'object' && owner.logo.url ? (
+            <Image src={(owner.logo as Media).url as string} alt={owner.brandName || "Agent"} fill className="object-cover" sizes="64px" />
+          ) : (
+            owner.brandName?.substring(0, 2)
+          )}
         </div>
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5">
-            <h3 className="font-bold text-lg text-foreground">{owner.brandName}</h3>
+            <h3 className="font-bold">{owner.brandName}</h3>
             {owner.verified && (
               <span title={t("verified")}>
                 <SealCheckIcon weight="fill" className="w-5 h-5 text-primary" />

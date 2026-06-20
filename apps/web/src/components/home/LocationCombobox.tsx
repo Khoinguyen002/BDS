@@ -3,7 +3,11 @@
 import React, { useEffect } from "react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { XIcon, CheckIcon, CaretRightIcon } from "@phosphor-icons/react/dist/ssr";
+import {
+  XIcon,
+  CheckIcon,
+  CaretRightIcon,
+} from "@phosphor-icons/react/dist/ssr";
 import type { Location } from "@bds/shared/payload-types";
 
 // ─────────────────────────────────────────────────────────────
@@ -39,7 +43,7 @@ function ColumnItem({
 }: {
   loc: Location;
   checked: boolean;
-  partial?: boolean;   // has children selected but not itself
+  partial?: boolean; // has children selected but not itself
   focused: boolean;
   disabled: boolean;
   hasChildren: boolean;
@@ -75,14 +79,20 @@ function ColumnItem({
             ${disabled && !isActive ? "opacity-50" : ""}
           `}
         >
-          {checked && <CheckIcon className="w-3 h-3 text-white" weight="bold" />}
-          {partial && !checked && (
-            <span className="w-2 h-0.5 bg-white block" />
+          {checked && (
+            <CheckIcon className="w-3 h-3 text-white" weight="bold" />
           )}
+          {partial && !checked && <span className="w-2 h-0.5 bg-white block" />}
         </div>
-        <span className={`text-sm truncate ${isActive ? "text-primary font-medium" : "text-foreground"}`}>
+        <span
+          className={`text-sm truncate ${isActive ? "text-primary font-medium" : "text-foreground"}`}
+        >
           {loc.title as string}
-          {titleSuffix && <span className="text-foreground-muted font-normal ml-1">{titleSuffix}</span>}
+          {titleSuffix && (
+            <span className="text-foreground-muted font-normal ml-1">
+              {titleSuffix}
+            </span>
+          )}
         </span>
       </div>
 
@@ -93,7 +103,9 @@ function ColumnItem({
         />
       )}
       {disabled && !checked && (
-        <span className="text-xs text-foreground-muted ml-2 shrink-0">✓ quận đã chọn</span>
+        <span className="text-xs text-foreground-muted ml-2 shrink-0">
+          ✓ quận đã chọn
+        </span>
       )}
     </div>
   );
@@ -111,7 +123,7 @@ export const LocationPanel = ({
   onClose,
 }: LocationPanelProps) => {
   const t = useTranslations();
-  
+
   const {
     searchQuery,
     setSearchQuery,
@@ -129,7 +141,7 @@ export const LocationPanel = ({
     selectedWards,
     searchResults,
     cityForDistricts,
-    getParentId
+    getParentId,
   } = useLocationPanel({ allLocations, value, onChange });
 
   useEffect(() => {
@@ -164,13 +176,19 @@ export const LocationPanel = ({
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold text-foreground">{t("apartments.select_location")}</span>
+            <span className="text-sm font-semibold text-foreground">
+              {t("apartments.select_location")}
+            </span>
             {value.length > 0 && (
               <span className="text-xs text-foreground-muted">
                 {value.length} đã chọn
-                {selectedDistricts.length > 0 && ` (${selectedDistricts.length} quận/huyện`}
-                {selectedWards.length > 0 && `, ${selectedWards.length} phường/xã)`}
-                {selectedDistricts.length > 0 && selectedWards.length === 0 && ")"}
+                {selectedDistricts.length > 0 &&
+                  ` (${selectedDistricts.length} quận/huyện`}
+                {selectedWards.length > 0 &&
+                  `, ${selectedWards.length} phường/xã)`}
+                {selectedDistricts.length > 0 &&
+                  selectedWards.length === 0 &&
+                  ")"}
               </span>
             )}
           </div>
@@ -243,84 +261,86 @@ export const LocationPanel = ({
             <>
               {/* Col 1: TP.HCM + Districts */}
               <div className="flex flex-col border-r border-border min-w-[200px] max-w-[220px]">
-            {/* City header — always shown, pre-selected state */}
-            <div className="px-3 py-2 border-b border-border bg-zinc-50 dark:bg-zinc-900">
-              <span className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">
-                {t("apartments.city")}
-              </span>
-            </div>
-            <div className="border-b border-border bg-primary/5 px-3 py-2.5">
-              <div className="flex items-center gap-2.5">
-                <div className="w-4 h-4 bg-primary border border-primary flex items-center justify-center shrink-0">
-                  <CheckIcon className="w-3 h-3 text-white" weight="bold" />
+                {/* City header — always shown, pre-selected state */}
+                <div className="px-3 py-2 border-b border-border bg-zinc-50 dark:bg-zinc-900">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+                    {t("apartments.city")}
+                  </span>
                 </div>
-                <span className="text-sm font-medium text-primary">
-                  {cityForDistricts ? (cityForDistricts.title as string) : "TP. Hồ Chí Minh"}
-                </span>
-              </div>
-            </div>
-            {/* Districts */}
-            <div className="overflow-y-auto flex-1">
-              <div className="px-3 py-1.5 border-b border-border/40">
-                <span className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">
-                  {t("apartments.district")}
-                </span>
-              </div>
-              {districts.map((d: Location) => (
-                <ColumnItem
-                  key={d.id}
-                  loc={d}
-                  checked={selectedIds.has(d.id)}
-                  partial={partialDistrictIds.has(d.id)}
-                  focused={focusedDistrictId === d.id}
-                  disabled={false}
-                  hasChildren={hasWardChildren(d.id)}
-                  onCheck={() => toggle(d)}
-                  onFocus={() => setFocusedDistrictId(d.id)}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Col 2: Wards of focused district */}
-          {focusedDistrictId ? (
-            <div className="flex flex-col flex-1 min-w-0">
-              <div className="px-3 py-2 border-b border-border bg-zinc-50 dark:bg-zinc-900">
-                <span className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">
-                  {t("apartments.ward")}
-                  {selectedIds.has(focusedDistrictId) && (
-                    <span className="ml-2 text-primary normal-case font-normal">
-                      · Đã chọn cả quận
+                <div className="border-b border-border bg-primary/5 px-3 py-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-4 h-4 bg-primary border border-primary flex items-center justify-center shrink-0">
+                      <CheckIcon className="w-3 h-3 text-white" weight="bold" />
+                    </div>
+                    <span className="text-sm font-medium text-primary">
+                      {cityForDistricts
+                        ? (cityForDistricts.title as string)
+                        : "TP. Hồ Chí Minh"}
                     </span>
-                  )}
-                </span>
-              </div>
-              <div className="overflow-y-auto flex-1">
-                {activeWards.length === 0 ? (
-                  <div className="px-4 py-8 text-sm text-foreground-muted text-center">
-                    Không có phường/xã
                   </div>
-                ) : (
-                  activeWards.map((w: Location) => (
+                </div>
+                {/* Districts */}
+                <div className="overflow-y-auto flex-1">
+                  <div className="px-3 py-1.5 border-b border-border/40">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+                      {t("apartments.district")}
+                    </span>
+                  </div>
+                  {districts.map((d: Location) => (
                     <ColumnItem
-                      key={w.id}
-                      loc={w}
-                      checked={selectedIds.has(w.id)}
-                      focused={false}
-                      disabled={disabledIds.has(w.id)}
-                      hasChildren={false}
-                      onCheck={() => toggle(w)}
-                      onFocus={() => {}}
+                      key={d.id}
+                      loc={d}
+                      checked={selectedIds.has(d.id)}
+                      partial={partialDistrictIds.has(d.id)}
+                      focused={focusedDistrictId === d.id}
+                      disabled={false}
+                      hasChildren={hasWardChildren(d.id)}
+                      onCheck={() => toggle(d)}
+                      onFocus={() => setFocusedDistrictId(d.id)}
                     />
-                  ))
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-sm text-foreground-muted">
-              <span>{t("apartments.select_district_first")}</span>
-            </div>
-          )}
+
+              {/* Col 2: Wards of focused district */}
+              {focusedDistrictId ? (
+                <div className="flex flex-col flex-1 min-w-0">
+                  <div className="px-3 py-2 border-b border-border bg-zinc-50 dark:bg-zinc-900">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+                      {t("apartments.ward")}
+                      {selectedIds.has(focusedDistrictId) && (
+                        <span className="ml-2 text-primary normal-case font-normal">
+                          · Đã chọn cả quận
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  <div className="overflow-y-auto flex-1">
+                    {activeWards.length === 0 ? (
+                      <div className="px-4 py-8 text-sm text-foreground-muted text-center">
+                        Không có phường/xã
+                      </div>
+                    ) : (
+                      activeWards.map((w: Location) => (
+                        <ColumnItem
+                          key={w.id}
+                          loc={w}
+                          checked={selectedIds.has(w.id)}
+                          focused={false}
+                          disabled={disabledIds.has(w.id)}
+                          hasChildren={false}
+                          onCheck={() => toggle(w)}
+                          onFocus={() => {}}
+                        />
+                      ))
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-sm text-foreground-muted">
+                  <span>{t("apartments.select_district_first")}</span>
+                </div>
+              )}
             </>
           )}
         </div>

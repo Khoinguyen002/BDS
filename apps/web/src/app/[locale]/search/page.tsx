@@ -79,7 +79,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
       <main className="min-h-screen bg-background pt-24 pb-16">
         <div className="container">
           <div className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground mb-4">
+            <h1 className="mb-4">
               Tìm kiếm bất động sản
             </h1>
             <p className="text-lg text-foreground-muted max-w-2xl mt-4">

@@ -45,15 +45,10 @@ const NodeRenderer = ({ node }: { node: ElementNode | TextNode }) => {
       return <p className="mb-3 text-[15px] text-foreground-secondary leading-relaxed">{children}</p>;
     case "heading":
       const Tag = (elNode.tag as keyof React.JSX.IntrinsicElements) || "h2";
-      const headingClasses: Record<string, string> = {
-        h1: "text-3xl font-bold mb-4 text-zinc-900 dark:text-zinc-100",
-        h2: "text-2xl font-bold mb-3 text-zinc-900 dark:text-zinc-100",
-        h3: "text-xl font-bold mb-2 text-zinc-900 dark:text-zinc-100",
-        h4: "text-lg font-bold mb-2 text-zinc-900 dark:text-zinc-100",
-        h5: "text-base font-bold mb-2 text-zinc-900 dark:text-zinc-100",
-        h6: "text-sm font-bold mb-2 text-zinc-900 dark:text-zinc-100",
+      const headingMargin: Record<string, string> = {
+        h1: "mb-4", h2: "mb-3", h3: "mb-2", h4: "mb-2", h5: "mb-2", h6: "mb-2",
       };
-      return <Tag className={headingClasses[Tag as string] || headingClasses.h2}>{children}</Tag>;
+      return <Tag className={`font-bold ${headingMargin[Tag as string] || "mb-3"}`}>{children}</Tag>;
     case "list":
       const ListTag = elNode.tag === "ol" ? "ol" : "ul";
       const listClass = elNode.tag === "ol" ? "list-decimal ml-6 mb-4" : "list-disc ml-6 mb-4";

@@ -21,7 +21,7 @@ export default async function ContactForm(
           {/* Text Content */}
           <AnimatedSection direction="up" className="w-full md:w-5/12 flex flex-col gap-8">
             <div>
-              <h2 className="text-4xl md:text-5xl font-medium mb-4 text-foreground tracking-tight leading-[1.1]">
+              <h2 className="mb-4">
                 {title || t("title")}
               </h2>
               <p className="text-foreground-secondary text-base leading-relaxed">
