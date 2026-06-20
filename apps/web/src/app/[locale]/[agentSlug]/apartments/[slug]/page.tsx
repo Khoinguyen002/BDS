@@ -5,7 +5,6 @@ import { getApartmentBySlug, getApartmentsByOwner } from "@/lib/payload-fetcher"
 import { Breadcrumbs } from "@/components/apartments/Breadcrumbs";
 import { MediaGallery } from "@/components/apartments/MediaGallery";
 import { DetailBody } from "@/components/apartments/DetailBody";
-import { AgentCard } from "@/components/apartments/AgentCard";
 import { PriceBreakdown } from "@/components/apartments/PriceBreakdown";
 import { SaveAndShare } from "@/components/apartments/SaveAndShare";
 import { StickyCTA } from "@/components/apartments/StickyCTA";
@@ -149,8 +148,6 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
                   <PriceBreakdown price={apt.price} apartment={apt} />
                 </div>
 
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <AgentCard owner={apt.owner as any} listingType={apt.listingType} />
                 {apt.listingType === "sale" && (
                   <InvestmentROI rentalYield={apt.investment?.rentalYield} />
                 )}
@@ -163,7 +160,7 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
       </main>
 
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <StickyCTA phoneNumber={(apt.owner as any)?.profile?.phoneNumber} listingType={apt.listingType} />
+      <StickyCTA owner={apt.owner as any} phoneNumber={(apt.owner as any)?.profile?.phoneNumber} zaloNumber={(apt.owner as any)?.profile?.zaloNumber} listingType={apt.listingType} />
 
       {/* Structured Data for SEO */}
       <script

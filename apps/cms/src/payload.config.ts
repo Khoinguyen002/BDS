@@ -6,6 +6,7 @@ import { en } from "@payloadcms/translations/languages/en";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { s3Storage } from "@payloadcms/storage-s3";
+import { cloudinaryStorage } from "./lib/cloudinary-storage";
 import { Users } from "./collections/Users";
 import { LandingPages } from "./collections/LandingPages";
 import { Media } from "./collections/Media";
@@ -47,7 +48,18 @@ export default buildConfig({
   secret: env.PAYLOAD_SECRET,
   collections: [Users, LandingPages, Media, Apartments, Leads, Templates, Translations, Amenities, Locations],
   plugins: [
-    ...(env.S3_BUCKET
+    // Ưu tiên Cloudinary nếu có cấu hình; fallback S3; nếu không có cả hai → local storage.
+    ...(env.CLOUDINARY_CLOUD_NAME
+      ? [
+          cloudinaryStorage({
+            cloudName: env.CLOUDINARY_CLOUD_NAME,
+            apiKey: env.CLOUDINARY_API_KEY || "",
+            apiSecret: env.CLOUDINARY_API_SECRET || "",
+            folder: "bds",
+            collections: { media: true },
+          }),
+        ]
+      : env.S3_BUCKET
       ? [
           s3Storage({
             collections: {

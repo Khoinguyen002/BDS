@@ -1,9 +1,7 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { ThemeInjector } from "@/components/ThemeInjector";
 import { getUserBySlug, getApartments, getLocations } from "@/lib/payload-fetcher";
 import { ListApartmentsClient } from "@/components/blocks/ListApartmentsClient";
-import { ArrowLeftIcon } from "@phosphor-icons/react/dist/ssr";
 import { getTranslations } from "next-intl/server";
 import { SearchFunnel } from "@/components/home/SearchFunnel";
 import { resolveLocationSlugsToWardIds } from "@/lib/location-utils";
@@ -26,7 +24,6 @@ export async function generateMetadata({ params }: Props) {
 export default async function ViewAllApartmentsPage({ params, searchParams }: Props) {
   const { locale, agentSlug } = await params;
   const sp = await searchParams;
-  const tCommon = await getTranslations("common");
   const t = await getTranslations("apartments");
 
   const owner = await getUserBySlug(agentSlug);
@@ -80,34 +77,18 @@ export default async function ViewAllApartmentsPage({ params, searchParams }: Pr
     <>
       <ThemeInjector theme={owner.theme} />
       <main className="min-h-screen bg-background">
-        
-        {/* Navigation */}
-        <nav className="w-full bg-background/90 backdrop-blur-sm border-b border-border py-4 px-6 sticky top-0 z-50">
-          <div className="container flex items-center justify-between">
-            <Link
-              href={`/${locale}/${agentSlug}`}
-              className="group text-xs font-semibold uppercase tracking-widest text-foreground-muted hover:text-foreground flex items-center gap-2 transition-colors"
-            >
-              <ArrowLeftIcon weight="bold" className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-              {tCommon("back")}
-            </Link>
-            <div className="text-xs uppercase tracking-widest text-foreground-muted font-light">
-              {t('properties_found', { count: apartments.length })}
-            </div>
-          </div>
-        </nav>
-
-        <div className="py-16">
+        <div className="pt-10 pb-16 md:pt-12">
           <div className="container mb-12">
             <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground mb-4">
               {t('featured_collection')}
             </h1>
             <p className="text-lg text-foreground-muted">
               {t('managed_by', { brandName: owner.brandName })}
+              <span className="text-foreground-muted/70"> · {t('properties_found', { count: apartments.length })}</span>
             </p>
           </div>
 
-          <div className="container mb-12">
+          <div className="container mb-12 sticky md:static top-[64px] z-40">
             <SearchFunnel locations={allLocations} agentSlug={agentSlug} />
           </div>
 

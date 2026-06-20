@@ -1,5 +1,3 @@
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { HtmlLang } from "@/components/HtmlLang";
 import { Footer } from "@/components/layout/Footer";
 import { NextIntlClientProvider } from 'next-intl';
@@ -36,10 +34,6 @@ export default async function LocaleLayout({
         <HtmlLang locale={locale} />
         {children}
         <Footer />
-        <div className="fixed right-4 top-4 md:top-auto md:bottom-6 md:right-6 flex items-center gap-3 z-50">
-          <LocaleSwitcher />
-          <ThemeToggle />
-        </div>
       </CurrencyProvider>
     </NextIntlClientProvider>
   );

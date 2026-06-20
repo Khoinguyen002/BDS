@@ -50,7 +50,7 @@ export function ListApartmentsClient({
         )}
 
         {initialApartments.length > 0 ? (
-          <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+          <ul className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 hide-scrollbar">
             {initialApartments.map((apartment, i) => (
               <motion.li
                 key={apartment.id}
@@ -59,11 +59,11 @@ export function ListApartmentsClient({
                 viewport={{ once: true, amount: 0.1 }}
                 transition={{
                   duration: 0.6,
-                  delay: i * 0.1,
+                  delay: (i % 3) * 0.1,
                   ease: [0.16, 1, 0.3, 1],
                 }}
+                className="w-[85vw] shrink-0 snap-start md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
               >
-                { }
                 <PropertyCard apartment={apartment} agentSlug={agentSlug} />
               </motion.li>
             ))}

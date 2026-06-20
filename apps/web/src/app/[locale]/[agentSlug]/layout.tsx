@@ -1,4 +1,5 @@
 import { ThemeInjector } from "@/components/ThemeInjector";
+import { SiteHeader } from "@/components/layout/SiteHeader";
 import { getUserBySlug } from "@/lib/payload-fetcher";
 
 export default async function AgentLayout({
@@ -6,15 +7,17 @@ export default async function AgentLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ agentSlug: string }>;
+  params: Promise<{ locale: string; agentSlug: string }>;
 }) {
-  const { agentSlug } = await params;
+  const { locale, agentSlug } = await params;
 
   let theme = null;
+  let brandName = agentSlug;
   try {
     const user = await getUserBySlug(agentSlug);
     if (user) {
       theme = user.theme;
+      brandName = user.brandName || agentSlug;
     }
   } catch (error) {
     console.error("Error fetching agent theme:", error);
@@ -23,6 +26,7 @@ export default async function AgentLayout({
   return (
     <>
       <ThemeInjector theme={theme} />
+      <SiteHeader brandName={brandName} homeHref={`/${locale}/${agentSlug}`} />
       {children}
     </>
   );

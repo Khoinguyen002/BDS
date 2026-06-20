@@ -5,7 +5,7 @@ import { env } from "../env";
 export const Media: CollectionConfig = {
   slug: "media",
   upload: {
-    disableLocalStorage: !!env.S3_BUCKET,
+    disableLocalStorage: !!env.CLOUDINARY_CLOUD_NAME || !!env.S3_BUCKET,
   },
   access: {
     read: () => true,

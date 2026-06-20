@@ -1,6 +1,7 @@
 import React from "react";
 import { getFeaturedAgents, getCuratedApartments, getLocations } from "@/lib/payload-fetcher";
 import HeroBanner from "@/components/blocks/HeroBanner";
+import { SiteHeader } from "@/components/layout/SiteHeader";
 import { CuratedCollections } from "@/components/home/CuratedCollections";
 import { MarketSnapshot } from "@/components/home/MarketSnapshot";
 import { FeaturedAgents } from "@/components/home/FeaturedAgents";
@@ -25,7 +26,8 @@ export default async function GlobalHomePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 flex flex-col">
-      
+      <SiteHeader brandName="Bất Động Sản" homeHref={`/${locale}`} />
+
       <main className="flex-1">
         {/* Block 1: Hero & Smart Search */}
         <HeroBanner locations={locations} />

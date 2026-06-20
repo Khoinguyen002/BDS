@@ -34,17 +34,29 @@ export function CurrencyProvider({
     document.cookie = `bds_currency=${newCurrency}; path=/; max-age=31536000`;
   };
 
+  const formatCompactVND = (amount: number): string => {
+    if (amount >= 1e9) {
+      const value = amount / 1e9;
+      return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(value)} tỷ`;
+    }
+    if (amount >= 1e6) {
+      const value = amount / 1e6;
+      return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(value)} triệu`;
+    }
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   const formatCurrency = (amount?: number | null) => {
     if (amount === undefined || amount === null) {
       return t("price_contact") || "Liên hệ";
     }
 
     if (currency === "VND") {
-      return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-        maximumFractionDigits: 0,
-      }).format(amount);
+      return formatCompactVND(amount);
     }
 
     const usdAmount = amount / rates.VND;
@@ -62,11 +74,7 @@ export function CurrencyProvider({
 
   const formatVND = (amount?: number | null): string => {
     if (amount === undefined || amount === null) return t("price_contact") || "Liên hệ";
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      maximumFractionDigits: 0,
-    }).format(amount);
+    return formatCompactVND(amount);
   };
 
   const formatUSD = (amount?: number | null): string => {

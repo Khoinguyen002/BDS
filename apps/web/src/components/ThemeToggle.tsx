@@ -9,17 +9,12 @@ export function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className="p-3.5 w-14 h-14 bg-background border border-border hover:border-border-strong shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center group active:scale-95"
+      className="inline-flex items-center justify-center h-9 w-9 rounded-md border border-current/15 hover:bg-current/10 transition-colors active:scale-95"
       aria-label="Toggle theme"
     >
-      <MoonIcon
-        weight="regular"
-        className="w-5 h-5 text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors block dark:hidden"
-      />
-      <SunIcon
-        weight="regular"
-        className="w-5 h-5 text-zinc-400 group-hover:text-zinc-50 transition-colors hidden dark:block"
-      />
+      {/* Màu kế thừa từ header (trắng trên hero, foreground khi nền đặc) */}
+      <MoonIcon weight="regular" className="w-4 h-4 block dark:hidden" />
+      <SunIcon weight="regular" className="w-4 h-4 hidden dark:block" />
     </button>
   );
 }

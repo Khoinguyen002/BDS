@@ -189,7 +189,7 @@ export const SearchFunnel = ({ agentSlug, locations = [] }: SearchFunnelProps) =
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="w-full bg-background p-4 md:p-6 shadow-xl border border-border/50"
+      className="w-full bg-background p-4 md:p-6 shadow-xl border border-border/50 sticky md:static top-[60px] z-40"
     >
       <form onSubmit={handleSearch} className="flex flex-col gap-3">
 

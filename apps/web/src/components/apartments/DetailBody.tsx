@@ -24,13 +24,17 @@ export const DetailBody = async ({ apartment }: { apartment: Apartment }) => {
     <div className="flex flex-col divide-y divide-border/50">
       {blocks.map((blockKey) => {
         switch (blockKey) {
-          case "keyFacts":
+          case "keyFacts": {
+            const kf = apartment.keyFacts;
+            const hasKeyFacts = kf && Object.entries(kf).some(([k, v]) => k !== 'id' && k !== 'blockType' && v !== null && v !== undefined && v !== "");
+            if (!hasKeyFacts) return null;
             return (
               <section key={blockKey} className="pb-8">
                 <h2 className="text-2xl font-bold mb-6">{t("key_facts")}</h2>
                 <KeyFactsGrid apartment={apartment} />
               </section>
             );
+          }
           
           case "overview":
             if (!apartment.details?.overview && !apartment.details?.highlights && !apartment.details?.landscape) return null;
@@ -61,14 +65,24 @@ export const DetailBody = async ({ apartment }: { apartment: Apartment }) => {
               </section>
             );
 
-          case "legal":
-            if (!apartment.legal) return null;
+          case "legal": {
+            const leg = apartment.legal;
+            const hasLegalData = leg && (
+              !!leg.documentType ||
+              !!leg.ownershipTerm ||
+              leg.bankMortgaged === true ||
+              (leg.isFullyPermitted !== undefined && leg.isFullyPermitted !== null) ||
+              leg.hasZoningIssue === true ||
+              leg.hasDispute === true
+            );
+            if (!hasLegalData) return null;
             return (
               <section key={blockKey} className="py-8">
                 <h2 className="text-2xl font-bold mb-6">{t("legal_status")}</h2>
                 <LegalCard legal={apartment.legal} />
               </section>
             );
+          }
 
           case "amenities":
             if (!apartment.amenities || apartment.amenities.length === 0) return null;

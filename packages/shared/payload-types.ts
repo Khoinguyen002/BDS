@@ -312,6 +312,9 @@ export interface Template {
 export interface Media {
   id: number;
   owner: number | User;
+  cloudinaryPublicId?: string | null;
+  cloudinaryURL?: string | null;
+  cloudinaryResourceType?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -750,6 +753,9 @@ export interface LandingPagesSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   owner?: T;
+  cloudinaryPublicId?: T;
+  cloudinaryURL?: T;
+  cloudinaryResourceType?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

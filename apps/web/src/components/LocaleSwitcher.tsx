@@ -17,7 +17,7 @@ export function LocaleSwitcher() {
   return (
     <button
       onClick={toggleLocale}
-      className="p-3.5 w-14 h-14 bg-background border border-border hover:border-border-strong shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center uppercase font-mono font-bold text-xs tracking-widest text-foreground-secondary hover:text-foreground active:scale-95"
+      className="inline-flex items-center justify-center h-9 px-2.5 rounded-md border border-current/15 hover:bg-current/10 uppercase font-mono font-bold text-[11px] tracking-widest transition-colors active:scale-95"
       aria-label="Toggle language"
     >
       {locale}

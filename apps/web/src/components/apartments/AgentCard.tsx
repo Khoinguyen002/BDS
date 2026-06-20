@@ -57,16 +57,16 @@ export const AgentCard = ({ owner, listingType }: AgentCardProps) => {
         </div>
       )}
 
-      <div className="flex flex-col gap-3 mt-6">
+      <div className="flex flex-col gap-3 mt-4">
         {listingType === "rent" ? (
           <>
-            <Button asChild size="lg" className="w-full">
+            <Button asChild className="w-full">
               <a href={`tel:${owner.profile?.phoneNumber || ""}`}>
                 <PhoneIcon weight="fill" className="w-5 h-5 mr-2" />
                 {tApartments("call_now") || "Gọi điện"}
               </a>
             </Button>
-            <Button asChild size="lg" className="w-full">
+            <Button asChild className="w-full">
               <a href={owner.profile?.zaloUrl || `https://zalo.me/${owner.profile?.phoneNumber || ""}`} target="_blank" rel="noreferrer">
                 Chat Zalo
               </a>
@@ -75,13 +75,12 @@ export const AgentCard = ({ owner, listingType }: AgentCardProps) => {
         ) : (
           <>
             <Button
-              size="lg"
               className="w-full"
               onClick={() => alert("Mở form Nhận báo giá (Sẽ kết nối API Leads ở phase sau)")}
             >
               {tLead("form_title_sale") || "Nhận báo giá"}
             </Button>
-            <Button asChild variant="outline" size="lg" className="w-full bg-background-subtle border-border/50 hover:border-primary/50">
+            <Button asChild variant="outline" className="w-full bg-background-subtle border-border/50 hover:border-primary/50">
               <a href={`tel:${owner.profile?.phoneNumber || ""}`}>
                 <PhoneIcon weight="duotone" className="w-5 h-5 mr-2" />
                 {tApartments("call_now") || "Gọi điện"}

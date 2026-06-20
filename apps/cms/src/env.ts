@@ -13,6 +13,9 @@ const envSchema = z.object({
   S3_SECRET_ACCESS_KEY: z.string().optional(),
   S3_REGION: z.string().default("auto"),
   S3_ENDPOINT: z.string().optional(),
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
   REVALIDATE_SECRET: z.string().default("bds-super-secret-token-2026"),
 });
 
@@ -26,5 +29,8 @@ export const env = envSchema.parse({
   S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY,
   S3_REGION: process.env.S3_REGION,
   S3_ENDPOINT: process.env.S3_ENDPOINT,
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
   REVALIDATE_SECRET: process.env.REVALIDATE_SECRET,
 });

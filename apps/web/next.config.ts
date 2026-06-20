@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
         hostname: payloadUrl.hostname,
         port: payloadUrl.port || undefined,
       },
+      // Cloudinary CDN (media storage mới của Payload)
+      { protocol: "https" as const, hostname: "res.cloudinary.com" },
       ...allowedHostnames.map((hostname) => ({
         protocol: "https" as const,
         hostname,

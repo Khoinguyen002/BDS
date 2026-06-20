@@ -4,6 +4,7 @@ import { getApartments, getLocations } from "@/lib/payload-fetcher";
 import { resolveLocationSlugsToWardIds } from "@/lib/location-utils";
 import { SearchFunnel } from "@/components/home/SearchFunnel";
 import { ListApartmentsClient } from "@/components/blocks/ListApartmentsClient";
+import { SiteHeader } from "@/components/layout/SiteHeader";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
@@ -71,7 +72,8 @@ export default async function SearchPage({ params, searchParams }: Props) {
   return (
     <>
       <ThemeInjector />
-      <main className="min-h-screen bg-background pt-24 pb-16">
+      <SiteHeader brandName="Bất Động Sản" homeHref={`/${locale}`} />
+      <main className="min-h-screen bg-background pt-10 pb-16">
         <div className="container">
           <div className="mb-8">
             <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-foreground mb-4">
@@ -82,7 +84,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
             </p>
           </div>
 
-          <div className="mb-12">
+          <div className="mb-12 sticky md:static top-[64px] z-40">
             <SearchFunnel locations={allLocations} />
           </div>
 

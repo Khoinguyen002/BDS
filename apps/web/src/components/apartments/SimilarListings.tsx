@@ -19,13 +19,14 @@ export const SimilarListings = ({ apartments, agentSlug, propertyType }: Similar
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {propertyType ? t(`similar_${propertyType}` as any) : t("similar_listings")}
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-4 hide-scrollbar">
         {apartments.map((apt) => (
-          <PropertyCard
-            key={apt.id}
-            apartment={apt}
-            agentSlug={agentSlug}
-          />
+          <div key={apt.id} className="w-[85vw] shrink-0 snap-start md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)]">
+            <PropertyCard
+              apartment={apt}
+              agentSlug={agentSlug}
+            />
+          </div>
         ))}
       </div>
     </div>

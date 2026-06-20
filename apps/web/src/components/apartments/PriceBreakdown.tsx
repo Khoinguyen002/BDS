@@ -16,7 +16,7 @@ type PriceBreakdownProps = {
 
 export const PriceBreakdown = ({ price, apartment }: PriceBreakdownProps) => {
   const t = useTranslations("apartments");
-  const { formatCurrency } = useCurrency();
+  const { formatCurrency, formatUSD } = useCurrency();
   const [isOpen, setIsOpen] = useState(false);
 
   const priceBreakdown = apartment.priceBreakdown;
@@ -47,15 +47,20 @@ export const PriceBreakdown = ({ price, apartment }: PriceBreakdownProps) => {
           </div>
         </div>
 
-        <div className="flex items-baseline flex-wrap gap-x-3 gap-y-2">
-          <span className="text-3xl md:text-4xl font-bold text-primary break-all">
-            {formatCurrency(displayPrice)}
-          </span>
-          {priceBreakdown?.negotiable && (
-            <span className="text-sm text-success bg-success/10 px-2 py-0.5 rounded-none font-medium shrink-0">
-              {t("negotiable")}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-baseline flex-wrap gap-x-3 gap-y-2">
+            <span className="text-3xl md:text-4xl font-bold text-primary break-all">
+              {formatCurrency(displayPrice)}
             </span>
-          )}
+            {priceBreakdown?.negotiable && (
+              <span className="text-sm text-success bg-success/10 px-2 py-0.5 rounded-none font-medium shrink-0">
+                {t("negotiable")}
+              </span>
+            )}
+          </div>
+          <span className="text-sm font-medium text-foreground-muted">
+            {formatUSD(displayPrice)}
+          </span>
         </div>
       </div>
 
