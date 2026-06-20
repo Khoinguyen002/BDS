@@ -18,7 +18,7 @@ export const AgentCard = ({ owner, listingType }: AgentCardProps) => {
   return (
     <div className="bg-background-subtle rounded-none p-6 border border-border/50 flex flex-col gap-6">
       <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 text-2xl font-bold uppercase">
+        <div className="w-16 h-16 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0 text-2xl font-bold uppercase">
           {owner.brandName.substring(0, 2)}
         </div>
         <div className="flex flex-col">
@@ -38,7 +38,7 @@ export const AgentCard = ({ owner, listingType }: AgentCardProps) => {
         <div className="grid grid-cols-2 gap-4 py-4 border-y border-border/50">
           {owner.profile?.experienceYears && (
             <div className="flex flex-col items-center justify-center gap-1">
-              <span className="flex items-center gap-1.5 text-primary font-bold text-lg">
+              <span className="flex items-center gap-1.5 text-secondary font-bold text-lg">
                 <StarIcon weight="fill" className="w-4 h-4" />
                 {owner.profile.experienceYears}+
               </span>

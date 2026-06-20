@@ -29,7 +29,7 @@ export const AmenitiesGrid = ({ amenities }: AmenitiesGridProps) => {
         return (
           <div key={idx} className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-none bg-background-subtle flex items-center justify-center shrink-0">
-              <IconComponent weight="duotone" className="w-5 h-5 text-primary" />
+              <IconComponent weight="duotone" className="w-5 h-5 text-secondary" />
             </div>
             <span className="text-sm font-medium">{amenity.title}</span>
           </div>

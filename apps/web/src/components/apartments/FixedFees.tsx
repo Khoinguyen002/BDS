@@ -22,8 +22,8 @@ export const FixedFees = ({ apartment }: { apartment: Apartment }) => {
         {/* Deposit */}
         {rp.deposit && (
           <div className="flex items-center gap-4 bg-background-subtle border border-border p-4 rounded-none">
-            <div className="p-3 bg-primary/10 rounded-full">
-              <MoneyIcon className="w-6 h-6 text-primary" weight="duotone" />
+            <div className="p-3 bg-secondary/10 rounded-full">
+              <MoneyIcon className="w-6 h-6 text-secondary" weight="duotone" />
             </div>
             <div>
               <p className="text-xs text-foreground-muted uppercase tracking-wider font-semibold mb-0.5">

@@ -154,6 +154,7 @@ export interface User {
   };
   theme?: {
     primaryColor?: string | null;
+    secondaryColor?: string | null;
     borderRadius?: ('none' | 'sm' | 'md' | 'lg' | 'full') | null;
     fontFamily?: ('sans' | 'serif') | null;
   };
@@ -665,6 +666,7 @@ export interface UsersSelect<T extends boolean = true> {
     | T
     | {
         primaryColor?: T;
+        secondaryColor?: T;
         borderRadius?: T;
         fontFamily?: T;
       };

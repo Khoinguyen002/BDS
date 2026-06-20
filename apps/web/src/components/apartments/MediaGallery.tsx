@@ -15,9 +15,10 @@ export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
   const [showTour, setShowTour] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
   const dragStartX = useRef(0);
-  const dragDeltaX = useRef(0);
   const trackRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const images = gallery.filter((item): item is Media => typeof item === "object" && item !== null);
   const total = images.length;
@@ -43,26 +44,33 @@ export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
     return () => window.removeEventListener("keydown", onKey);
   }, [next, prev]);
 
-  // Touch/mouse swipe
+  // Touch/mouse swipe - image follows cursor in realtime
   const onPointerDown = (e: React.PointerEvent) => {
     dragStartX.current = e.clientX;
-    dragDeltaX.current = 0;
+    setDragOffset(0);
     setIsDragging(true);
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return;
-    dragDeltaX.current = e.clientX - dragStartX.current;
+    const delta = e.clientX - dragStartX.current;
+    // Resist dragging past first/last slide (rubber-band effect)
+    if ((activeIndex === 0 && delta > 0) || (activeIndex === total - 1 && delta < 0)) {
+      setDragOffset(delta * 0.3);
+    } else {
+      setDragOffset(delta);
+    }
   };
 
   const onPointerUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
-    const threshold = 50;
-    if (dragDeltaX.current < -threshold) next();
-    else if (dragDeltaX.current > threshold) prev();
-    dragDeltaX.current = 0;
+    const containerWidth = containerRef.current?.offsetWidth || 1;
+    const threshold = containerWidth * 0.15; // 15% of container width
+    if (dragOffset < -threshold) next();
+    else if (dragOffset > threshold) prev();
+    setDragOffset(0);
   };
 
   if (images.length === 0 && !tourUrl) {
@@ -74,7 +82,7 @@ export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
   }
 
   return (
-    <div className="relative w-full aspect-[4/3] md:aspect-video overflow-hidden bg-black group select-none">
+    <div ref={containerRef} className="relative w-full aspect-[4/3] md:aspect-video overflow-hidden bg-black group select-none">
       {showTour && tourUrl ? (
         <iframe
           src={tourUrl}
@@ -89,9 +97,10 @@ export const MediaGallery = ({ gallery, tourUrl }: MediaGalleryProps) => {
             ref={trackRef}
             className="flex w-full h-full"
             style={{
-              transform: `translateX(-${activeIndex * 100}%)`,
+              transform: `translateX(calc(-${activeIndex * 100}% + ${dragOffset}px))`,
               transition: isDragging ? "none" : "transform 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
               willChange: "transform",
+              cursor: isDragging ? "grabbing" : "grab",
             }}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}

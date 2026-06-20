@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload';
 import { formatSlug } from '../utils/formatSlug';
+import { triggerRevalidateTag } from '../utils/revalidate';
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -111,6 +112,17 @@ export const Users: CollectionConfig = {
             }
           }
         },
+        { 
+          name: 'secondaryColor', 
+          type: 'text', 
+          defaultValue: '#475569', 
+          label: { vi: "Màu phụ (Secondary Color)", en: "Brand Secondary Color" },
+          admin: {
+            components: {
+              Field: '@/components/ColorPickerField#ColorPickerField',
+            }
+          }
+        },
         { name: 'borderRadius', type: 'select', options: ['none', 'sm', 'md', 'lg', 'full'], defaultValue: 'lg', label: { vi: "Bo góc", en: "Border Radius" } },
         { name: 'fontFamily', type: 'select', options: ['sans', 'serif'], defaultValue: 'sans', label: { vi: "Phông chữ", en: "Font Family" } },
       ]
@@ -151,6 +163,16 @@ export const Users: CollectionConfig = {
         }
         return data;
       }
-    ]
+    ],
+    afterChange: [
+      async ({ req }) => {
+        triggerRevalidateTag({ tag: 'users', req });
+      }
+    ],
+    afterDelete: [
+      async ({ req }) => {
+        triggerRevalidateTag({ tag: 'users', req });
+      }
+    ],
   }
 }

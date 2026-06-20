@@ -4,7 +4,7 @@ import React from "react";
 import type { Apartment } from "@bds/shared/payload-types";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { ArrowUpRightIcon } from "@phosphor-icons/react";
+import { ArrowUpRightIcon } from "@phosphor-icons/react/dist/ssr";
 import { useTranslations, useLocale } from "next-intl";
 import { PropertyCard } from "./PropertyCard";
 

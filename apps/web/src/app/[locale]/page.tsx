@@ -1,6 +1,6 @@
 import React from "react";
 import { getFeaturedAgents, getCuratedApartments, getLocations } from "@/lib/payload-fetcher";
-import { HeroSearch } from "@/components/home/HeroSearch";
+import HeroBanner from "@/components/blocks/HeroBanner";
 import { CuratedCollections } from "@/components/home/CuratedCollections";
 import { MarketSnapshot } from "@/components/home/MarketSnapshot";
 import { FeaturedAgents } from "@/components/home/FeaturedAgents";
@@ -28,7 +28,7 @@ export default async function GlobalHomePage({ params }: PageProps) {
       
       <main className="flex-1">
         {/* Block 1: Hero & Smart Search */}
-        <HeroSearch locations={locations} />
+        <HeroBanner locations={locations} />
         
         {/* Block 2: Curated Collections */}
         <CuratedCollections initialRent={rentApartments} initialSale={saleApartments} />
@@ -45,3 +45,4 @@ export default async function GlobalHomePage({ params }: PageProps) {
     </div>
   );
 }
+

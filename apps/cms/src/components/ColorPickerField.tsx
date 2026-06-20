@@ -2,14 +2,24 @@
 
 import React from "react";
 import { useField } from "@payloadcms/ui";
+import type { TextFieldClientProps } from "payload";
 
-export function ColorPickerField({ path, label }: { path: string; label?: string }) {
+export function ColorPickerField({ path, field }: TextFieldClientProps) {
   const { value, setValue } = useField<string>({ path });
+
+  // Payload may pass label as string or localized object { vi, en }
+  const rawLabel = field?.label;
+  const displayLabel =
+    typeof rawLabel === "string"
+      ? rawLabel
+      : typeof rawLabel === "object" && rawLabel !== null
+        ? (rawLabel as Record<string, string>)["vi"] || (rawLabel as Record<string, string>)["en"] || "Color"
+        : "Color";
 
   return (
     <div className="field-type text" style={{ marginBottom: "20px" }}>
       <label className="field-label" style={{ display: "block", marginBottom: "8px" }}>
-        {label || "Brand Primary Color"}
+        {displayLabel}
       </label>
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <input
@@ -45,3 +55,5 @@ export function ColorPickerField({ path, label }: { path: string; label?: string
     </div>
   );
 }
+
+

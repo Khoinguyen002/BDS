@@ -18,17 +18,17 @@ export const KeyFactsGrid = ({ apartment }: KeyFactsProps) => {
   if (apartment.propertyType === "boarding_room") {
     facts = [
       {
-        icon: <ArrowsOutIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <ArrowsOutIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("area"),
         value: keyFacts.area ? `${keyFacts.area} m²` : "-",
       },
       {
-        icon: <BathtubIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <BathtubIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("bathroom_type"),
         value: keyFacts.bathroomType ? t(`bathroom_${keyFacts.bathroomType}`) : "-",
       },
       {
-        icon: <BuildingsIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <BuildingsIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("floor_level"),
         value: keyFacts.floorLevel ? t(`floor_${keyFacts.floorLevel}`) : "-",
       },
@@ -36,32 +36,32 @@ export const KeyFactsGrid = ({ apartment }: KeyFactsProps) => {
   } else if (apartment.propertyType === "land_house") {
     facts = [
       {
-        icon: <ArrowsOutIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <ArrowsOutIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("land_area"),
         value: keyFacts.landArea ? `${keyFacts.landArea} m²` : "-",
       },
       {
-        icon: <ArrowsOutIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <ArrowsOutIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("usable_area"),
         value: keyFacts.usableArea ? `${keyFacts.usableArea} m²` : "-",
       },
       {
-        icon: <CompassIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <CompassIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("frontage_width"),
         value: keyFacts.frontageWidth ? `${keyFacts.frontageWidth} m` : "-",
       },
       {
-        icon: <CompassIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <CompassIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("depth"),
         value: keyFacts.depth ? `${keyFacts.depth} m` : "-",
       },
       {
-        icon: <BuildingsIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <BuildingsIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("num_floors"),
         value: keyFacts.numFloors ? `${keyFacts.numFloors}` : "-",
       },
       {
-        icon: <CompassIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <CompassIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("house_direction"),
         value: keyFacts.direction ? t(`direction_${keyFacts.direction}`) : "-",
       },
@@ -70,27 +70,27 @@ export const KeyFactsGrid = ({ apartment }: KeyFactsProps) => {
     // Default: Apartment
     facts = [
       {
-        icon: <CompassIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <CompassIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("direction"),
         value: keyFacts.direction || "-",
       },
       {
-        icon: <BuildingsIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <BuildingsIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("floor_level"),
         value: keyFacts.floorLevel ? t(`floor_${keyFacts.floorLevel}`) : "-",
       },
       {
-        icon: <ArrowsOutIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <ArrowsOutIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("area"),
         value: keyFacts.area ? `${keyFacts.area} m²` : "-",
       },
       {
-        icon: <BedIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <BedIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("bedrooms"),
         value: keyFacts.bedrooms || "-",
       },
       {
-        icon: <BathtubIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <BathtubIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("bathrooms"),
         value: keyFacts.bathrooms || "-",
       },
@@ -98,7 +98,7 @@ export const KeyFactsGrid = ({ apartment }: KeyFactsProps) => {
 
     if (keyFacts.balconyDirection) {
       facts.splice(1, 0, {
-        icon: <CompassIcon weight="duotone" className="w-5 h-5 text-primary" />,
+        icon: <CompassIcon weight="duotone" className="w-5 h-5 text-secondary" />,
         label: t("balcony_direction"),
         value: keyFacts.balconyDirection,
       });
@@ -108,8 +108,8 @@ export const KeyFactsGrid = ({ apartment }: KeyFactsProps) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {facts.map((fact, idx) => (
-        <div key={idx} className="flex items-center gap-3 p-4 rounded-none bg-background-subtle border border-border/50 hover:border-primary/20 transition-colors">
-          <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
+        <div key={idx} className="flex items-center gap-3 p-4 rounded-none bg-background-subtle border border-border/50 hover:border-secondary/20 transition-colors">
+          <div className="w-10 h-10 rounded-none bg-secondary/10 flex items-center justify-center shrink-0">
             {fact.icon}
           </div>
           <div className="flex flex-col">

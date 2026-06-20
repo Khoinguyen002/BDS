@@ -48,10 +48,14 @@ trigger: always_on
 - **Text Secondary:** Zinc-600 `#52525b` (light) / Zinc-400 `#a1a1aa` (dark)
 - **Text Muted:** Zinc-500 `#71717a` (cả 2 mode)
 - **Border:** Zinc-200 `#e4e4e7` (light) / Zinc-800 `#27272a` (dark)
-- **Accent (Primary):** Emerald-600 `#059669` - Mặc định, có thể override bởi agent theme
+- **Accent (Primary):** Emerald-600 `#059669` - CTA, active states, prices. Overridable per agent.
+- **Accent (Secondary):** Slate-600 `#475569` (light) / Slate-400 `#94a3b8` (dark) - Informational badges, decorative icons, muted accent surfaces. Overridable per agent.
 
 ### Luật cứng
-- **Tối đa 1 accent color** trên toàn trang. Không có màu phụ thứ 2.
+- **Tối đa 2 accent colors** trên toàn trang: Primary (CTA, active states, prices) + Secondary (badges, icons, decorative accents).
+- Primary dùng cho: buttons, active tab, price text, hover text, focus ring, selection.
+- Secondary dùng cho: info badges, key-fact icons, amenity icons, legal card, card hover border, muted accent backgrounds.
+- **KHÔNG dùng thêm accent thứ 3.** 2 là giới hạn.
 - **Saturation < 70%.** Không neon, không electric blue, không hot pink.
 - **Không gradient trên text.** Không gradient trên button. Gradient chỉ được dùng làm subtle background overlay (opacity < 10%).
 - **Không shadow đậm.** Nếu dùng shadow → tint theo background hue, opacity thấp. Không `shadow-xl` hay `shadow-2xl` trên card.
@@ -147,7 +151,8 @@ Người dùng BDS đang tìm nhà/đầu tư. Họ cần scan thông tin nhanh,
 
 ### Button
 - Primary: `bg-primary text-white`. Góc vuông. `px-6 py-3`. `font-medium`.
-- Secondary: `border border-border text-foreground`. Góc vuông. 
+- Secondary: `bg-secondary text-secondary-foreground`. Góc vuông.
+- Outline: `border border-border text-foreground`. Góc vuông. 
 - Ghost: `text-primary hover:bg-primary/5`. Không border.
 - KHÔNG pill button (rounded-full). KHÔNG gradient button. KHÔNG glow effect.
 
@@ -180,7 +185,7 @@ Người dùng BDS đang tìm nhà/đầu tư. Họ cần scan thông tin nhanh,
 ## 9. DARK MODE
 
 - Hỗ trợ cả 2 mode. Detect `prefers-color-scheme` làm default.
-- Token đã define trong `globals.css`. KHÔNG define thêm biến mới ngoài hệ thống hiện tại.
+- Token đã define trong `globals.css` (bao gồm `--secondary`, `--secondary-foreground`). KHÔNG define thêm biến mới ngoài hệ thống hiện tại.
 - KHÔNG dùng pure `#000000` background (dùng zinc-950 `#09090b`).
 - KHÔNG dùng pure `#ffffff` text trên dark (dùng zinc-50 `#fafafa`).
 - Test cả 2 mode trước khi ship. Contrast WCAG AA minimum.

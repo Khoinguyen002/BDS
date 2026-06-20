@@ -300,46 +300,48 @@ export const SearchFunnel = ({ agentSlug, locations = [] }: SearchFunnelProps) =
         {/* Row 2: Location trigger + Price */}
         <div className="flex flex-col md:flex-row items-stretch w-full bg-background border border-border shadow-sm divide-y md:divide-y-0 md:divide-x divide-border">
           {/* Location — trigger button */}
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => setLocationPanelOpen(true)}
-            onKeyDown={(e) => e.key === "Enter" && setLocationPanelOpen(true)}
-            className="flex items-center gap-3 flex-1 h-[64px] pl-5 pr-4 text-left hover:bg-primary/5 transition-colors min-w-0 cursor-pointer"
-          >
-            <MapPinIcon className="w-5 h-5 text-foreground-muted shrink-0" />
-            {selectedLocations.length === 0 ? (
-              <span className="text-foreground-muted text-sm">{t("apartments.location_trigger")}</span>
-            ) : (
-              <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-hidden">
-                {selectedLocations.slice(0, 2).map((loc) => (
-                  <span
-                    key={loc.id}
-                    className="flex items-center gap-1 bg-primary/10 text-primary text-xs font-medium px-2 py-1 shrink-0"
-                  >
-                    {loc.title}
-                  </span>
-                ))}
-                {selectedLocations.length > 2 && (
-                  <span className="text-xs text-foreground-muted shrink-0">
-                    {t("apartments.more_locations", { count: selectedLocations.length - 2 })}
-                  </span>
-                )}
-              </div>
-            )}
-            {selectedLocations.length > 0 && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  dirtyFields.current.add("locations");
-                  setSelectedLocations([]);
-                }}
-                className="ml-auto shrink-0 text-foreground-muted hover:text-foreground transition-colors"
-              >
-                <XCircleIcon className="w-4 h-4" />
-              </button>
-            )}
+          <div className="relative flex-1 w-full py-1">
+            <MapPinIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-muted pointer-events-none z-10" />
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setLocationPanelOpen(true)}
+              onKeyDown={(e) => e.key === "Enter" && setLocationPanelOpen(true)}
+              className="flex items-center w-full h-14 pl-12 pr-4 text-left hover:bg-secondary/5 transition-colors min-w-0 cursor-pointer"
+            >
+              {selectedLocations.length === 0 ? (
+                <span className="text-foreground-muted text-sm">{t("apartments.location_trigger")}</span>
+              ) : (
+                <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-hidden">
+                  {selectedLocations.slice(0, 2).map((loc) => (
+                    <span
+                      key={loc.id}
+                      className="flex items-center gap-1 bg-secondary/10 text-secondary text-xs font-medium px-2 py-1 shrink-0"
+                    >
+                      {loc.title}
+                    </span>
+                  ))}
+                  {selectedLocations.length > 2 && (
+                    <span className="text-xs text-foreground-muted shrink-0">
+                      {t("apartments.more_locations", { count: selectedLocations.length - 2 })}
+                    </span>
+                  )}
+                </div>
+              )}
+              {selectedLocations.length > 0 && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    dirtyFields.current.add("locations");
+                    setSelectedLocations([]);
+                  }}
+                  className="ml-auto shrink-0 text-foreground-muted hover:text-foreground transition-colors relative z-20"
+                >
+                  <XCircleIcon className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Price — dynamic based on mode */}

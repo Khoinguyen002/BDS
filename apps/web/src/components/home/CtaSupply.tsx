@@ -9,8 +9,8 @@ export const CtaSupply = () => {
   return (
     <section className="py-24 bg-foreground text-background">
       <div className="container max-w-4xl text-center flex flex-col items-center">
-        <div className="w-16 h-16 bg-primary/20 rounded-none flex items-center justify-center mb-8">
-          <HouseLineIcon weight="duotone" className="w-8 h-8 text-primary" />
+        <div className="w-16 h-16 bg-secondary/20 rounded-none flex items-center justify-center mb-8">
+          <HouseLineIcon weight="duotone" className="w-8 h-8 text-secondary" />
         </div>
         
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">{t("cta_supply_title")}</h2>

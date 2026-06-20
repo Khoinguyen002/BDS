@@ -22,7 +22,7 @@ export const LivingRules = ({ apartment }: { apartment: Apartment }) => {
       <h2 className="text-2xl font-bold mb-6">{t("living_rules") || "Nội quy phòng trọ"}</h2>
       <div className="flex flex-wrap gap-4">
         {rules.map((r, i) => (
-          <div key={i} className={`flex items-center gap-2 px-4 py-2 rounded-none border ${r.val ? 'border-primary/50 bg-primary/5 text-primary' : 'border-red-500/50 bg-red-500/5 text-red-600'}`}>
+          <div key={i} className={`flex items-center gap-2 px-4 py-2 rounded-none border ${r.val ? 'border-secondary/50 bg-secondary/5 text-secondary' : 'border-red-500/50 bg-red-500/5 text-red-600'}`}>
             {r.val ? <CheckCircleIcon className="w-5 h-5" weight="fill" /> : <XCircleIcon className="w-5 h-5" weight="fill" />}
             <span className="font-medium text-sm">{r.label}</span>
           </div>

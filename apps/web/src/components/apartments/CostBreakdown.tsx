@@ -12,7 +12,7 @@ export const CostBreakdown = ({ apartment }: { apartment: Apartment }) => {
     { label: t("electricity_price"), value: rp.electricityPrice, icon: <LightningIcon className="w-5 h-5 text-amber-500" /> },
     { label: t("water_price"), value: rp.waterPrice, icon: <DropIcon className="w-5 h-5 text-blue-500" /> },
     { label: t("trash_fee"), value: rp.trashFee ? `${rp.trashFee.toLocaleString()} VND/tháng` : null, icon: <TrashIcon className="w-5 h-5 text-zinc-500" /> },
-    { label: t("wifi_fee"), value: rp.wifiFee ? `${rp.wifiFee.toLocaleString()} VND/tháng` : null, icon: <WifiHighIcon className="w-5 h-5 text-primary" /> },
+    { label: t("wifi_fee"), value: rp.wifiFee ? `${rp.wifiFee.toLocaleString()} VND/tháng` : null, icon: <WifiHighIcon className="w-5 h-5 text-secondary" /> },
     { label: t("parking_fee"), value: rp.parkingFee ? `${rp.parkingFee.toLocaleString()} VND/tháng` : null, icon: <CarProfileIcon className="w-5 h-5 text-foreground-muted" /> },
   ].filter(c => c.value);
 
@@ -40,7 +40,7 @@ export const CostBreakdown = ({ apartment }: { apartment: Apartment }) => {
         ))}
       </div>
       {showTotal && (
-        <div className="mt-4 flex items-center justify-between p-4 bg-primary/5 border border-primary/20 rounded-none">
+        <div className="mt-4 flex items-center justify-between p-4 bg-secondary/5 border border-secondary/20 rounded-none">
           <span className="font-semibold text-foreground">
             {t("estimated_total") || "Ước tính tổng/tháng"}
           </span>

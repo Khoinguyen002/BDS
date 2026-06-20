@@ -48,7 +48,7 @@ export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
   const displayUSD = hasPrice ? formatUSD(price) : null;
 
   return (
-    <Link href={href} className="group flex flex-col h-full bg-background-subtle rounded-none overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
+    <Link href={href} className="group flex flex-col h-full bg-background-subtle rounded-none overflow-hidden border border-border/50 hover:border-secondary/30 transition-all duration-300 hover:-translate-y-1">
       <div className="relative w-full aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-zinc-900">
         <Image
           src={imageUrl}
@@ -64,11 +64,11 @@ export const PropertyCard = ({ apartment, agentSlug }: PropertyCardProps) => {
             </div>
           )}
           {apartment.listingType === "sale" ? (
-            <div className="bg-primary/90 text-primary-foreground backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-widest font-light">
+            <div className="bg-emerald-600 text-white px-3 py-1.5 rounded-none text-xs uppercase tracking-widest shadow-lg">
               {t("for_sale") || "Đang Bán"}
             </div>
           ) : (
-            <div className="bg-primary/90 text-primary-foreground backdrop-blur-md px-3 py-1.5 rounded-none text-xs uppercase tracking-widest font-light">
+            <div className="bg-amber-500 text-black px-3 py-1.5 rounded-none text-xs uppercase tracking-widest shadow-lg">
               {t("for_rent") || "Cho Thuê"}
             </div>
           )}

@@ -16,8 +16,8 @@ export const MarketSnapshot = () => {
           </p>
           
           <div className="flex items-center gap-6 pt-4">
-            <div className="p-4 rounded-none bg-primary/10 border border-primary/20">
-              <span className="block text-sm text-primary font-medium mb-1">{t("market_avg_price")}</span>
+            <div className="p-4 rounded-none bg-secondary/10 border border-secondary/20">
+              <span className="block text-sm text-secondary font-medium mb-1">{t("market_avg_price")}</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold">75.5</span>
                 <span className="text-foreground-muted font-medium">Tr/m²</span>
@@ -53,10 +53,10 @@ export const MarketSnapshot = () => {
 
         <div className="flex-1 w-full aspect-video md:aspect-[4/3] rounded-none bg-background-subtle border border-border flex items-center justify-center overflow-hidden relative">
           {/* Abstract Chart Representation */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent" />
-          <svg className="w-full h-full text-primary/20" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <div className="absolute inset-0 bg-gradient-to-tr from-secondary/5 to-transparent" />
+          <svg className="w-full h-full text-secondary/20" viewBox="0 0 100 100" preserveAspectRatio="none">
             <path d="M0,100 L0,80 Q25,90 50,60 T100,20 L100,100 Z" fill="currentColor" />
-            <path d="M0,80 Q25,90 50,60 T100,20" fill="none" stroke="var(--theme-primary)" strokeWidth="2" strokeLinecap="round" />
+            <path d="M0,80 Q25,90 50,60 T100,20" fill="none" stroke="var(--theme-secondary, var(--secondary))" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </div>
       </div>
