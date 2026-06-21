@@ -6,6 +6,7 @@ import { pageBlocks } from "./blocks/pageBlocks";
 
 export const Templates: CollectionConfig = {
   slug: "templates",
+  custom: { cacheable: false },
   admin: {
     useAsTitle: "title",
   },

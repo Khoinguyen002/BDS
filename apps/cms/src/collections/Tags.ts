@@ -1,5 +1,5 @@
 import { CollectionConfig } from "payload";
-import { triggerRevalidateTag } from "../utils/revalidate";
+import { triggerRevalidateWithCascade } from "../utils/revalidate";
 import { COLLECTION_TAGS } from "@bds/shared/cache-tags";
 import { formatSlug } from "../utils/formatSlug";
 
@@ -45,12 +45,12 @@ export const Tags: CollectionConfig = {
   hooks: {
     afterChange: [
       ({ req }) => {
-        triggerRevalidateTag({ tag: COLLECTION_TAGS.tags, req });
+        triggerRevalidateWithCascade({ tag: COLLECTION_TAGS.tags, req });
       },
     ],
     afterDelete: [
       ({ req }) => {
-        triggerRevalidateTag({ tag: COLLECTION_TAGS.tags, req });
+        triggerRevalidateWithCascade({ tag: COLLECTION_TAGS.tags, req });
       },
     ],
   },

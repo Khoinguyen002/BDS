@@ -21,6 +21,7 @@ export const leadsAccess: CollectionConfig["access"] = {
 
 export const Leads: CollectionConfig = {
   slug: "leads",
+  custom: { cacheable: false },
   admin: {
     useAsTitle: "name",
   },

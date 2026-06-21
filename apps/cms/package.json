@@ -13,7 +13,8 @@
     "seed:templates": "tsx --env-file=.env scripts/seed-templates.ts",
     "seed:apartments": "tsx --env-file=.env scripts/seed-apartments.ts",
     "seed:locations": "tsx --env-file=.env scripts/seed-locations.ts",
-    "migrate:supabase": "tsx --env-file=.env scripts/migrate-from-supabase.ts"
+    "migrate:supabase": "tsx --env-file=.env scripts/migrate-from-supabase.ts",
+    "gen:cache-tags": "tsx scripts/gen-cache-tags.ts"
   },
   "dependencies": {
     "@bds/shared": "workspace:*",

@@ -2,17 +2,17 @@
  * payload-fetcher.ts
  *
  * Centralized service for data fetching from Payload CMS API.
- * Cache: infinite (revalidate: false) + tag tường minh; làm tươi hoàn toàn dựa
- * vào revalidateTag từ CMS hook (xem @bds/shared/cache-tags).
+ *
+ * Quy tắc:
+ * 1. autoCacheFetch CHỈ gọi Payload built-in REST API (/api/{collection-slug})
+ * 2. Collection tag tự derive từ endpoint — KHÔNG truyền tag thủ công
+ * 3. Custom endpoint → dùng fetch() thường, KHÔNG cache
+ * 4. Cache: infinite (revalidate: false) + tag tường minh; làm tươi hoàn toàn
+ *    dựa vào revalidateTag từ CMS hook (xem @bds/shared/cache-tags)
  */
 
 import type { User, LandingPage, Apartment, Location, Tag } from "@bds/shared/payload-types";
-import {
-  COLLECTION_TAGS,
-  apartmentTag,
-  userTag,
-  landingPageByOwnerTag,
-} from "@bds/shared/cache-tags";
+import { COLLECTION_TAGS } from "@bds/shared/cache-tags";
 import { getLocale } from 'next-intl/server';
 import { env } from "../env";
 
@@ -20,15 +20,37 @@ const SERVER_URL = env.NEXT_PUBLIC_SERVER_URL;
 const REVALIDATE_TIME = false; // Infinite cache — chỉ dựa vào tag purge từ CMS.
 
 /**
- * Mọi fetch muốn được cache PHẢI khai báo `tags` tường minh. Không còn suy tag
- * bằng regex từ endpoint nữa: caller tự chọn đúng tag (xem @bds/shared/cache-tags)
- * sao cho khớp với tag mà CMS hook purge.
+ * autoCacheFetch — fetch Payload built-in REST API với auto-tagging.
+ *
+ * Auto-derive collection tag từ endpoint path:
+ *   "/apartments?where..." → "apartments" → COLLECTION_TAGS.apartments
+ *   "/users?where..."      → "users"      → COLLECTION_TAGS.users
+ *
+ * Throws nếu collection không tồn tại trong COLLECTION_TAGS (→ dùng fetch()
+ * thường cho custom endpoint).
  */
-async function fetchAPI(
+async function autoCacheFetch(
   endpoint: string,
-  tags: string[],
   options?: RequestInit,
 ) {
+  // Auto-derive collection slug từ endpoint
+  const collectionSlug = endpoint
+    .replace(/^\//, "")        // bỏ leading /
+    .split("?")[0]             // bỏ query string
+    .split("/")[0];            // lấy segment đầu tiên
+
+  // Validate: slug phải tồn tại trong COLLECTION_TAGS values
+  // (keys là camelCase, values là slug gốc — match endpoint)
+  const collectionTag = Object.values(COLLECTION_TAGS).find(
+    (tag) => tag === collectionSlug,
+  );
+  if (!collectionTag) {
+    throw new Error(
+      `autoCacheFetch: "${collectionSlug}" không có trong COLLECTION_TAGS. ` +
+      `Dùng fetch() thường cho custom endpoint.`,
+    );
+  }
+
   const url = new URL(`${SERVER_URL}/api${endpoint}`);
 
   if (!url.searchParams.has('locale')) {
@@ -45,7 +67,7 @@ async function fetchAPI(
     ...options,
     next: {
       revalidate: REVALIDATE_TIME,
-      tags,
+      tags: [collectionTag],
       ...options?.next,
     },
   });
@@ -55,11 +77,15 @@ async function fetchAPI(
   return res.json();
 }
 
+// ─────────────────────────────────────────────────────────────
+// User fetchers
+// ─────────────────────────────────────────────────────────────
+
 export async function getUserBySlug(agentSlug: string): Promise<User | null> {
   try {
-    const data = await fetchAPI(`/users?where[agentSlug][equals]=${agentSlug}`, [
-      userTag(agentSlug),
-    ]);
+    const data = await autoCacheFetch(
+      `/users?where[agentSlug][equals]=${agentSlug}`,
+    );
     if (data.docs && data.docs.length > 0) {
       return data.docs[0];
     }
@@ -70,14 +96,28 @@ export async function getUserBySlug(agentSlug: string): Promise<User | null> {
   }
 }
 
+export async function getFeaturedAgents(limit: number = 4): Promise<User[]> {
+  try {
+    const data = await autoCacheFetch(
+      `/users?where[verified][equals]=true&sort=-successfulTransactions&limit=${limit}`,
+    );
+    return data.docs || [];
+  } catch (error) {
+    console.error("Error in getFeaturedAgents:", error);
+    return [];
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Landing Page fetchers
+// ─────────────────────────────────────────────────────────────
+
 export async function getLandingPageByOwner(
   userId: string | number,
 ): Promise<LandingPage | null> {
   try {
-    const data = await fetchAPI(
+    const data = await autoCacheFetch(
       `/landing-pages?where[owner][equals]=${userId}&depth=1`,
-      // Per-doc theo owner + collection tag để khớp purge từ CMS LandingPages.
-      [landingPageByOwnerTag(userId), COLLECTION_TAGS.landingPages],
     );
     if (data.docs && data.docs.length > 0) {
       return data.docs[0];
@@ -89,13 +129,16 @@ export async function getLandingPageByOwner(
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+// Translations
+// ─────────────────────────────────────────────────────────────
+
 type DictionaryNode = string | { [key: string]: DictionaryNode };
 
 export const getDictionary = async (locale: string): Promise<Record<string, DictionaryNode>> => {
   try {
-    const data = await fetchAPI(
+    const data = await autoCacheFetch(
       `/translations?locale=${locale}&limit=1000`,
-      [COLLECTION_TAGS.translations],
       { cache: "force-cache" },
     );
 
@@ -124,25 +167,24 @@ export const getDictionary = async (locale: string): Promise<Record<string, Dict
   }
 };
 
+// ─────────────────────────────────────────────────────────────
+// Apartment fetchers
+// ─────────────────────────────────────────────────────────────
+
 export const getApartmentBySlugOrId = async (
   slugOrId: string,
 ): Promise<Apartment | null> => {
   try {
-    // Detail (depth=2) nhúng owner → kèm COLLECTION_TAGS.users để đổi profile
-    // agent cũng làm tươi trang. CMS purge cả apartment:<slug> lẫn apartment:<id>.
-    const docTags = [apartmentTag(slugOrId), COLLECTION_TAGS.users];
-
     // Attempt fetch by slug first
-    const data = await fetchAPI(
+    const data = await autoCacheFetch(
       `/apartments?where[slug][equals]=${slugOrId}&depth=2`,
-      docTags,
     );
     if (data.docs && data.docs.length > 0) {
       return data.docs[0];
     }
 
     // Fallback: Attempt fetch by ID if slug not found (and it's a valid ID)
-    const fallbackData = await fetchAPI(`/apartments/${slugOrId}?depth=2`, docTags);
+    const fallbackData = await autoCacheFetch(`/apartments/${slugOrId}?depth=2`);
     if (fallbackData && !fallbackData.errors) {
       return fallbackData;
     }
@@ -187,9 +229,8 @@ export async function getApartmentsByOwner(
   }
 
   try {
-    const data = await fetchAPI(
+    const data = await autoCacheFetch(
       `/apartments?${where}&depth=1&limit=${limit}&locale=${locale}`,
-      [COLLECTION_TAGS.apartments],
     );
     return data.docs || [];
   } catch (error) {
@@ -274,9 +315,8 @@ export async function getApartments(
       typeof filtersOrExtraWhere === "string"
         ? filtersOrExtraWhere
         : buildApartmentWhere(filtersOrExtraWhere);
-    const data = await fetchAPI(
+    const data = await autoCacheFetch(
       `/apartments?depth=1&limit=${limit}&locale=${locale}${extraWhere}`,
-      [COLLECTION_TAGS.apartments],
     );
     return data.docs || [];
   } catch (error) {
@@ -291,10 +331,8 @@ export async function getApartmentBySlug(
   locale: string,
 ): Promise<Apartment | null> {
   try {
-    const data = await fetchAPI(
+    const data = await autoCacheFetch(
       `/apartments?where[slug][equals]=${slug}&depth=2&locale=${locale}`,
-      // Per-doc + users (depth=2 nhúng owner).
-      [apartmentTag(slug), COLLECTION_TAGS.users],
     );
     if (data.docs && data.docs.length > 0) {
       return data.docs[0];
@@ -306,19 +344,6 @@ export async function getApartmentBySlug(
   }
 }
 
-export async function getFeaturedAgents(limit: number = 4): Promise<User[]> {
-  try {
-    const data = await fetchAPI(
-      `/users?where[verified][equals]=true&sort=-successfulTransactions&limit=${limit}`,
-      [COLLECTION_TAGS.users],
-    );
-    return data.docs || [];
-  } catch (error) {
-    console.error("Error in getFeaturedAgents:", error);
-    return [];
-  }
-}
-
 export async function getCuratedApartments(
   listingType: "sale" | "rent",
   locale: string,
@@ -326,9 +351,8 @@ export async function getCuratedApartments(
   limit: number = 6
 ): Promise<Apartment[]> {
   try {
-    const data = await fetchAPI(
+    const data = await autoCacheFetch(
       `/apartments?where[listingType][equals]=${listingType}${extraWhere}&depth=1&limit=${limit}&locale=${locale}`,
-      [COLLECTION_TAGS.apartments],
     );
     return data.docs || [];
   } catch (error) {
@@ -337,11 +361,14 @@ export async function getCuratedApartments(
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+// Locations & Tags
+// ─────────────────────────────────────────────────────────────
+
 export async function getLocations(locale: string): Promise<Location[]> {
   try {
-    const data = await fetchAPI(
+    const data = await autoCacheFetch(
       `/locations?limit=500&depth=1&locale=${locale}`,
-      [COLLECTION_TAGS.locations],
     );
     return data.docs || [];
   } catch (error) {
@@ -352,9 +379,7 @@ export async function getLocations(locale: string): Promise<Location[]> {
 
 export async function getTags(locale: string): Promise<Tag[]> {
   try {
-    const data = await fetchAPI(`/tags?limit=200&locale=${locale}`, [
-      COLLECTION_TAGS.tags,
-    ]);
+    const data = await autoCacheFetch(`/tags?limit=200&locale=${locale}`);
     return data.docs || [];
   } catch (error) {
     console.error("Error in getTags:", error);

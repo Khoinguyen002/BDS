@@ -1,7 +1,7 @@
 import { CollectionConfig, APIError } from "payload";
 import { getEffectiveTier, TIERS } from "@bds/shared";
-import { triggerRevalidateTag } from "../utils/revalidate";
-import { COLLECTION_TAGS, apartmentTag } from "@bds/shared/cache-tags";
+import { triggerRevalidateWithCascade } from "../utils/revalidate";
+import { COLLECTION_TAGS } from "@bds/shared/cache-tags";
 import { formatSlug } from "../utils/formatSlug";
 
 export const Apartments: CollectionConfig = {
@@ -299,30 +299,13 @@ export const Apartments: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ doc, previousDoc, req }) => {
-        // Collection tag: mọi list/filter. Per-doc tag: trang detail (fetch theo
-        // slug hoặc id → purge cả hai biến thể). Đổi slug thì purge cả slug cũ.
-        const tags = [
-          COLLECTION_TAGS.apartments,
-          apartmentTag(doc.slug),
-          apartmentTag(doc.id),
-        ];
-        if (previousDoc?.slug && previousDoc.slug !== doc.slug) {
-          tags.push(apartmentTag(previousDoc.slug));
-        }
-        await triggerRevalidateTag({ tag: tags, req });
+      async ({ req }) => {
+        triggerRevalidateWithCascade({ tag: COLLECTION_TAGS.apartments, req });
       },
     ],
     afterDelete: [
-      async ({ doc, req }) => {
-        await triggerRevalidateTag({
-          tag: [
-            COLLECTION_TAGS.apartments,
-            apartmentTag(doc.slug),
-            apartmentTag(doc.id),
-          ],
-          req,
-        });
+      async ({ req }) => {
+        triggerRevalidateWithCascade({ tag: COLLECTION_TAGS.apartments, req });
       },
     ],
   },

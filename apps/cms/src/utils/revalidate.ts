@@ -1,5 +1,6 @@
-import type { PayloadRequest } from 'payload';
-import { env } from '../env';
+import type { PayloadRequest } from "payload";
+import { REVERSE_DEPS } from "@bds/shared/cache-tags";
+import { env } from "../env";
 
 // ── Debounce / coalescing ────────────────────────────────────────────
 // Gom mọi tags phát sinh trong cửa sổ FLUSH_MS rồi gửi 1 request duy nhất.
@@ -16,10 +17,10 @@ let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
 const postRevalidate = async (body: Record<string, unknown>) => {
   return fetch(`${env.NEXT_PUBLIC_APP_URL}/api/revalidate`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${env.REVALIDATE_SECRET}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${env.REVALIDATE_SECRET}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
   });
@@ -33,7 +34,7 @@ const flush = async () => {
   try {
     await postRevalidate({ tags });
   } catch (err) {
-    console.error('Revalidation flush error', err);
+    console.error("Revalidation flush error", err);
   }
 };
 
@@ -44,6 +45,10 @@ const scheduleFlush = () => {
   }, FLUSH_MS);
 };
 
+/**
+ * Purge cache tag(s) — KHÔNG cascade.
+ * Dùng cho leaf collections (không bị reference bởi collection khác).
+ */
 export const triggerRevalidateTag = ({
   tag,
   req,
@@ -55,4 +60,31 @@ export const triggerRevalidateTag = ({
   const tags = Array.isArray(tag) ? tag : [tag];
   for (const t of tags) pendingTags.add(t);
   scheduleFlush();
+};
+
+/**
+ * Purge cache tag(s) + tự động cascade purge các collection phụ thuộc.
+ * Dùng cho collections bị reference bởi collection khác (xem REVERSE_DEPS).
+ *
+ * VD: triggerRevalidateWithCascade({ tag: "amenities", req })
+ *   → purge "amenities" + "apartments" (vì apartments reference amenities)
+ */
+export const triggerRevalidateWithCascade = ({
+  tag,
+  req,
+}: {
+  tag: string | string[];
+  req?: PayloadRequest;
+}) => {
+  const inputTags = Array.isArray(tag) ? tag : [tag];
+  const allTags = new Set(inputTags);
+
+  for (const t of inputTags) {
+    const deps = REVERSE_DEPS[t];
+    if (deps) {
+      for (const dep of deps) allTags.add(dep);
+    }
+  }
+
+  triggerRevalidateTag({ tag: [...allTags], req });
 };

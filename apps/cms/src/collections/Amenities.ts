@@ -1,5 +1,5 @@
 import { CollectionConfig } from 'payload';
-import { triggerRevalidateTag } from '../utils/revalidate';
+import { triggerRevalidateWithCascade } from '../utils/revalidate';
 import { COLLECTION_TAGS } from '@bds/shared/cache-tags';
 
 export const Amenities: CollectionConfig = {
@@ -49,12 +49,12 @@ export const Amenities: CollectionConfig = {
   hooks: {
     afterChange: [
       ({ req }) => {
-        triggerRevalidateTag({ tag: COLLECTION_TAGS.amenities, req });
+        triggerRevalidateWithCascade({ tag: COLLECTION_TAGS.amenities, req });
       }
     ],
     afterDelete: [
       ({ req }) => {
-        triggerRevalidateTag({ tag: COLLECTION_TAGS.amenities, req });
+        triggerRevalidateWithCascade({ tag: COLLECTION_TAGS.amenities, req });
       }
     ]
   }
