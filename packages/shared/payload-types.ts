@@ -103,8 +103,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('vi' | 'en') | ('vi' | 'en')[];
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'app-settings': AppSetting;
+  };
+  globalsSelect: {
+    'app-settings': AppSettingsSelect<false> | AppSettingsSelect<true>;
+  };
   locale: 'vi' | 'en';
   widgets: {
     collections: CollectionsWidget;
@@ -904,6 +908,44 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "app-settings".
+ */
+export interface AppSetting {
+  id: number;
+  brandName: string;
+  themePrimary?: string | null;
+  themePrimaryForeground?: string | null;
+  themeSecondary?: string | null;
+  themeSecondaryForeground?: string | null;
+  /**
+   * Only SVG files are accepted
+   */
+  fullLogo?: (number | null) | Media;
+  /**
+   * Only SVG files are accepted
+   */
+  shortLogo?: (number | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "app-settings_select".
+ */
+export interface AppSettingsSelect<T extends boolean = true> {
+  brandName?: T;
+  themePrimary?: T;
+  themePrimaryForeground?: T;
+  themeSecondary?: T;
+  themeSecondaryForeground?: T;
+  fullLogo?: T;
+  shortLogo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

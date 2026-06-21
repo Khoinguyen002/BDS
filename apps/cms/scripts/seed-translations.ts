@@ -262,6 +262,18 @@ export async function seedTranslations() {
       vi: "Quay lại",
       en: "Back",
     },
+    { key: "footer.bds_platform", namespace: "footer", vi: "RealX", en: "RealX" },
+    { key: "footer.contact_email", namespace: "footer", vi: "Email: contact@bds.vn", en: "Email: contact@bds.vn" },
+    { key: "common.real_estate", namespace: "common", vi: "Bất Động Sản", en: "Real Estate" },
+    { key: "common.premium_real_estate", namespace: "common", vi: "Bất Động Sản Cao Cấp", en: "Premium Real Estate" },
+    { key: "common.premium_living_experience", namespace: "common", vi: "Trải nghiệm không gian sống thượng lưu", en: "Experience premium living spaces" },
+    { key: "common.search.title", namespace: "common", vi: "Tìm kiếm bất động sản", en: "Search Real Estate" },
+    { key: "common.search.explore_desc", namespace: "common", vi: "Khám phá danh sách các bất động sản đa dạng trên nền tảng.", en: "Explore diverse real estate listings on the platform." },
+    { key: "search.title", namespace: "common", vi: "Tìm kiếm bất động sản", en: "Search Real Estate" },
+    { key: "search.explore_desc", namespace: "common", vi: "Khám phá danh sách các bất động sản đa dạng trên nền tảng.", en: "Explore a diverse list of properties on the platform." },
+    { key: "apartments.all_properties_by", namespace: "apartments", vi: "Tất cả bất động sản - {brandName}", en: "All real estate - {brandName}" },
+    { key: "agent.real_estate_by", namespace: "agent", vi: "Bất động sản bởi {brandName}", en: "Real estate by {brandName}" },
+    { key: "apartments.property_details_desc", namespace: "apartments", vi: "Bất động sản chi tiết", en: "Detailed real estate" },
 
     {
       key: "apartments.agent_property",
@@ -630,8 +642,24 @@ export async function seedTranslations() {
       });
 
       if (existing.docs.length > 0) {
-        // Key already exists – skip to avoid overriding manually-set values
-        console.log(`[skip] ${t.key}`);
+        if (t.key === "footer.bds_platform") {
+          await payload.update({
+            collection: "translations",
+            id: existing.docs[0].id,
+            data: { value: t.vi },
+            locale: "vi",
+          });
+          await payload.update({
+            collection: "translations",
+            id: existing.docs[0].id,
+            data: { value: t.en },
+            locale: "en",
+          });
+          console.log(`[updated] ${t.key}`);
+        } else {
+          // Key already exists – skip to avoid overriding manually-set values
+          console.log(`[skip] ${t.key}`);
+        }
       } else {
         // Create vi first
         const newDoc = await payload.create({

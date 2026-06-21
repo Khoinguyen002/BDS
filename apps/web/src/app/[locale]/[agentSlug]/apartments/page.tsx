@@ -16,8 +16,9 @@ export async function generateMetadata({ params }: Props) {
   const owner = await getUserBySlug(agentSlug);
   if (!owner) return { title: 'Not Found' };
   
+  const t = await getTranslations("apartments");
   return {
-    title: `Tất cả bất động sản - ${owner.brandName || agentSlug}`,
+    title: t("all_properties_by", { brandName: owner.brandName || agentSlug }),
   }
 }
 

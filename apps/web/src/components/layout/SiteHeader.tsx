@@ -12,12 +12,21 @@ type SiteHeaderProps = {
   brandName: string;
   /** Đích của logo/back — landing của agent (/vi/slug) hoặc home platform (/vi). */
   homeHref: string;
+  /** Hiển thị logo platform thay vì text */
+  showPlatformLogo?: boolean;
+  /** Node logo truyền từ server xuống (nếu có CMS upload) */
+  logoNode?: React.ReactNode;
 };
 
 // Header chung sticky + auto-hide. Trên trang landing (pathname === homeHref) header
 // fixed & trong suốt để đè lên hero; các trang khác sticky nền đặc (nằm trong flow nên
 // nội dung tự xuống dưới, không bị che như mấy nút floating cũ).
-export function SiteHeader({ brandName, homeHref }: SiteHeaderProps) {
+export function SiteHeader({
+  brandName,
+  homeHref,
+  showPlatformLogo,
+  logoNode,
+}: SiteHeaderProps) {
   const pathname = usePathname();
   const t = useTranslations("common");
 
@@ -30,7 +39,7 @@ export function SiteHeader({ brandName, homeHref }: SiteHeaderProps) {
         // + backdrop-blur để hút blur từ nội dung/hero phía sau, phủ thêm gradient nhẹ
         // pha primary → secondary của agent.
         "fixed top-0 inset-x-0 z-50",
-        "bg-background/60 backdrop-blur-xl bg-linear-to-r from-primary/30 via-primary/10 to-secondary/30 text-foreground border-b border-border",
+        "bg-background/60 backdrop-blur-xl bg-linear-to-r from-secondary/30 via-primary/10 to-primary/30 text-foreground border-b border-border",
       ].join(" ")}
     >
       <div className="container flex items-center justify-between gap-4 h-(--header-h)">
@@ -50,9 +59,16 @@ export function SiteHeader({ brandName, homeHref }: SiteHeaderProps) {
           )}
           <Link
             href={homeHref}
-            className="font-semibold tracking-tight truncate text-base md:text-lg hover:opacity-80 transition-opacity"
+            className="flex items-center hover:opacity-80 transition-opacity"
+            aria-label={brandName}
           >
-            {brandName}
+            {showPlatformLogo && logoNode ? (
+              logoNode
+            ) : (
+              <span className="font-semibold tracking-tight truncate text-base md:text-lg">
+                {brandName}
+              </span>
+            )}
           </Link>
         </div>
 

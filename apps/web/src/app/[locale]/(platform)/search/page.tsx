@@ -4,13 +4,12 @@ import { getApartments, getLocations, getTags } from "@/lib/payload-fetcher";
 import { resolveLocationSlugsToWardIds } from "@/lib/location-utils";
 import { SearchFunnel } from "@/components/home/SearchFunnel";
 import { ListApartmentsClient } from "@/components/blocks/ListApartmentsClient";
-import { SiteHeader } from "@/components/layout/SiteHeader";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
-  const t = await getTranslations("home");
+  const t = await getTranslations("common");
   return {
-    title: t("search_btn") || `Tìm kiếm bất động sản`,
+    title: t("search.title") || `Tìm kiếm bất động sản`,
   };
 }
 
@@ -33,6 +32,7 @@ function toStr(val: string | string[] | undefined): string {
 export default async function SearchPage({ params, searchParams }: Props) {
   const { locale } = await params;
   const sp = await searchParams;
+  const t = await getTranslations("common");
 
   // ─── Parse URL params ──────────────────────────────────────
   const q = toStr(sp.q);
@@ -75,15 +75,14 @@ export default async function SearchPage({ params, searchParams }: Props) {
   return (
     <>
       <ThemeInjector />
-      <SiteHeader brandName="Bất Động Sản" homeHref={`/${locale}`} />
       <main className="min-h-screen bg-background pt-24 pb-16">
         <div className="container">
           <div className="mb-8">
             <h1 className="mb-4">
-              Tìm kiếm bất động sản
+              {t("search.title")}
             </h1>
             <p className="text-lg text-foreground-muted max-w-2xl mt-4">
-              Khám phá danh sách các bất động sản đa dạng trên nền tảng.
+              {t("search.explore_desc")}
             </p>
           </div>
 

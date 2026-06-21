@@ -12,7 +12,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
           {/* Brand & About */}
           <div className="col-span-1 md:col-span-2">
-            <h3 className="font-bold mb-4">BDS Platform</h3>
+            <h3 className="font-bold mb-4">{tFooter("bds_platform")}</h3>
             <p className="text-foreground-secondary text-sm mb-6 max-w-sm">
               {tFooter("brand_desc")}
             </p>
@@ -37,7 +37,7 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider text-foreground-muted">{tFooter("contact")}</h4>
             <ul className="space-y-3 text-sm text-foreground-secondary">
-              <li>Email: contact@bds.vn</li>
+              <li>{tFooter("contact_email")}</li>
               <li>Hotline: 1900 9999</li>
               <li>{tFooter("address_label")}</li>
             </ul>
@@ -45,7 +45,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-border text-center text-xs text-foreground-muted">
-          <p>{tFooter("copyright")} © {new Date().getFullYear()} BDS Platform.</p>
+          <p>{tFooter("copyright")} © {new Date().getFullYear()} {tFooter("bds_platform")}.</p>
         </div>
       </div>
     </footer>

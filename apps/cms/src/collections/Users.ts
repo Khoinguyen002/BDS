@@ -38,7 +38,10 @@ export const Users: CollectionConfig = {
       relationTo: 'media',
       label: { vi: "Logo thương hiệu", en: "Brand Logo" },
       admin: {
-        description: { vi: "Logo sẽ hiển thị thay cho chữ cái viết tắt", en: "Logo to display instead of initials" }
+        description: { vi: "Logo sẽ hiển thị thay cho chữ cái viết tắt", en: "Logo to display instead of initials" },
+        components: {
+          Cell: '@/components/ThumbnailCell#ThumbnailCell',
+        }
       }
     },
     {

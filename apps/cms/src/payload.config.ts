@@ -17,7 +17,9 @@ import { Translations } from "./collections/Translations";
 import { Amenities } from "./collections/Amenities";
 import { Tags } from "./collections/Tags";
 import { Locations } from "./collections/Locations";
+import { AppSettings } from "./globals/AppSettings";
 import { registerHandler } from "./endpoints/register";
+import { faviconHandler } from "./endpoints/favicon";
 import { env } from "./env";
 
 export default buildConfig({
@@ -105,6 +107,23 @@ export default buildConfig({
     defaultLocale: "vi",
     fallback: true,
   },
+  admin: {
+    components: {
+      graphics: {
+        Logo: "@/components/AdminLogo#AdminLogo",
+        Icon: "@/components/AdminLogo#AdminIcon",
+      },
+    },
+    meta: {
+      icons: [
+        {
+          rel: "icon",
+          type: "image/svg+xml",
+          url: "/api/favicon",
+        },
+      ],
+    },
+  },
   serverURL: env.PAYLOAD_PUBLIC_SERVER_URL,
   db: postgresAdapter({
     pool: {
@@ -124,6 +143,7 @@ export default buildConfig({
   },
   secret: env.PAYLOAD_SECRET,
   collections: [Users, LandingPages, Media, Apartments, Leads, Templates, Translations, Amenities, Tags, Locations],
+  globals: [AppSettings],
   plugins: [
     // Ưu tiên Cloudinary nếu có cấu hình; fallback S3; nếu không có cả hai → local storage.
     ...(env.CLOUDINARY_CLOUD_NAME
@@ -161,6 +181,11 @@ export default buildConfig({
       path: "/users/register",
       method: "post",
       handler: registerHandler,
+    },
+    {
+      path: "/favicon",
+      method: "get",
+      handler: faviconHandler,
     },
   ],
 });

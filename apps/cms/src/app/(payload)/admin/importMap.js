@@ -1,3 +1,4 @@
+import { ThumbnailCell as ThumbnailCell_932a73a9b075c09fca8bb3ed186c1943 } from '@/components/ThumbnailCell'
 import { ColorPickerField as ColorPickerField_37fac220471b04d5e6dda304975d2c1e } from '@/components/ColorPickerField'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -28,10 +29,13 @@ import { LocationPickerField as LocationPickerField_c2172835f37410ccd59133bb5abc
 import { SectionRowLabel as SectionRowLabel_ae1c4365d5ae4136760591ff946aa806 } from '@/components/SectionRowLabel'
 import { TranslationActions as TranslationActions_c215208c47c179add42056341eba8ccb } from '@/components/TranslationActions'
 import { IconPickerField as IconPickerField_96fa91b3a1147f26fe9c9a414cfa6358 } from '@/components/IconPickerField'
+import { AdminIcon as AdminIcon_aa0a2d19d38a4839dbd373417e210b89 } from '@/components/AdminLogo'
+import { AdminLogo as AdminLogo_aa0a2d19d38a4839dbd373417e210b89 } from '@/components/AdminLogo'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "@/components/ThumbnailCell#ThumbnailCell": ThumbnailCell_932a73a9b075c09fca8bb3ed186c1943,
   "@/components/ColorPickerField#ColorPickerField": ColorPickerField_37fac220471b04d5e6dda304975d2c1e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -62,5 +66,7 @@ export const importMap = {
   "@/components/SectionRowLabel#SectionRowLabel": SectionRowLabel_ae1c4365d5ae4136760591ff946aa806,
   "@/components/TranslationActions#TranslationActions": TranslationActions_c215208c47c179add42056341eba8ccb,
   "@/components/IconPickerField#IconPickerField": IconPickerField_96fa91b3a1147f26fe9c9a414cfa6358,
+  "@/components/AdminLogo#AdminIcon": AdminIcon_aa0a2d19d38a4839dbd373417e210b89,
+  "@/components/AdminLogo#AdminLogo": AdminLogo_aa0a2d19d38a4839dbd373417e210b89,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

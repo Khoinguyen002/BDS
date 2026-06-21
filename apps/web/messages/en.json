@@ -1,9 +1,18 @@
 {
-  "lead": {
-    "form_title_rent": "Contact for Rent",
-    "form_title_sale": "Get Quote & Documents"
+  "common": {
+    "search": {
+      "explore_desc": "Explore diverse real estate listings on the platform.",
+      "title": "Search Real Estate"
+    },
+    "premium_living_experience": "Experience premium living spaces",
+    "premium_real_estate": "Premium Real Estate",
+    "real_estate": "Real Estate",
+    "receive_info": "Request Information",
+    "back": "Back"
   },
   "apartments": {
+    "property_details_desc": "Detailed real estate",
+    "all_properties_by": "All real estate - {brandName}",
     "is_fully_permitted": "Fully Permitted",
     "house_direction": "House Direction",
     "is_business_facade": "Business Facade",
@@ -185,6 +194,31 @@
     "estimated_total": "Estimated total/month",
     "for_sale": "For Sale"
   },
+  "agent": {
+    "real_estate_by": "Real estate by {brandName}",
+    "transactions": "Transactions",
+    "experience_years": "Years experience",
+    "verified": "Verified",
+    "updating_info": "Information is being updated...",
+    "consultant": "Consultant"
+  },
+  "search": {
+    "explore_desc": "Explore a diverse list of properties on the platform.",
+    "title": "Search Real Estate"
+  },
+  "footer": {
+    "contact_email": "Email: contact@bds.vn",
+    "bds_platform": "RealX",
+    "address_label": "Address: District 1, HCMC",
+    "contact": "Contact",
+    "category": "Categories",
+    "brand_desc": "Premium real estate transaction platform, bringing the most professional and transparent experience to customers.",
+    "copyright": "Copyright by"
+  },
+  "lead": {
+    "form_title_rent": "Contact for Rent",
+    "form_title_sale": "Get Quote & Documents"
+  },
   "home": {
     "cta_consign": "Consign Now",
     "cta_post_free": "Post Free Listing",
@@ -237,24 +271,6 @@
     "search_placeholder_apartment_sale": "3BR Apartment in D2 under 5B",
     "tab_rent": "RENT",
     "tab_sale": "SALE"
-  },
-  "agent": {
-    "transactions": "Transactions",
-    "experience_years": "Years experience",
-    "verified": "Verified",
-    "updating_info": "Information is being updated...",
-    "consultant": "Consultant"
-  },
-  "common": {
-    "receive_info": "Request Information",
-    "back": "Back"
-  },
-  "footer": {
-    "address_label": "Address: District 1, HCMC",
-    "contact": "Contact",
-    "category": "Categories",
-    "brand_desc": "Premium real estate transaction platform, bringing the most professional and transparent experience to customers.",
-    "copyright": "Copyright by"
   },
   "nav": {
     "contact": "Contact",

@@ -24,7 +24,8 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   const title = `${apt.title} | ${apt.price ? `${apt.price.toLocaleString()} VND` : 'Liên hệ'}`;
-  const description = "Thông tin chi tiết căn hộ, pháp lý và tiện ích.";
+  const t = await getTranslations("apartments");
+  const description = t("property_details_desc");
   const imageUrl = apt.gallery && apt.gallery.length > 0 && typeof apt.gallery[0] === 'object' && apt.gallery[0]?.url
     ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}${apt.gallery[0].url}`
     : undefined;
@@ -188,7 +189,7 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
             "@context": "https://schema.org",
             "@type": "RealEstateListing",
             "name": apt.title,
-            "description": "Bất động sản chi tiết",
+            "description": t("apartments.property_details_desc"),
             "offers": {
               "@type": "Offer",
               "price": apt.price,

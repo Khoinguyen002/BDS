@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { getTranslations } from "next-intl/server";
 import { resolveLandingPage } from '@/lib/resolver';
 import { getLocations, getTags } from '@/lib/payload-fetcher';
 import HeroBanner from '@/components/blocks/HeroBanner';
@@ -17,10 +18,11 @@ export async function generateMetadata({ params }: Props) {
   if (!landingPage) return { title: 'Not Found' };
   
   const heroBlock = landingPage.blocks?.find((b: NonNullable<LandingPage['blocks']>[number]) => b.blockType === 'heroBanner');
+  const t = await getTranslations("agent");
   
   return {
     title: heroBlock?.title || `Landing Page`,
-    description: heroBlock?.subtitle || `Bất động sản by ${agentSlug}`,
+    description: heroBlock?.subtitle || t("real_estate_by", { brandName: agentSlug }),
   }
 }
 

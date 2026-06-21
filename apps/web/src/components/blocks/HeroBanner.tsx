@@ -50,7 +50,7 @@ export default function HeroBanner(props: HeroBannerProps) {
           >
             <Image
               src={bgUrl}
-              alt={bgImage?.filename || "Bất động sản cao cấp"}
+              alt={bgImage?.filename || t("common.premium_real_estate")}
               fill
               className="object-cover"
               priority

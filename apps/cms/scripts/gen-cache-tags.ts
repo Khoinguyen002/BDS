@@ -15,7 +15,7 @@
  *   custom: { cacheable: false }  trong collection config
  */
 
-import type { CollectionConfig, Field, Block } from "payload";
+import type { CollectionConfig, GlobalConfig, Field, Block } from "payload";
 import { writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
@@ -32,6 +32,9 @@ import { Media } from "../src/collections/Media.js";
 import { Leads } from "../src/collections/Leads.js";
 import { Templates } from "../src/collections/Templates.js";
 
+// ── Import tất cả global configs ────────────────────────────────────
+import { AppSettings } from "../src/globals/AppSettings.js";
+
 const ALL_COLLECTIONS: CollectionConfig[] = [
   Users,
   Apartments,
@@ -43,6 +46,10 @@ const ALL_COLLECTIONS: CollectionConfig[] = [
   Media,
   Leads,
   Templates,
+];
+
+const ALL_GLOBALS: GlobalConfig[] = [
+  AppSettings,
 ];
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -132,14 +139,17 @@ function computeTransitiveClosure(
 
 // ── Build ───────────────────────────────────────────────────────────
 
-// Exclude collections marked with custom.cacheable === false
+type EntityConfig = CollectionConfig | GlobalConfig;
+const ALL_ENTITIES: EntityConfig[] = [...ALL_COLLECTIONS, ...ALL_GLOBALS];
+
+// Exclude entities marked with custom.cacheable === false
 const excluded = new Set(
-  ALL_COLLECTIONS.filter(
+  ALL_ENTITIES.filter(
     (c) => (c.custom as Record<string, unknown>)?.cacheable === false,
   ).map((c) => c.slug),
 );
 
-const cacheable = ALL_COLLECTIONS.filter((c) => !excluded.has(c.slug));
+const cacheable = ALL_ENTITIES.filter((c) => !excluded.has(c.slug));
 
 // 1. COLLECTION_TAGS
 const collectionTags: Record<string, string> = {};

@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { RouteProgress } from "@/components/RouteProgress";
+import { getTranslations } from "next-intl/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,16 +16,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Bất Động Sản Cao Cấp",
-  description: "Trải nghiệm không gian sống thượng lưu",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common");
+  return {
+    title: t("premium_real_estate") || "Bất Động Sản Cao Cấp",
+    description: t("premium_living_experience") || "Trải nghiệm không gian sống thượng lưu",
+  };
+}
 
 // Root layout — KHÔNG phụ thuộc locale, nên đổi ngôn ngữ (soft-nav) không
 // re-render <html>/<ThemeProvider> → theme không bị flash.
 // lang mặc định "vi", được inline script set lại theo URL trước khi paint,
 // và <HtmlLang> sync khi điều hướng client.
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;

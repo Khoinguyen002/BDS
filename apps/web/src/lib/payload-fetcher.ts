@@ -11,7 +11,7 @@
  *    dựa vào revalidateTag từ CMS hook (xem @bds/shared/cache-tags)
  */
 
-import type { User, LandingPage, Apartment, Location, Tag } from "@bds/shared/payload-types";
+import type { User, LandingPage, Apartment, Location, Tag, AppSetting } from "@bds/shared/payload-types";
 import { COLLECTION_TAGS } from "@bds/shared/cache-tags";
 import { getLocale } from 'next-intl/server';
 import { env } from "../env";
@@ -384,5 +384,29 @@ export async function getTags(locale: string): Promise<Tag[]> {
   } catch (error) {
     console.error("Error in getTags:", error);
     return [];
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// App Settings
+// ─────────────────────────────────────────────────────────────
+
+export async function getAppSettings(): Promise<AppSetting | null> {
+  try {
+    const url = new URL(`${SERVER_URL}/api/globals/app-settings`);
+    const res = await fetch(url.toString(), {
+      next: {
+        revalidate: REVALIDATE_TIME,
+        tags: [COLLECTION_TAGS.appSettings],
+      },
+    });
+    if (!res.ok) {
+      return null;
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Error in getAppSettings:", error);
+    return null;
   }
 }

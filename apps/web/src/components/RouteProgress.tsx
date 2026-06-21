@@ -7,16 +7,20 @@ import { usePathname, useSearchParams } from "next/navigation";
  * Thanh loading toàn cục (kiểu YouTube/GitHub) hiển thị khi điều hướng giữa
  * các page. App Router (Next 16) không có router events, nên ta:
  *  - Bắt click trên thẻ <a> nội bộ → bắt đầu thanh trước khi điều hướng.
- *  - Patch history.pushState/replaceState + popstate → bắt router.push/replace
- *    và nút back/forward.
+ *  - Patch history.pushState + popstate → bắt router.push và nút back/forward.
  *  - Khi pathname/searchParams đổi (tree mới đã commit) → kết thúc thanh.
  *
- * Có delay nhỏ trước khi hiện để tránh nhấp nháy với điều hướng đã prefetch
- * (hoàn tất gần như tức thì).
+ * KHÔNG patch replaceState — Next.js gọi nó nội bộ để cập nhật state (scroll
+ * restoration, shallow updates), không phải navigation thật. Patch nó sẽ khiến
+ * progress bar bị trigger lại sau khi đã done().
+ *
+ * Có safety timeout 4s: nếu navigation không hoàn tất (pathname không đổi),
+ * thanh sẽ tự tắt thay vì chạy mãi.
  */
 const SHOW_DELAY = 120; // ms — dưới mức này coi như điều hướng tức thì, không hiện
 const TRICKLE_MS = 200;
 const DONE_FADE_MS = 300;
+const SAFETY_TIMEOUT = 4000; // ms — auto-complete nếu navigation treo
 
 export function RouteProgress() {
   const pathname = usePathname();
@@ -29,33 +33,18 @@ export function RouteProgress() {
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trickleRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const safetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearTimers = () => {
     if (showTimerRef.current) clearTimeout(showTimerRef.current);
     if (trickleRef.current) clearInterval(trickleRef.current);
     if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+    if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current);
     showTimerRef.current = null;
     trickleRef.current = null;
     fadeTimerRef.current = null;
+    safetyTimerRef.current = null;
   };
-
-  const start = useCallback(() => {
-    if (activeRef.current) return;
-    activeRef.current = true;
-    clearTimers();
-    // Trì hoãn việc hiện thanh: nếu điều hướng xong ngay (prefetched) thì không nhấp nháy.
-    showTimerRef.current = setTimeout(() => {
-      setVisible(true);
-      setProgress(8);
-      trickleRef.current = setInterval(() => {
-        setProgress((p) => {
-          if (p >= 90) return p;
-          // Tiến chậm dần khi gần 90% để tạo cảm giác "đang tải".
-          return p + Math.max(0.5, (90 - p) * 0.06);
-        });
-      }, TRICKLE_MS);
-    }, SHOW_DELAY);
-  }, []);
 
   const done = useCallback(() => {
     if (!activeRef.current) return;
@@ -75,6 +64,30 @@ export function RouteProgress() {
       return true;
     });
   }, []);
+
+  const start = useCallback(() => {
+    if (activeRef.current) return;
+    activeRef.current = true;
+    clearTimers();
+    // Trì hoãn việc hiện thanh: nếu điều hướng xong ngay (prefetched) thì không nhấp nháy.
+    showTimerRef.current = setTimeout(() => {
+      setVisible(true);
+      setProgress(8);
+      trickleRef.current = setInterval(() => {
+        setProgress((p) => {
+          if (p >= 90) return p;
+          // Tiến chậm dần khi gần 90% để tạo cảm giác "đang tải".
+          return p + Math.max(0.5, (90 - p) * 0.06);
+        });
+      }, TRICKLE_MS);
+    }, SHOW_DELAY);
+
+    // Safety: tự động done() nếu navigation không hoàn tất sau SAFETY_TIMEOUT.
+    // Tránh trường hợp bar treo mãi (bfcache, same-page nav, popstate edge cases).
+    safetyTimerRef.current = setTimeout(() => {
+      done();
+    }, SAFETY_TIMEOUT);
+  }, [done]);
 
   // Kết thúc thanh khi tree mới đã commit (URL đổi).
   useEffect(() => {
@@ -124,25 +137,41 @@ export function RouteProgress() {
     return () => document.removeEventListener("click", onClick, true);
   }, [start]);
 
-  // Bắt điều hướng bằng router.push/replace (Next gọi history API) + back/forward.
+  // Bắt điều hướng bằng router.push (Next gọi history.pushState) + back/forward.
+  // pushState patch chỉ trigger start() khi URL thực sự thay đổi — Next.js gọi
+  // pushState nội bộ để sync state (scroll, transition) với cùng URL, nếu không
+  // check thì bar sẽ bị trigger lại sau done().
   useEffect(() => {
     const origPush = window.history.pushState;
-    const origReplace = window.history.replaceState;
 
-    window.history.pushState = function (...args) {
-      start();
-      return origPush.apply(this, args);
+    window.history.pushState = function (
+      state: unknown,
+      title: string,
+      url?: string | URL | null
+    ) {
+      // Chỉ start nếu URL thực sự thay đổi
+      if (url != null) {
+        try {
+          const target = new URL(String(url), window.location.href);
+          if (
+            target.pathname !== window.location.pathname ||
+            target.search !== window.location.search
+          ) {
+            start();
+          }
+        } catch {
+          // URL parse fail → assume navigation
+          start();
+        }
+      }
+      return origPush.apply(this, [state, title, url]);
     };
-    window.history.replaceState = function (...args) {
-      start();
-      return origReplace.apply(this, args);
-    };
+
     const onPop = () => start();
     window.addEventListener("popstate", onPop);
 
     return () => {
       window.history.pushState = origPush;
-      window.history.replaceState = origReplace;
       window.removeEventListener("popstate", onPop);
     };
   }, [start]);
@@ -171,3 +200,4 @@ export function RouteProgress() {
     </div>
   );
 }
+

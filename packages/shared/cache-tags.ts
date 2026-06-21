@@ -13,6 +13,7 @@ export const COLLECTION_TAGS = {
   tags: "tags",
   translations: "translations",
   amenities: "amenities",
+  appSettings: "app-settings",
 } as const;
 
 export type CollectionTag = (typeof COLLECTION_TAGS)[keyof typeof COLLECTION_TAGS];
