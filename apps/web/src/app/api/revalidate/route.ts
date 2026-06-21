@@ -22,11 +22,7 @@ export async function POST(req: NextRequest) {
     if (tags.length === 0)
       return NextResponse.json({ error: "Tag required" }, { status: 400 });
 
-    // Next 16: revalidateTag yêu cầu profile thứ 2. Dạng 1 tham số đã deprecated.
-    // Dùng "max" (stale-while-revalidate): user đầu tiên sau purge VẪN nhận data
-    // cũ ngay (không chờ origin fetch), data mới được refetch ở background và
-    // phục vụ từ request kế tiếp. Trễ 1 nhịp nhưng không ai phải block.
-    for (const t of tags) revalidateTag(t, "max");
+    for (const t of tags) revalidateTag(t, { expire: 0 });
 
     return NextResponse.json({ revalidated: true, tags: tags.length });
   } catch {
