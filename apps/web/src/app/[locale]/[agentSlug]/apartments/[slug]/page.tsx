@@ -182,6 +182,7 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
       {/* Structured Data for SEO */}
       <script
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",

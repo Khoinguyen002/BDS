@@ -41,6 +41,7 @@ export default function RootLayout({
       >
         {/* Chặn FOUC theme + set lang đồng bộ TRƯỚC khi body paint. */}
         <script
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;var d=t==='dark'||((!t||t==='system')&&m);var e=document.documentElement;if(d){e.classList.add('dark');e.style.colorScheme='dark';}else{e.classList.remove('dark');e.style.colorScheme='light';}var l=location.pathname.split('/')[1];if(l==='vi'||l==='en')e.lang=l;}catch(_){}})();`,
           }}
