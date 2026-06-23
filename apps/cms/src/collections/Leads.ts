@@ -71,8 +71,68 @@ export const Leads: CollectionConfig = {
       label: { vi: "Cảnh báo trùng lặp (Spam)", en: "Dedupe Warning" },
       admin: { readOnly: true },
     },
+    {
+      name: "isHidden",
+      type: "checkbox",
+      defaultValue: false,
+      label: { vi: "Bị ẩn (Vượt giới hạn gói)", en: "Hidden (Limit Exceeded)" },
+      admin: {
+        description: { vi: "Đánh dấu True nếu lead này đến sau khi user đã vượt giới hạn tháng", en: "True if lead arrives after user exceeded monthly limit" },
+        readOnly: true,
+      }
+    },
   ],
   hooks: {
+    beforeChange: [
+      async ({ data, req, operation }) => {
+        if (operation === "create" && data.owner) {
+          const ownerId = typeof data.owner === 'object' ? data.owner.id : data.owner;
+          const ownerUser = await req.payload.findByID({ collection: "users", id: String(ownerId), depth: 0, req });
+          
+          if (ownerUser.role !== 'admin' && ownerUser.activeSubscription) {
+            const subId = typeof ownerUser.activeSubscription === 'object' ? ownerUser.activeSubscription.id : ownerUser.activeSubscription;
+            const sub = await req.payload.findByID({ collection: 'subscriptions', id: subId, depth: 0, req });
+            
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            let lastReset = sub.usage?.lastLeadResetDate ? new Date(sub.usage.lastLeadResetDate) : null;
+            let currentLeads = sub.usage?.currentLeadsThisMonth || 0;
+            
+            // Lazy Reset: Nếu chưa có lastReset hoặc đã khác tháng/năm
+            if (!lastReset || lastReset.getMonth() !== currentMonth || lastReset.getFullYear() !== currentYear) {
+               currentLeads = 0;
+               lastReset = now;
+            }
+            
+            const maxLeads = sub.customLimits?.limits?.maxLeadsPerMonth;
+            
+            // Check nếu có giới hạn
+            if (maxLeads !== undefined && maxLeads !== null && maxLeads !== -1) {
+              if (currentLeads >= maxLeads) {
+                data.isHidden = true; // Mark as hidden
+              }
+            }
+            
+            // Tăng số đếm và cập nhật lại lastReset
+            await req.payload.update({
+               collection: 'subscriptions',
+               id: subId,
+               data: {
+                 usage: {
+                   ...sub.usage,
+                   currentLeadsThisMonth: currentLeads + 1,
+                   lastLeadResetDate: lastReset.toISOString(),
+                 }
+               },
+               req,
+            });
+          }
+        }
+        return data;
+      }
+    ],
     beforeValidate: [
       async ({ data, req, operation }) => {
         if (operation === "create" && data) {

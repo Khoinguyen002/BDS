@@ -1,5 +1,4 @@
 import { CollectionConfig, APIError } from "payload";
-import { getEffectiveTier, TIERS } from "@bds/shared";
 import { env } from "../env";
 
 export const Media: CollectionConfig = {
@@ -34,25 +33,40 @@ export const Media: CollectionConfig = {
           const file = req.file;
           if (!file) return data;
 
-          const tier = getEffectiveTier(user);
+          if (user.role === 'admin') return data; // Admin bypass
 
-          if (
-            (file.mimetype as string)?.startsWith("video/") &&
-            !TIERS[tier].video
-          ) {
-            throw new APIError(
-              `Your ${tier} tier does not support video uploads.`,
-              400,
-              undefined,
-              true
-            );
+          if (!user.activeSubscription) {
+             throw new APIError("Bạn chưa có gói dịch vụ nào đang kích hoạt.", 400);
           }
 
-          const storageBytes = user.usage?.storageBytes || 0;
-          const maxStorageBytes = TIERS[tier].maxStorageMB * 1024 * 1024;
+          const isVideo = (file.mimetype as string)?.startsWith("video/");
+          
+          // 1. Max File Size Limit
+          if (isVideo && file.size > 50 * 1024 * 1024) {
+             throw new APIError("Dung lượng video tối đa là 50MB. Vui lòng nén lại.", 400);
+          } else if (!isVideo && file.size > 5 * 1024 * 1024) {
+             throw new APIError("Dung lượng ảnh tối đa là 5MB. Vui lòng nén lại.", 400);
+          }
 
-          if (storageBytes + file.size > maxStorageBytes) {
-            throw new APIError(`Storage limit exceeded. Upgrade to pro.`, 400, undefined, true);
+          const subId = typeof user.activeSubscription === 'object' ? user.activeSubscription.id : user.activeSubscription;
+          const sub = await req.payload.findByID({ collection: 'subscriptions', id: subId, depth: 0 });
+
+          const maxListings = sub.customLimits?.limits?.maxListings || 0;
+
+          if (isVideo) {
+            const maxVideosPerListing = sub.customLimits?.limits?.maxVideosPerListing || 0;
+            const maxVideosAllow = maxListings * maxVideosPerListing;
+            const currentVideosCount = sub.usage?.currentVideosCount || 0;
+            if (currentVideosCount >= maxVideosAllow) {
+               throw new APIError(`Kho lưu trữ Video của bạn đã đầy (Tối đa ${maxVideosAllow} video). Vui lòng xoá bớt.`, 400);
+            }
+          } else {
+            const maxImagesPerListing = sub.customLimits?.limits?.maxImagesPerListing || 0;
+            const maxImagesAllow = maxListings * maxImagesPerListing;
+            const currentImagesCount = sub.usage?.currentImagesCount || 0;
+            if (currentImagesCount >= maxImagesAllow) {
+               throw new APIError(`Kho lưu trữ Ảnh của bạn đã đầy (Tối đa ${maxImagesAllow} ảnh). Vui lòng xoá bớt.`, 400);
+            }
           }
         }
         return data;
@@ -60,19 +74,24 @@ export const Media: CollectionConfig = {
     ],
     afterChange: [
       async ({ req, operation }) => {
-        if (operation === "create" && req.user && req.file) {
-          const ownerUser = await req.payload.findByID({
-            collection: "users",
-            id: String(req.user.id),
-            req,
-          });
-          const newSize = (ownerUser.usage?.storageBytes || 0) + req.file.size;
-          await req.payload.update({
-            collection: "users",
-            id: ownerUser.id,
-            data: { usage: { storageBytes: newSize } },
-            req,
-          });
+        if (operation === "create" && req.user && req.file && req.user.role !== 'admin') {
+           const isVideo = (req.file.mimetype as string)?.startsWith("video/");
+           const activeSub = req.user.activeSubscription;
+           if (activeSub) {
+             const subId = typeof activeSub === 'object' ? activeSub.id : activeSub;
+             const sub = await req.payload.findByID({ collection: 'subscriptions', id: subId, depth: 0 });
+             await req.payload.update({
+               collection: 'subscriptions',
+               id: subId,
+               data: {
+                 usage: {
+                   ...sub.usage,
+                   currentImagesCount: !isVideo ? (sub.usage?.currentImagesCount || 0) + 1 : sub.usage?.currentImagesCount,
+                   currentVideosCount: isVideo ? (sub.usage?.currentVideosCount || 0) + 1 : sub.usage?.currentVideosCount,
+                 }
+               }
+             });
+           }
         }
       },
     ],
@@ -135,16 +154,24 @@ export const Media: CollectionConfig = {
               id: String(ownerId),
               req,
             });
-            const newSize = Math.max(
-              0,
-              (ownerUser.usage?.storageBytes || 0) - (doc.filesize || 0),
-            );
-            await req.payload.update({
-              collection: "users",
-              id: ownerUser.id,
-              data: { usage: { storageBytes: newSize } },
-              req,
-            });
+            if (ownerUser.role !== 'admin' && ownerUser.activeSubscription) {
+              const activeSub = ownerUser.activeSubscription;
+              const subId = typeof activeSub === 'object' ? activeSub.id : activeSub;
+              const isVideo = (doc.mimeType as string)?.startsWith("video/");
+              const sub = await req.payload.findByID({ collection: 'subscriptions', id: subId, depth: 0 });
+              
+              await req.payload.update({
+                collection: 'subscriptions',
+                id: subId,
+                data: {
+                  usage: {
+                    ...sub.usage,
+                    currentImagesCount: !isVideo ? Math.max((sub.usage?.currentImagesCount || 0) - 1, 0) : sub.usage?.currentImagesCount,
+                    currentVideosCount: isVideo ? Math.max((sub.usage?.currentVideosCount || 0) - 1, 0) : sub.usage?.currentVideosCount,
+                  }
+                }
+              });
+            }
           }
         } catch (error) {
           req.payload.logger.error(

@@ -1,5 +1,4 @@
 import { CollectionConfig, APIError } from "payload";
-import { getEffectiveTier, TIERS } from "@bds/shared";
 import { triggerRevalidateWithCascade } from "../utils/revalidate";
 import { COLLECTION_TAGS } from "@bds/shared/cache-tags";
 import { formatSlug } from "../utils/formatSlug";
@@ -258,17 +257,21 @@ export const Apartments: CollectionConfig = {
       async ({ data, req, operation }) => {
         if (operation === "create" && req.user) {
           const user = req.user;
-          const tier = getEffectiveTier(user);
+          if (user.role === 'admin') return data; // Admin bypass
 
-          const count = await req.payload.count({
-            collection: "apartments",
-            where: { owner: { equals: user.id } },
-            req,
-          });
+          if (!user.activeSubscription) {
+             throw new APIError("Bạn chưa có gói dịch vụ nào đang kích hoạt.", 400);
+          }
 
-          if (count.totalDocs >= TIERS[tier].maxApt) {
+          const subId = typeof user.activeSubscription === 'object' ? user.activeSubscription.id : user.activeSubscription;
+          const sub = await req.payload.findByID({ collection: 'subscriptions', id: subId, depth: 0 });
+
+          const maxListings = sub.customLimits?.limits?.maxListings || 0;
+          const currentCount = sub.usage?.currentListingsCount || 0;
+
+          if (currentCount >= maxListings) {
             throw new APIError(
-              `Maximum apartments limit reached for ${tier} tier.`,
+              `Bạn đã đạt giới hạn ${maxListings} bài đăng của gói hiện tại. Vui lòng nâng cấp.`,
               400,
               undefined,
               true,
@@ -299,12 +302,46 @@ export const Apartments: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ req }) => {
+      async ({ req, operation }) => {
+        if (operation === 'create' && req.user && req.user.role !== 'admin') {
+          const activeSub = req.user.activeSubscription;
+          if (activeSub) {
+            const subId = typeof activeSub === 'object' ? activeSub.id : activeSub;
+             const sub = await req.payload.findByID({ collection: 'subscriptions', id: subId, depth: 0 });
+             await req.payload.update({
+               collection: 'subscriptions',
+               id: subId,
+               data: {
+                 usage: {
+                   ...sub.usage,
+                   currentListingsCount: (sub.usage?.currentListingsCount || 0) + 1,
+                 }
+               }
+             });
+          }
+        }
         triggerRevalidateWithCascade({ tag: COLLECTION_TAGS.apartments, req });
       },
     ],
     afterDelete: [
       async ({ req }) => {
+        if (req.user && req.user.role !== 'admin') {
+          const activeSub = req.user.activeSubscription;
+          if (activeSub) {
+            const subId = typeof activeSub === 'object' ? activeSub.id : activeSub;
+             const sub = await req.payload.findByID({ collection: 'subscriptions', id: subId, depth: 0 });
+             await req.payload.update({
+               collection: 'subscriptions',
+               id: subId,
+               data: {
+                 usage: {
+                   ...sub.usage,
+                   currentListingsCount: Math.max((sub.usage?.currentListingsCount || 0) - 1, 0),
+                 }
+               }
+             });
+          }
+        }
         triggerRevalidateWithCascade({ tag: COLLECTION_TAGS.apartments, req });
       },
     ],

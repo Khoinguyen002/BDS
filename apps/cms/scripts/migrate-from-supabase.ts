@@ -72,7 +72,6 @@ const CITY_LABEL: Record<string, string> = {
   ha_noi: "Hà Nội",
   ho_chi_minh: "TP. Hồ Chí Minh",
 };
-const FAR_FUTURE = "2099-01-01T00:00:00.000Z";
 
 async function sb<T>(path: string): Promise<T> {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -241,15 +240,15 @@ async function main() {
     return;
   }
 
-  // Nâng tier owner → pro để qua hook giới hạn; restore ở finally.
-  const originalSub = ownerDoc.subscription ?? null;
+  // Nâng role owner → admin để qua hook giới hạn; restore ở finally.
+  const originalRole = ownerDoc.role;
   await payload.update({
     collection: "users",
     id: owner,
-    data: { subscription: { tier: "pro", expiresAt: FAR_FUTURE } },
+    data: { role: "admin" },
     overrideAccess: true,
   });
-  console.log(`→ Nâng owner ${owner} lên pro (tạm).`);
+  console.log(`→ Nâng owner ${owner} lên admin (tạm).`);
 
   // Preload 1 lần để khỏi query lặp: media (dedup ảnh) + apartments (upsert theo title).
   const mediaDocs = await payload.find({ collection: "media", limit: 20000, depth: 0 });
@@ -283,10 +282,10 @@ async function main() {
     await payload.update({
       collection: "users",
       id: owner,
-      data: { subscription: originalSub ?? { tier: "free" } },
+      data: { role: originalRole ?? "agent" },
       overrideAccess: true,
     });
-    console.log(`→ Khôi phục tier owner ${owner}.`);
+    console.log(`→ Khôi phục role owner ${owner}.`);
   }
 
   console.log(`\n=== Done. created=${created} updated=${updated} mediaLinked=${media} errors=${errors} ===`);

@@ -2,18 +2,21 @@
 // Chạy: pnpm --filter cms run gen:cache-tags
 //
 // Source of truth: Payload collection configs (relationship fields)
-// Excluded (custom.cacheable: false): media, leads, templates
+// Excluded (custom.cacheable: false): leads, media, templates
 
 // ── Collection-level tags ────────────────────────────────────────────
 export const COLLECTION_TAGS = {
-  users: "users",
+  amenities: "amenities",
   apartments: "apartments",
   landingPages: "landing-pages",
   locations: "locations",
+  plans: "plans",
+  subscriptions: "subscriptions",
   tags: "tags",
   translations: "translations",
-  amenities: "amenities",
+  users: "users",
   appSettings: "app-settings",
+  componentPermissions: "component-permissions",
 } as const;
 
 export type CollectionTag = (typeof COLLECTION_TAGS)[keyof typeof COLLECTION_TAGS];
@@ -25,8 +28,10 @@ export const REVERSE_DEPS: Readonly<Record<string, readonly CollectionTag[]>> = 
   [COLLECTION_TAGS.tags]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages],
   [COLLECTION_TAGS.locations]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages],
   [COLLECTION_TAGS.amenities]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages],
-  [COLLECTION_TAGS.users]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages],
+  [COLLECTION_TAGS.users]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.users],
   [COLLECTION_TAGS.apartments]: [COLLECTION_TAGS.landingPages],
+  [COLLECTION_TAGS.plans]: [COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.users, COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages],
+  [COLLECTION_TAGS.subscriptions]: [COLLECTION_TAGS.users, COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions],
 };
 
 // ── External source tags (không phải Payload collection) ───────────

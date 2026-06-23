@@ -77,6 +77,8 @@ export interface Config {
     amenities: Amenity;
     tags: Tag;
     locations: Location;
+    plans: Plan;
+    subscriptions: Subscription;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +96,8 @@ export interface Config {
     amenities: AmenitiesSelect<false> | AmenitiesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     locations: LocationsSelect<false> | LocationsSelect<true>;
+    plans: PlansSelect<false> | PlansSelect<true>;
+    subscriptions: SubscriptionsSelect<false> | SubscriptionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -105,9 +109,11 @@ export interface Config {
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('vi' | 'en') | ('vi' | 'en')[];
   globals: {
     'app-settings': AppSetting;
+    'component-permissions': ComponentPermission;
   };
   globalsSelect: {
     'app-settings': AppSettingsSelect<false> | AppSettingsSelect<true>;
+    'component-permissions': ComponentPermissionsSelect<false> | ComponentPermissionsSelect<true>;
   };
   locale: 'vi' | 'en';
   widgets: {
@@ -157,20 +163,13 @@ export interface User {
     zaloUrl?: string | null;
   };
   role?: ('admin' | 'agent') | null;
-  subscription?: {
-    tier?: ('free' | 'pro') | null;
-    expiresAt?: string | null;
-    lastPaymentId?: string | null;
-  };
+  activeSubscription?: (number | null) | Subscription;
   theme?: {
     primaryColor?: string | null;
     secondaryColor?: string | null;
     secondaryForegroundColor?: string | null;
     borderRadius?: ('none' | 'sm' | 'md' | 'lg' | 'full') | null;
     fontFamily?: ('sans' | 'serif') | null;
-  };
-  usage?: {
-    storageBytes?: number | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -198,9 +197,6 @@ export interface User {
 export interface Media {
   id: number;
   owner: number | User;
-  cloudinaryPublicId?: string | null;
-  cloudinaryURL?: string | null;
-  cloudinaryResourceType?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -212,6 +208,99 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscriptions".
+ */
+export interface Subscription {
+  id: number;
+  user: number | User;
+  /**
+   * Base Plan Template
+   */
+  plan: number | Plan;
+  status: 'active' | 'expired' | 'canceled';
+  startDate: string;
+  /**
+   * Leave empty for lifetime (e.g. FREE)
+   */
+  endDate?: string | null;
+  customLimits: {
+    limits: {
+      maxListings: number;
+      /**
+       * Để trống = Unlimited
+       */
+      maxLeadsPerMonth?: number | null;
+      maxImagesPerListing: number;
+      maxVideosPerListing: number;
+    };
+    features?: {
+      enableAdvanceLandingPage?: boolean | null;
+      enableCustomDomain?: boolean | null;
+      enableAutoReply?: boolean | null;
+      forceWatermark?: boolean | null;
+    };
+  };
+  /**
+   * Auto-updated via Hooks. Admins should avoid manual edits.
+   */
+  usage?: {
+    currentListingsCount?: number | null;
+    currentLeadsThisMonth?: number | null;
+    currentImagesCount?: number | null;
+    currentVideosCount?: number | null;
+    /**
+     * Start date for current month lead counting
+     */
+    lastLeadResetDate?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "plans".
+ */
+export interface Plan {
+  id: number;
+  name: string;
+  slug: string;
+  /**
+   * Used to display crossed-out price
+   */
+  originalPrice?: number | null;
+  price: number;
+  limits: {
+    maxListings: number;
+    /**
+     * Leave empty for unlimited
+     */
+    maxLeadsPerMonth?: number | null;
+    maxImagesPerListing: number;
+    maxVideosPerListing: number;
+  };
+  features?: {
+    enableAdvanceLandingPage?: boolean | null;
+    enableCustomDomain?: boolean | null;
+    enableAutoReply?: boolean | null;
+    /**
+     * Check this for FREE tier only
+     */
+    forceWatermark?: boolean | null;
+    /**
+     * Show additional dynamic feature rows on pricing table
+     */
+    customFeatures?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -460,6 +549,10 @@ export interface Lead {
   status?: ('new' | 'contacted' | 'closed' | 'lost') | null;
   deleted?: boolean | null;
   dedupeWarning?: boolean | null;
+  /**
+   * True if lead arrives after user exceeded monthly limit
+   */
+  isHidden?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -543,6 +636,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'locations';
         value: number | Location;
+      } | null)
+    | ({
+        relationTo: 'plans';
+        value: number | Plan;
+      } | null)
+    | ({
+        relationTo: 'subscriptions';
+        value: number | Subscription;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -604,13 +705,7 @@ export interface UsersSelect<T extends boolean = true> {
         zaloUrl?: T;
       };
   role?: T;
-  subscription?:
-    | T
-    | {
-        tier?: T;
-        expiresAt?: T;
-        lastPaymentId?: T;
-      };
+  activeSubscription?: T;
   theme?:
     | T
     | {
@@ -619,11 +714,6 @@ export interface UsersSelect<T extends boolean = true> {
         secondaryForegroundColor?: T;
         borderRadius?: T;
         fontFamily?: T;
-      };
-  usage?:
-    | T
-    | {
-        storageBytes?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -700,9 +790,6 @@ export interface LandingPagesSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   owner?: T;
-  cloudinaryPublicId?: T;
-  cloudinaryURL?: T;
-  cloudinaryResourceType?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -770,6 +857,7 @@ export interface LeadsSelect<T extends boolean = true> {
   status?: T;
   deleted?: T;
   dedupeWarning?: T;
+  isHidden?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -871,6 +959,82 @@ export interface LocationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "plans_select".
+ */
+export interface PlansSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  originalPrice?: T;
+  price?: T;
+  limits?:
+    | T
+    | {
+        maxListings?: T;
+        maxLeadsPerMonth?: T;
+        maxImagesPerListing?: T;
+        maxVideosPerListing?: T;
+      };
+  features?:
+    | T
+    | {
+        enableAdvanceLandingPage?: T;
+        enableCustomDomain?: T;
+        enableAutoReply?: T;
+        forceWatermark?: T;
+        customFeatures?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscriptions_select".
+ */
+export interface SubscriptionsSelect<T extends boolean = true> {
+  user?: T;
+  plan?: T;
+  status?: T;
+  startDate?: T;
+  endDate?: T;
+  customLimits?:
+    | T
+    | {
+        limits?:
+          | T
+          | {
+              maxListings?: T;
+              maxLeadsPerMonth?: T;
+              maxImagesPerListing?: T;
+              maxVideosPerListing?: T;
+            };
+        features?:
+          | T
+          | {
+              enableAdvanceLandingPage?: T;
+              enableCustomDomain?: T;
+              enableAutoReply?: T;
+              forceWatermark?: T;
+            };
+      };
+  usage?:
+    | T
+    | {
+        currentListingsCount?: T;
+        currentLeadsThisMonth?: T;
+        currentImagesCount?: T;
+        currentVideosCount?: T;
+        lastLeadResetDate?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -933,6 +1097,71 @@ export interface AppSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "component-permissions".
+ */
+export interface ComponentPermission {
+  id: number;
+  heroBanner?: {
+    /**
+     * Để trống nếu tất cả các gói đều được phép dùng.
+     */
+    allowedPlans?: (number | Plan)[] | null;
+    /**
+     * Những user này sẽ luôn được phép xài block này bất kể họ ở gói nào. (Gõ để tìm theo email)
+     */
+    includeUsers?: (number | User)[] | null;
+    /**
+     * Những user này BỊ CẤM xài block này bất kể họ mua gói nào. (Gõ để tìm theo email)
+     */
+    excludeUsers?: (number | User)[] | null;
+  };
+  aboutAgent?: {
+    /**
+     * Để trống nếu tất cả các gói đều được phép dùng.
+     */
+    allowedPlans?: (number | Plan)[] | null;
+    /**
+     * Những user này sẽ luôn được phép xài block này bất kể họ ở gói nào. (Gõ để tìm theo email)
+     */
+    includeUsers?: (number | User)[] | null;
+    /**
+     * Những user này BỊ CẤM xài block này bất kể họ mua gói nào. (Gõ để tìm theo email)
+     */
+    excludeUsers?: (number | User)[] | null;
+  };
+  listApartments?: {
+    /**
+     * Để trống nếu tất cả các gói đều được phép dùng.
+     */
+    allowedPlans?: (number | Plan)[] | null;
+    /**
+     * Những user này sẽ luôn được phép xài block này bất kể họ ở gói nào. (Gõ để tìm theo email)
+     */
+    includeUsers?: (number | User)[] | null;
+    /**
+     * Những user này BỊ CẤM xài block này bất kể họ mua gói nào. (Gõ để tìm theo email)
+     */
+    excludeUsers?: (number | User)[] | null;
+  };
+  contactForm?: {
+    /**
+     * Để trống nếu tất cả các gói đều được phép dùng.
+     */
+    allowedPlans?: (number | Plan)[] | null;
+    /**
+     * Những user này sẽ luôn được phép xài block này bất kể họ ở gói nào. (Gõ để tìm theo email)
+     */
+    includeUsers?: (number | User)[] | null;
+    /**
+     * Những user này BỊ CẤM xài block này bất kể họ mua gói nào. (Gõ để tìm theo email)
+     */
+    excludeUsers?: (number | User)[] | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "app-settings_select".
  */
 export interface AppSettingsSelect<T extends boolean = true> {
@@ -943,6 +1172,43 @@ export interface AppSettingsSelect<T extends boolean = true> {
   themeSecondaryForeground?: T;
   fullLogo?: T;
   shortLogo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "component-permissions_select".
+ */
+export interface ComponentPermissionsSelect<T extends boolean = true> {
+  heroBanner?:
+    | T
+    | {
+        allowedPlans?: T;
+        includeUsers?: T;
+        excludeUsers?: T;
+      };
+  aboutAgent?:
+    | T
+    | {
+        allowedPlans?: T;
+        includeUsers?: T;
+        excludeUsers?: T;
+      };
+  listApartments?:
+    | T
+    | {
+        allowedPlans?: T;
+        includeUsers?: T;
+        excludeUsers?: T;
+      };
+  contactForm?:
+    | T
+    | {
+        allowedPlans?: T;
+        includeUsers?: T;
+        excludeUsers?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

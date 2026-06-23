@@ -16,41 +16,31 @@
  */
 
 import type { CollectionConfig, GlobalConfig, Field, Block } from "payload";
-import { writeFileSync } from "fs";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
+import { writeFileSync, readdirSync } from "fs";
+import { resolve, dirname, join } from "path";
+import { fileURLToPath, pathToFileURL } from "url";
 
-// ── Import tất cả collection configs ────────────────────────────────
-import { Users } from "../src/collections/Users.js";
-import { Apartments } from "../src/collections/Apartments.js";
-import { LandingPages } from "../src/collections/LandingPages.js";
-import { Locations } from "../src/collections/Locations.js";
-import { Tags } from "../src/collections/Tags.js";
-import { Translations } from "../src/collections/Translations.js";
-import { Amenities } from "../src/collections/Amenities.js";
-import { Media } from "../src/collections/Media.js";
-import { Leads } from "../src/collections/Leads.js";
-import { Templates } from "../src/collections/Templates.js";
+// ── Tự động Import tất cả collection và global configs ─────────────
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// ── Import tất cả global configs ────────────────────────────────────
-import { AppSettings } from "../src/globals/AppSettings.js";
+async function getConfigsFromDir(dirPath: string) {
+  const files = readdirSync(dirPath).filter(
+    (f) => f.endsWith(".ts") && !f.endsWith(".d.ts") && f !== "index.ts" && !f.includes("Blocks.ts")
+  );
+  const configs: Record<string, unknown>[] = [];
+  for (const file of files) {
+    const importedModule = await import(pathToFileURL(join(dirPath, file)).href);
+    for (const key of Object.keys(importedModule)) {
+      if (typeof importedModule[key] === "object" && importedModule[key] !== null && "slug" in importedModule[key]) {
+        configs.push(importedModule[key] as Record<string, unknown>);
+      }
+    }
+  }
+  return configs;
+}
 
-const ALL_COLLECTIONS: CollectionConfig[] = [
-  Users,
-  Apartments,
-  LandingPages,
-  Locations,
-  Tags,
-  Translations,
-  Amenities,
-  Media,
-  Leads,
-  Templates,
-];
-
-const ALL_GLOBALS: GlobalConfig[] = [
-  AppSettings,
-];
+const ALL_COLLECTIONS = await getConfigsFromDir(resolve(__dirname, "../src/collections")) as CollectionConfig[];
+const ALL_GLOBALS = await getConfigsFromDir(resolve(__dirname, "../src/globals")) as GlobalConfig[];
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
@@ -151,6 +141,21 @@ const excluded = new Set(
 
 const cacheable = ALL_ENTITIES.filter((c) => !excluded.has(c.slug));
 
+// ── Guardrail Check: Quên Invalidate Cache ─────────────────────────
+const missingHooks: string[] = [];
+for (const col of cacheable) {
+  const hasAfterChange = col.hooks?.afterChange && col.hooks.afterChange.length > 0;
+  if (!hasAfterChange) {
+    missingHooks.push(col.slug);
+  }
+}
+
+if (missingHooks.length > 0) {
+  throw new Error(
+    `🚨 BÁO ĐỘNG ĐỎ: Các Collection/Global sau có bật Cache nhưng QUÊN khai báo hook 'afterChange' để triggerRevalidate: ${missingHooks.join(", ")}`
+  );
+}
+
 // 1. COLLECTION_TAGS
 const collectionTags: Record<string, string> = {};
 for (const col of cacheable) {
@@ -232,7 +237,6 @@ lines.push('export const EXCHANGE_RATE_TAG = "exchange-rate";');
 lines.push("");
 
 // Write to packages/shared/cache-tags.ts
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const outPath = resolve(__dirname, "../../../packages/shared/cache-tags.ts");
 
 writeFileSync(outPath, lines.join("\n") + "\n", "utf-8");

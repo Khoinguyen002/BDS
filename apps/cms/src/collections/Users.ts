@@ -99,19 +99,16 @@ export const Users: CollectionConfig = {
       }
     },
     {
-      name: 'subscription',
-      type: 'group',
+      name: 'activeSubscription',
+      type: 'relationship',
+      relationTo: 'subscriptions',
       admin: {
+        position: 'sidebar',
         condition: (data, siblingData, { user }) => {
-          if (!user) return false; // Ẩn ở trang Onboarding
+          if (!user) return false;
           return data.role !== 'admin';
         },
       },
-      fields: [
-        { name: 'tier', type: 'select', options: ['free', 'pro'], defaultValue: 'free' },
-        { name: 'expiresAt', type: 'date' },
-        { name: 'lastPaymentId', type: 'text' },
-      ]
     },
     {
       name: 'theme',
@@ -158,20 +155,7 @@ export const Users: CollectionConfig = {
         { name: 'fontFamily', type: 'select', options: ['sans', 'serif'], defaultValue: 'sans', label: { vi: "Phông chữ", en: "Font Family" } },
       ]
     },
-    {
-      name: 'usage',
-      type: 'group',
-      label: { vi: "Mức sử dụng", en: "Usage" },
-      admin: {
-        condition: (data, siblingData, { user }) => {
-          if (!user) return false; // Ẩn ở trang Onboarding
-          return data.role !== 'admin';
-        },
-      },
-      fields: [
-        { name: 'storageBytes', type: 'number', defaultValue: 0 },
-      ]
-    }
+
   ],
   hooks: {
     beforeChange: [

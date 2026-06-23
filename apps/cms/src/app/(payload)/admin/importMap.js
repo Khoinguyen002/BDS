@@ -29,6 +29,7 @@ import { LocationPickerField as LocationPickerField_c2172835f37410ccd59133bb5abc
 import { SectionRowLabel as SectionRowLabel_ae1c4365d5ae4136760591ff946aa806 } from '@/components/SectionRowLabel'
 import { TranslationActions as TranslationActions_c215208c47c179add42056341eba8ccb } from '@/components/TranslationActions'
 import { IconPickerField as IconPickerField_96fa91b3a1147f26fe9c9a414cfa6358 } from '@/components/IconPickerField'
+import { default as default_d8fce4390fe29202379ae5a0aa0ced07 } from '@/components/BlockImagePreview'
 import { AdminIcon as AdminIcon_aa0a2d19d38a4839dbd373417e210b89 } from '@/components/AdminLogo'
 import { AdminLogo as AdminLogo_aa0a2d19d38a4839dbd373417e210b89 } from '@/components/AdminLogo'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -66,6 +67,7 @@ export const importMap = {
   "@/components/SectionRowLabel#SectionRowLabel": SectionRowLabel_ae1c4365d5ae4136760591ff946aa806,
   "@/components/TranslationActions#TranslationActions": TranslationActions_c215208c47c179add42056341eba8ccb,
   "@/components/IconPickerField#IconPickerField": IconPickerField_96fa91b3a1147f26fe9c9a414cfa6358,
+  "@/components/BlockImagePreview#default": default_d8fce4390fe29202379ae5a0aa0ced07,
   "@/components/AdminLogo#AdminIcon": AdminIcon_aa0a2d19d38a4839dbd373417e210b89,
   "@/components/AdminLogo#AdminLogo": AdminLogo_aa0a2d19d38a4839dbd373417e210b89,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

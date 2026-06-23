@@ -6,7 +6,10 @@ allowBuilds:
   sharp: set this to true or false
   unrs-resolver: set this to true or false
 onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
   - esbuild
+  - node-pty
   - sharp
   - unrs-resolver
   - workerd

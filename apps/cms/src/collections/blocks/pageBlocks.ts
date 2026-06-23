@@ -10,8 +10,19 @@ export const pageBlocks: Block[] = [
       plural: { vi: "Hero Banners", en: "Hero Banners" },
     },
     fields: [
-      { name: "title", type: "text", required: true, localized: true, label: { vi: "Tiêu đề", en: "Title" } },
-      { name: "subtitle", type: "text", localized: true, label: { vi: "Tiêu đề phụ", en: "Subtitle" } },
+      {
+        name: "title",
+        type: "text",
+        required: true,
+        localized: true,
+        label: { vi: "Tiêu đề", en: "Title" },
+      },
+      {
+        name: "subtitle",
+        type: "text",
+        localized: true,
+        label: { vi: "Tiêu đề phụ", en: "Subtitle" },
+      },
       {
         name: "backgroundImage",
         type: "relationship",
@@ -28,14 +39,54 @@ export const pageBlocks: Block[] = [
       plural: { vi: "Thông tin Agent", en: "About Agent" },
     },
     fields: [
-      { name: "content", type: "richText", localized: true, label: { vi: "Nội dung", en: "Content" } },
-      { name: "avatar", type: "relationship", relationTo: "media", label: { vi: "Ảnh đại diện", en: "Avatar" } },
-      { name: "agentName", type: "text", localized: false, label: { vi: "Tên Agent", en: "Agent Name" } },
-      { name: "agentTitle", type: "text", localized: true, label: { vi: "Chức danh", en: "Agent Title" } },
-      { name: "phoneNumber", type: "text", localized: false, label: { vi: "Số điện thoại", en: "Phone Number" } },
-      { name: "zaloLink", type: "text", localized: false, label: { vi: "Link Zalo", en: "Zalo Link" } },
-      { name: "experienceYears", type: "number", localized: false, label: { vi: "Số năm kinh nghiệm", en: "Experience Years" } },
-      { name: "successfulDeals", type: "number", localized: false, label: { vi: "Số giao dịch thành công", en: "Successful Deals" } },
+      {
+        name: "content",
+        type: "richText",
+        localized: true,
+        label: { vi: "Nội dung", en: "Content" },
+      },
+      {
+        name: "avatar",
+        type: "relationship",
+        relationTo: "media",
+        label: { vi: "Ảnh đại diện", en: "Avatar" },
+      },
+      {
+        name: "agentName",
+        type: "text",
+        localized: false,
+        label: { vi: "Tên Agent", en: "Agent Name" },
+      },
+      {
+        name: "agentTitle",
+        type: "text",
+        localized: true,
+        label: { vi: "Chức danh", en: "Agent Title" },
+      },
+      {
+        name: "phoneNumber",
+        type: "text",
+        localized: false,
+        label: { vi: "Số điện thoại", en: "Phone Number" },
+      },
+      {
+        name: "zaloLink",
+        type: "text",
+        localized: false,
+        label: { vi: "Link Zalo", en: "Zalo Link" },
+      },
+      {
+        name: "experienceYears",
+        type: "number",
+        localized: false,
+        label: { vi: "Số năm kinh nghiệm", en: "Experience Years" },
+      },
+      {
+        name: "successfulDeals",
+        type: "number",
+        localized: false,
+        label: { vi: "Số giao dịch thành công", en: "Successful Deals" },
+      },
     ],
   },
   {
@@ -50,7 +101,10 @@ export const pageBlocks: Block[] = [
         name: "apartmentsFilter",
         type: "relationship",
         relationTo: "apartments",
-        label: { vi: "Chọn các căn hộ hiển thị (Để trống sẽ hiện tất cả)", en: "Filter Apartments" },
+        label: {
+          vi: "Chọn các căn hộ hiển thị (Để trống sẽ hiện tất cả)",
+          en: "Filter Apartments",
+        },
         hasMany: true,
         admin: {
           components: {
@@ -61,13 +115,16 @@ export const pageBlocks: Block[] = [
           const owner =
             (data as Partial<LandingPage>)?.owner ||
             (siblingData as Partial<LandingPage>)?.owner;
-            
-          const ownerId = typeof owner === 'object' && owner !== null && 'id' in owner ? owner.id : owner;
+
+          const ownerId =
+            typeof owner === "object" && owner !== null && "id" in owner
+              ? owner.id
+              : owner;
 
           if (ownerId) {
             return { owner: { equals: ownerId } };
           }
-          
+
           return { id: { exists: true } };
         },
       },
@@ -81,8 +138,18 @@ export const pageBlocks: Block[] = [
       plural: { vi: "Form liên hệ", en: "Contact Forms" },
     },
     fields: [
-      { name: "title", type: "text", localized: true, label: { vi: "Tiêu đề", en: "Title" } },
-      { name: "placeholder", type: "text", localized: true, label: { vi: "Chữ mờ trong ô nhập", en: "Placeholder" } },
+      {
+        name: "title",
+        type: "text",
+        localized: true,
+        label: { vi: "Tiêu đề", en: "Title" },
+      },
+      {
+        name: "placeholder",
+        type: "text",
+        localized: true,
+        label: { vi: "Chữ mờ trong ô nhập", en: "Placeholder" },
+      },
     ],
   },
 ];
