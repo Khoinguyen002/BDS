@@ -129,6 +129,26 @@ export async function getLandingPageByOwner(
   }
 }
 
+export async function getHomepage(): Promise<{ blocks?: Record<string, unknown>[] } | null> {
+  try {
+    const url = new URL(`${SERVER_URL}/api/globals/homepage`);
+    const res = await fetch(url.toString(), {
+      next: {
+        revalidate: REVALIDATE_TIME,
+        tags: [COLLECTION_TAGS.homepage],
+      },
+    });
+    if (!res.ok) {
+      return null;
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Error in getHomepage:", error);
+    return null;
+  }
+}
+
 // ─────────────────────────────────────────────────────────────
 // Translations
 // ─────────────────────────────────────────────────────────────

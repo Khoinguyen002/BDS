@@ -21,6 +21,7 @@ import { Plans } from "./collections/Plans";
 import { Subscriptions } from "./collections/Subscriptions";
 import { AppSettings } from "./globals/AppSettings";
 import { ComponentPermissions } from "./globals/ComponentPermissions";
+import { Homepage } from "./globals/Homepage";
 import { registerHandler } from "./endpoints/register";
 import { faviconHandler } from "./endpoints/favicon";
 import { env } from "./env";
@@ -148,7 +149,8 @@ export default buildConfig({
   collections: [Users, LandingPages, Media, Apartments, Leads, Templates, Translations, Amenities, Tags, Locations, Plans, Subscriptions],
   globals: [
     AppSettings,
-    ComponentPermissions
+    ComponentPermissions,
+    Homepage
   ],
   plugins: [
     // Ưu tiên Cloudinary nếu có cấu hình; fallback S3; nếu không có cả hai → local storage.

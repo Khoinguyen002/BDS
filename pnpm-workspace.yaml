@@ -13,3 +13,6 @@ onlyBuiltDependencies:
   - sharp
   - unrs-resolver
   - workerd
+
+catalog:
+  next: 16.2.9

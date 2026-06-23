@@ -23,7 +23,7 @@ export default async function PlatformLayout({
       ? appSettings.fullLogo?.url
       : undefined;
   const logoNode = fullLogoUrl ? (
-    <DynamicSvg url={fullLogoUrl} className="h-10 w-auto text-primary" />
+    <DynamicSvg url={fullLogoUrl} className="h-6 md:h-8 w-auto text-primary" />
   ) : undefined;
 
   const platformTheme = {

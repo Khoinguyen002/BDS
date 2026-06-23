@@ -10,7 +10,7 @@ export default function BlockImagePreview(props: { field: UIField }) {
   if (!imageURL) return null;
 
   return (
-    <div style={{ marginBottom: "24px" }}>
+    <div style={{ marginBottom: "1rem" }}>
       <div
         style={{
           fontSize: "13px",

@@ -26,6 +26,11 @@ export const Templates: CollectionConfig = {
     {
       name: "blocks",
       type: "blocks",
+      admin: {
+        components: {
+          Field: "@/components/CustomBlocksField#CustomBlocksField",
+        },
+      },
       blocks: pageBlocks,
     },
   ],

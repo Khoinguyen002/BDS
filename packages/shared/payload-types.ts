@@ -110,10 +110,12 @@ export interface Config {
   globals: {
     'app-settings': AppSetting;
     'component-permissions': ComponentPermission;
+    homepage: Homepage;
   };
   globalsSelect: {
     'app-settings': AppSettingsSelect<false> | AppSettingsSelect<true>;
     'component-permissions': ComponentPermissionsSelect<false> | ComponentPermissionsSelect<true>;
+    homepage: HomepageSelect<false> | HomepageSelect<true>;
   };
   locale: 'vi' | 'en';
   widgets: {
@@ -197,6 +199,9 @@ export interface User {
 export interface Media {
   id: number;
   owner: number | User;
+  cloudinaryPublicId?: string | null;
+  cloudinaryURL?: string | null;
+  cloudinaryResourceType?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -360,6 +365,42 @@ export interface LandingPage {
             blockName?: string | null;
             blockType: 'contactForm';
           }
+        | {
+            title: string;
+            subtitle?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'platformHeroBanner';
+          }
+        | {
+            title?: string | null;
+            description?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'curatedCollections';
+          }
+        | {
+            title?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'marketSnapshot';
+          }
+        | {
+            title?: string | null;
+            limit?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'platformFeaturedAgents';
+          }
+        | {
+            title?: string | null;
+            description?: string | null;
+            buttonLabel?: string | null;
+            buttonLink?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'ctaSupply';
+          }
       )[]
     | null;
   updatedAt: string;
@@ -421,6 +462,42 @@ export interface Template {
             id?: string | null;
             blockName?: string | null;
             blockType: 'contactForm';
+          }
+        | {
+            title: string;
+            subtitle?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'platformHeroBanner';
+          }
+        | {
+            title?: string | null;
+            description?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'curatedCollections';
+          }
+        | {
+            title?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'marketSnapshot';
+          }
+        | {
+            title?: string | null;
+            limit?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'platformFeaturedAgents';
+          }
+        | {
+            title?: string | null;
+            description?: string | null;
+            buttonLabel?: string | null;
+            buttonLink?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'ctaSupply';
           }
       )[]
     | null;
@@ -780,6 +857,47 @@ export interface LandingPagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        platformHeroBanner?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              id?: T;
+              blockName?: T;
+            };
+        curatedCollections?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+              blockName?: T;
+            };
+        marketSnapshot?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        platformFeaturedAgents?:
+          | T
+          | {
+              title?: T;
+              limit?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ctaSupply?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              buttonLabel?: T;
+              buttonLink?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;
@@ -790,6 +908,9 @@ export interface LandingPagesSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   owner?: T;
+  cloudinaryPublicId?: T;
+  cloudinaryURL?: T;
+  cloudinaryResourceType?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -905,6 +1026,47 @@ export interface TemplatesSelect<T extends boolean = true> {
           | {
               title?: T;
               placeholder?: T;
+              id?: T;
+              blockName?: T;
+            };
+        platformHeroBanner?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              id?: T;
+              blockName?: T;
+            };
+        curatedCollections?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+              blockName?: T;
+            };
+        marketSnapshot?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        platformFeaturedAgents?:
+          | T
+          | {
+              title?: T;
+              limit?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ctaSupply?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              buttonLabel?: T;
+              buttonLink?: T;
               id?: T;
               blockName?: T;
             };
@@ -1101,6 +1263,15 @@ export interface AppSetting {
  */
 export interface ComponentPermission {
   id: number;
+  _blockFilter?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   heroBanner?: {
     /**
      * Để trống nếu tất cả các gói đều được phép dùng.
@@ -1157,6 +1328,173 @@ export interface ComponentPermission {
      */
     excludeUsers?: (number | User)[] | null;
   };
+  platformHeroBanner?: {
+    /**
+     * Để trống nếu tất cả các gói đều được phép dùng.
+     */
+    allowedPlans?: (number | Plan)[] | null;
+    /**
+     * Những user này sẽ luôn được phép xài block này bất kể họ ở gói nào. (Gõ để tìm theo email)
+     */
+    includeUsers?: (number | User)[] | null;
+    /**
+     * Những user này BỊ CẤM xài block này bất kể họ mua gói nào. (Gõ để tìm theo email)
+     */
+    excludeUsers?: (number | User)[] | null;
+  };
+  curatedCollections?: {
+    /**
+     * Để trống nếu tất cả các gói đều được phép dùng.
+     */
+    allowedPlans?: (number | Plan)[] | null;
+    /**
+     * Những user này sẽ luôn được phép xài block này bất kể họ ở gói nào. (Gõ để tìm theo email)
+     */
+    includeUsers?: (number | User)[] | null;
+    /**
+     * Những user này BỊ CẤM xài block này bất kể họ mua gói nào. (Gõ để tìm theo email)
+     */
+    excludeUsers?: (number | User)[] | null;
+  };
+  marketSnapshot?: {
+    /**
+     * Để trống nếu tất cả các gói đều được phép dùng.
+     */
+    allowedPlans?: (number | Plan)[] | null;
+    /**
+     * Những user này sẽ luôn được phép xài block này bất kể họ ở gói nào. (Gõ để tìm theo email)
+     */
+    includeUsers?: (number | User)[] | null;
+    /**
+     * Những user này BỊ CẤM xài block này bất kể họ mua gói nào. (Gõ để tìm theo email)
+     */
+    excludeUsers?: (number | User)[] | null;
+  };
+  platformFeaturedAgents?: {
+    /**
+     * Để trống nếu tất cả các gói đều được phép dùng.
+     */
+    allowedPlans?: (number | Plan)[] | null;
+    /**
+     * Những user này sẽ luôn được phép xài block này bất kể họ ở gói nào. (Gõ để tìm theo email)
+     */
+    includeUsers?: (number | User)[] | null;
+    /**
+     * Những user này BỊ CẤM xài block này bất kể họ mua gói nào. (Gõ để tìm theo email)
+     */
+    excludeUsers?: (number | User)[] | null;
+  };
+  ctaSupply?: {
+    /**
+     * Để trống nếu tất cả các gói đều được phép dùng.
+     */
+    allowedPlans?: (number | Plan)[] | null;
+    /**
+     * Những user này sẽ luôn được phép xài block này bất kể họ ở gói nào. (Gõ để tìm theo email)
+     */
+    includeUsers?: (number | User)[] | null;
+    /**
+     * Những user này BỊ CẤM xài block này bất kể họ mua gói nào. (Gõ để tìm theo email)
+     */
+    excludeUsers?: (number | User)[] | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homepage".
+ */
+export interface Homepage {
+  id: number;
+  blocks?:
+    | (
+        | {
+            title: string;
+            subtitle?: string | null;
+            backgroundImage?: (number | null) | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'heroBanner';
+          }
+        | {
+            content?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            avatar?: (number | null) | Media;
+            agentName?: string | null;
+            agentTitle?: string | null;
+            phoneNumber?: string | null;
+            zaloLink?: string | null;
+            experienceYears?: number | null;
+            successfulDeals?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'aboutAgent';
+          }
+        | {
+            apartmentsFilter?: (number | Apartment)[] | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'listApartments';
+          }
+        | {
+            title?: string | null;
+            placeholder?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'contactForm';
+          }
+        | {
+            title: string;
+            subtitle?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'platformHeroBanner';
+          }
+        | {
+            title?: string | null;
+            description?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'curatedCollections';
+          }
+        | {
+            title?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'marketSnapshot';
+          }
+        | {
+            title?: string | null;
+            limit?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'platformFeaturedAgents';
+          }
+        | {
+            title?: string | null;
+            description?: string | null;
+            buttonLabel?: string | null;
+            buttonLink?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'ctaSupply';
+          }
+      )[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1181,6 +1519,7 @@ export interface AppSettingsSelect<T extends boolean = true> {
  * via the `definition` "component-permissions_select".
  */
 export interface ComponentPermissionsSelect<T extends boolean = true> {
+  _blockFilter?: T;
   heroBanner?:
     | T
     | {
@@ -1208,6 +1547,133 @@ export interface ComponentPermissionsSelect<T extends boolean = true> {
         allowedPlans?: T;
         includeUsers?: T;
         excludeUsers?: T;
+      };
+  platformHeroBanner?:
+    | T
+    | {
+        allowedPlans?: T;
+        includeUsers?: T;
+        excludeUsers?: T;
+      };
+  curatedCollections?:
+    | T
+    | {
+        allowedPlans?: T;
+        includeUsers?: T;
+        excludeUsers?: T;
+      };
+  marketSnapshot?:
+    | T
+    | {
+        allowedPlans?: T;
+        includeUsers?: T;
+        excludeUsers?: T;
+      };
+  platformFeaturedAgents?:
+    | T
+    | {
+        allowedPlans?: T;
+        includeUsers?: T;
+        excludeUsers?: T;
+      };
+  ctaSupply?:
+    | T
+    | {
+        allowedPlans?: T;
+        includeUsers?: T;
+        excludeUsers?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homepage_select".
+ */
+export interface HomepageSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        heroBanner?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              backgroundImage?: T;
+              id?: T;
+              blockName?: T;
+            };
+        aboutAgent?:
+          | T
+          | {
+              content?: T;
+              avatar?: T;
+              agentName?: T;
+              agentTitle?: T;
+              phoneNumber?: T;
+              zaloLink?: T;
+              experienceYears?: T;
+              successfulDeals?: T;
+              id?: T;
+              blockName?: T;
+            };
+        listApartments?:
+          | T
+          | {
+              apartmentsFilter?: T;
+              id?: T;
+              blockName?: T;
+            };
+        contactForm?:
+          | T
+          | {
+              title?: T;
+              placeholder?: T;
+              id?: T;
+              blockName?: T;
+            };
+        platformHeroBanner?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              id?: T;
+              blockName?: T;
+            };
+        curatedCollections?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+              blockName?: T;
+            };
+        marketSnapshot?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        platformFeaturedAgents?:
+          | T
+          | {
+              title?: T;
+              limit?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ctaSupply?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              buttonLabel?: T;
+              buttonLink?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;

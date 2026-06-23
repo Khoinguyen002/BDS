@@ -50,6 +50,9 @@ export const LandingPages: CollectionConfig = {
       name: "blocks",
       type: "blocks",
       admin: {
+        components: {
+          Field: "@/components/CustomBlocksField#CustomBlocksField",
+        },
         condition: (data) => {
           if (data?.id) return true; // Always show when editing
           if (data?.templateSelection) return false; // Hide if a template is selected during creation

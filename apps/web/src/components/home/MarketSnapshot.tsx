@@ -4,13 +4,13 @@ import React from "react";
 import { TrendUpIcon, ChartLineUpIcon, BuildingApartmentIcon } from "@phosphor-icons/react/dist/ssr";
 import { useTranslations } from "next-intl";
 
-export const MarketSnapshot = () => {
+export const MarketSnapshot = ({ title }: { title?: string }) => {
   const t = useTranslations("home");
   return (
     <section className="py-24 border-y border-border">
       <div className="container flex flex-col md:flex-row items-center gap-12">
         <div className="flex-1 space-y-6">
-          <h2 className="font-bold">{t("market_snapshot_title")}</h2>
+          <h2 className="font-bold">{title || t("market_snapshot_title")}</h2>
           <p className="text-foreground-muted text-lg">
             {t("market_snapshot_description")}
           </p>

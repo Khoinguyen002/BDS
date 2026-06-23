@@ -17,6 +17,7 @@ export const COLLECTION_TAGS = {
   users: "users",
   appSettings: "app-settings",
   componentPermissions: "component-permissions",
+  homepage: "homepage",
 } as const;
 
 export type CollectionTag = (typeof COLLECTION_TAGS)[keyof typeof COLLECTION_TAGS];
@@ -25,13 +26,13 @@ export type CollectionTag = (typeof COLLECTION_TAGS)[keyof typeof COLLECTION_TAG
 // Khi collection X thay đổi → cascade purge TẤT CẢ collections phụ thuộc
 // (trực tiếp + gián tiếp). Auto-derived từ Payload relationship fields.
 export const REVERSE_DEPS: Readonly<Record<string, readonly CollectionTag[]>> = {
-  [COLLECTION_TAGS.tags]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages],
-  [COLLECTION_TAGS.locations]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages],
-  [COLLECTION_TAGS.amenities]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages],
-  [COLLECTION_TAGS.users]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.users],
-  [COLLECTION_TAGS.apartments]: [COLLECTION_TAGS.landingPages],
-  [COLLECTION_TAGS.plans]: [COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.users, COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages],
-  [COLLECTION_TAGS.subscriptions]: [COLLECTION_TAGS.users, COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions],
+  [COLLECTION_TAGS.tags]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.homepage],
+  [COLLECTION_TAGS.locations]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.homepage],
+  [COLLECTION_TAGS.amenities]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.homepage],
+  [COLLECTION_TAGS.users]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.homepage, COLLECTION_TAGS.users],
+  [COLLECTION_TAGS.apartments]: [COLLECTION_TAGS.landingPages, COLLECTION_TAGS.homepage],
+  [COLLECTION_TAGS.plans]: [COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.users, COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.homepage],
+  [COLLECTION_TAGS.subscriptions]: [COLLECTION_TAGS.users, COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.homepage],
 };
 
 // ── External source tags (không phải Payload collection) ───────────

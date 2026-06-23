@@ -10,9 +10,10 @@ import { useTranslations } from "next-intl";
 type FeaturedAgentsProps = {
   agents: User[];
   locale: string;
+  title?: string;
 };
 
-export const FeaturedAgents = ({ agents, locale }: FeaturedAgentsProps) => {
+export const FeaturedAgents = ({ agents, locale, title }: FeaturedAgentsProps) => {
   const t = useTranslations("home");
   if (!agents || agents.length === 0) return null;
 
@@ -21,7 +22,7 @@ export const FeaturedAgents = ({ agents, locale }: FeaturedAgentsProps) => {
       <div className="container">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="max-w-2xl">
-            <h3 className="font-bold mb-4">{t("featured_agents_title")}</h3>
+            <h3 className="font-bold mb-4">{title || t("featured_agents_title")}</h3>
             <p className="text-foreground-muted text-lg">{t("featured_agents_desc")}</p>
           </div>
           <Link href={`/${locale}/agents`} className="flex items-center gap-2 text-primary font-medium hover:underline">

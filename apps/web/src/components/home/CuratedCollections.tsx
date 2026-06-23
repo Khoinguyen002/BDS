@@ -9,9 +9,11 @@ import { useTranslations } from "next-intl";
 type CuratedCollectionsProps = {
   initialRent: Apartment[];
   initialSale: Apartment[];
+  title?: string;
+  description?: string;
 };
 
-export const CuratedCollections = ({ initialRent, initialSale }: CuratedCollectionsProps) => {
+export const CuratedCollections = ({ initialRent, initialSale, title, description }: CuratedCollectionsProps) => {
   const t = useTranslations();
   const [activeTab, setActiveTab] = useState<"sale" | "rent">("sale");
 
@@ -35,7 +37,8 @@ export const CuratedCollections = ({ initialRent, initialSale }: CuratedCollecti
       <div className="container">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
-            <h2 className="font-bold mb-4">{t('apartments.featured_collection')}</h2>
+            <h2 className="font-bold mb-2">{title || t('apartments.featured_collection')}</h2>
+            {description && <p className="text-foreground-muted mb-4">{description}</p>}
             <div className="flex bg-background p-1 rounded-none w-fit border border-border">
               <button
                 onClick={() => setActiveTab("sale")}
