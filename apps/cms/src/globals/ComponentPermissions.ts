@@ -97,6 +97,9 @@ const permissionFields: Field[] = pageBlocks.map((block) => {
 export const ComponentPermissions: GlobalConfig = {
   slug: "component-permissions",
   label: { vi: "Phân quyền Component", en: "Component Permissions" },
+  admin: {
+    hidden: ({ user }) => user?.role !== "admin",
+  },
   access: {
     read: () => true,
     update: ({ req: { user } }) => user?.role === "admin",

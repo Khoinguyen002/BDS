@@ -6,6 +6,9 @@ import { pageBlocks } from "../collections/blocks/pageBlocks";
 export const Homepage: GlobalConfig = {
   slug: "homepage",
   label: { vi: "Trang chủ", en: "Homepage" },
+  admin: {
+    hidden: ({ user }) => user?.role !== "admin",
+  },
   access: {
     read: () => true,
     update: ({ req: { user } }) => user?.role === "admin",
