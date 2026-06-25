@@ -12,6 +12,7 @@ type ApartmentDoc = {
   tags?: { id: number; title: string; slug: string }[];
   slug?: string;
   gallery?: { url?: string }[];
+  viewCount?: number;
 };
 
 type TagDoc = { id: number; title: string; slug: string };
@@ -100,6 +101,17 @@ export function ApartmentPickerField({ path, field }: { path: string; field: any
     setSelected((prev) => {
       const next = new Set(prev);
       filtered.forEach((a) => next.add(a.id));
+      return next;
+    });
+  };
+
+  const selectTopViewed = () => {
+    const top6 = [...filtered]
+      .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+      .slice(0, 6);
+    setSelected((prev) => {
+      const next = new Set(prev);
+      top6.forEach((a) => next.add(a.id));
       return next;
     });
   };
@@ -354,6 +366,9 @@ export function ApartmentPickerField({ path, field }: { path: string; field: any
               <div style={{ display: "flex", gap: "8px" }}>
                 <button type="button" onClick={selectAllFiltered} style={btnStyle}>
                   {allFilteredSelected ? t('custom:apartmentPicker:allSelected' as any) : `${t('custom:apartmentPicker:selectAll' as any)} (${filtered.length})`}
+                </button>
+                <button type="button" onClick={selectTopViewed} style={{ ...btnStyle, color: "var(--theme-success-600)" }}>
+                  Lượt xem cao nhất (Max 6)
                 </button>
                 <button type="button" onClick={deselectAllFiltered} style={btnStyle}>
                   {t('custom:apartmentPicker:deselectFiltered' as any)}

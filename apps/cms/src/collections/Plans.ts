@@ -177,6 +177,7 @@ export const Plans: CollectionConfig = {
               name: "text",
               type: "text",
               required: true,
+              localized: true,
               label: { vi: "Tên tính năng", en: "Feature text" },
             },
           ],

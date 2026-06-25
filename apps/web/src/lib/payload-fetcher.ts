@@ -11,68 +11,93 @@
  *    dựa vào revalidateTag từ CMS hook (xem @bds/shared/cache-tags)
  */
 
-import type { User, LandingPage, Apartment, Location, Tag, AppSetting } from "@bds/shared/payload-types";
-import { COLLECTION_TAGS } from "@bds/shared/cache-tags";
+import type { User, LandingPage, Apartment, Location, Tag, AppSetting, Plan } from "@bds/shared/payload-types";
+import { COLLECTION_TAGS, type CollectionTag } from "@bds/shared/cache-tags";
 import { getLocale } from 'next-intl/server';
+import { stringify } from 'qs-esm';
 import { env } from "../env";
+
+/** Payload `where` clause — nested operators (equals, in, like, …). */
+type WhereField = Record<string, unknown>;
+export type Where = {
+  [key: string]: WhereField | Where[] | undefined;
+  and?: Where[];
+  or?: Where[];
+};
 
 const SERVER_URL = env.NEXT_PUBLIC_SERVER_URL;
 const REVALIDATE_TIME = false; // Infinite cache — chỉ dựa vào tag purge từ CMS.
+const DEFAULT_LOCALE = "vi";
 
 /**
- * autoCacheFetch — fetch Payload built-in REST API với auto-tagging.
+ * resolveLocale — lấy locale hiện tại từ next-intl (request context).
+ * Fallback về DEFAULT_LOCALE khi gọi ngoài request context.
+ */
+async function resolveLocale(): Promise<string> {
+  try {
+    return await getLocale();
+  } catch {
+    return DEFAULT_LOCALE;
+  }
+}
+
+/**
+ * PayloadQuery — query params chuẩn của Payload REST API.
+ * `where` là object lồng nhau, được qs-esm serialize thành
+ * `where[owner][equals]=...` thay vì nối chuỗi thủ công.
+ */
+export interface PayloadQuery {
+  where?: Where;
+  sort?: string;
+  limit?: number;
+  page?: number;
+  depth?: number;
+  locale?: string;
+  /** Fetch 1 document theo id: /api/{collection}/{id} */
+  id?: string | number;
+}
+
+/**
+ * autoCacheFetch — fetch Payload built-in collection REST API với auto-tagging.
  *
- * Auto-derive collection tag từ endpoint path:
- *   "/apartments?where..." → "apartments" → COLLECTION_TAGS.apartments
- *   "/users?where..."      → "users"      → COLLECTION_TAGS.users
+ * - CHỈ dùng cho collection (truyền đúng CollectionTag, type-safe).
+ * - Cache tag = chính collection đó (tường minh, không derive từ chuỗi).
+ * - Query params được chuẩn hóa qua qs-esm (where lồng nhau, array, v.v.).
+ * - locale tự lấy từ next-intl nếu không truyền.
  *
- * Throws nếu collection không tồn tại trong COLLECTION_TAGS (→ dùng fetch()
- * thường cho custom endpoint).
+ * Globals (homepage, app-settings…) KHÔNG đi qua đây — dùng fetch() thường
+ * vì endpoint là /api/globals/{slug}.
  */
 async function autoCacheFetch(
-  endpoint: string,
+  collection: CollectionTag,
+  query: PayloadQuery = {},
   options?: RequestInit,
 ) {
-  // Auto-derive collection slug từ endpoint
-  const collectionSlug = endpoint
-    .replace(/^\//, "")        // bỏ leading /
-    .split("?")[0]             // bỏ query string
-    .split("/")[0];            // lấy segment đầu tiên
-
-  // Validate: slug phải tồn tại trong COLLECTION_TAGS values
-  // (keys là camelCase, values là slug gốc — match endpoint)
-  const collectionTag = Object.values(COLLECTION_TAGS).find(
-    (tag) => tag === collectionSlug,
-  );
-  if (!collectionTag) {
+  if (!Object.values(COLLECTION_TAGS).includes(collection)) {
     throw new Error(
-      `autoCacheFetch: "${collectionSlug}" không có trong COLLECTION_TAGS. ` +
-      `Dùng fetch() thường cho custom endpoint.`,
+      `autoCacheFetch: "${collection}" không có trong COLLECTION_TAGS.`,
     );
   }
 
-  const url = new URL(`${SERVER_URL}/api${endpoint}`);
+  const { id, locale, ...rest } = query;
+  const search = stringify(
+    { ...rest, locale: locale ?? (await resolveLocale()) },
+    { addQueryPrefix: true },
+  );
 
-  if (!url.searchParams.has('locale')) {
-    let locale = 'vi';
-    try {
-      locale = await getLocale();
-    } catch {
-      // getLocale might throw if called outside of a Next.js Request context
-    }
-    url.searchParams.set('locale', locale);
-  }
+  const path = id != null ? `${collection}/${id}` : collection;
+  const url = `${SERVER_URL}/api/${path}${search}`;
 
-  const res = await fetch(url.toString(), {
+  const res = await fetch(url, {
     ...options,
     next: {
       revalidate: REVALIDATE_TIME,
-      tags: [collectionTag],
+      tags: [collection],
       ...options?.next,
     },
   });
   if (!res.ok) {
-    throw new Error(`Failed to fetch API: ${url.toString()} - Status: ${res.status}`);
+    throw new Error(`Failed to fetch API: ${url} - Status: ${res.status}`);
   }
   return res.json();
 }
@@ -83,9 +108,9 @@ async function autoCacheFetch(
 
 export async function getUserBySlug(agentSlug: string): Promise<User | null> {
   try {
-    const data = await autoCacheFetch(
-      `/users?where[agentSlug][equals]=${agentSlug}`,
-    );
+    const data = await autoCacheFetch(COLLECTION_TAGS.users, {
+      where: { agentSlug: { equals: agentSlug } },
+    });
     if (data.docs && data.docs.length > 0) {
       return data.docs[0];
     }
@@ -98,9 +123,11 @@ export async function getUserBySlug(agentSlug: string): Promise<User | null> {
 
 export async function getFeaturedAgents(limit: number = 4): Promise<User[]> {
   try {
-    const data = await autoCacheFetch(
-      `/users?where[verified][equals]=true&sort=-successfulTransactions&limit=${limit}`,
-    );
+    const data = await autoCacheFetch(COLLECTION_TAGS.users, {
+      where: { verified: { equals: true } },
+      sort: "-successfulTransactions",
+      limit,
+    });
     return data.docs || [];
   } catch (error) {
     console.error("Error in getFeaturedAgents:", error);
@@ -116,9 +143,10 @@ export async function getLandingPageByOwner(
   userId: string | number,
 ): Promise<LandingPage | null> {
   try {
-    const data = await autoCacheFetch(
-      `/landing-pages?where[owner][equals]=${userId}&depth=1`,
-    );
+    const data = await autoCacheFetch(COLLECTION_TAGS.landingPages, {
+      where: { owner: { equals: userId } },
+      depth: 1,
+    });
     if (data.docs && data.docs.length > 0) {
       return data.docs[0];
     }
@@ -132,6 +160,7 @@ export async function getLandingPageByOwner(
 export async function getHomepage(): Promise<{ blocks?: Record<string, unknown>[] } | null> {
   try {
     const url = new URL(`${SERVER_URL}/api/globals/homepage`);
+    url.searchParams.set("locale", await resolveLocale());
     const res = await fetch(url.toString(), {
       next: {
         revalidate: REVALIDATE_TIME,
@@ -158,7 +187,8 @@ type DictionaryNode = string | { [key: string]: DictionaryNode };
 export const getDictionary = async (locale: string): Promise<Record<string, DictionaryNode>> => {
   try {
     const data = await autoCacheFetch(
-      `/translations?locale=${locale}&limit=1000`,
+      COLLECTION_TAGS.translations,
+      { locale, limit: 1000 },
       { cache: "force-cache" },
     );
 
@@ -196,15 +226,19 @@ export const getApartmentBySlugOrId = async (
 ): Promise<Apartment | null> => {
   try {
     // Attempt fetch by slug first
-    const data = await autoCacheFetch(
-      `/apartments?where[slug][equals]=${slugOrId}&depth=2`,
-    );
+    const data = await autoCacheFetch(COLLECTION_TAGS.apartments, {
+      where: { slug: { equals: slugOrId } },
+      depth: 2,
+    });
     if (data.docs && data.docs.length > 0) {
       return data.docs[0];
     }
 
     // Fallback: Attempt fetch by ID if slug not found (and it's a valid ID)
-    const fallbackData = await autoCacheFetch(`/apartments/${slugOrId}?depth=2`);
+    const fallbackData = await autoCacheFetch(COLLECTION_TAGS.apartments, {
+      id: slugOrId,
+      depth: 2,
+    });
     if (fallbackData && !fallbackData.errors) {
       return fallbackData;
     }
@@ -228,30 +262,31 @@ export async function getApartmentsByOwner(
   }
 ): Promise<Apartment[]> {
   const limit = options?.limit || 6;
-  let where = `where[owner][equals]=${ownerId}`;
+  const where: Where = { owner: { equals: ownerId } };
 
   if (options?.tagIds && options.tagIds.length > 0) {
-    options.tagIds.forEach((id, i) => {
-      where += `&where[tags][in][${i}]=${id}`;
-    });
+    where.tags = { in: options.tagIds };
   }
   if (options?.listingType) {
-    where += `&where[listingType][equals]=${options.listingType}`;
+    where.listingType = { equals: options.listingType };
   }
-  if (options?.priceMin !== undefined) {
-    where += `&where[price][greater_than_equal]=${options.priceMin}`;
-  }
-  if (options?.priceMax !== undefined) {
-    where += `&where[price][less_than_equal]=${options.priceMax}`;
+  if (options?.priceMin !== undefined || options?.priceMax !== undefined) {
+    where.price = {
+      ...(options.priceMin !== undefined && { greater_than_equal: options.priceMin }),
+      ...(options.priceMax !== undefined && { less_than_equal: options.priceMax }),
+    };
   }
   if (options?.excludeId) {
-    where += `&where[id][not_equals]=${options.excludeId}`;
+    where.id = { not_equals: options.excludeId };
   }
 
   try {
-    const data = await autoCacheFetch(
-      `/apartments?${where}&depth=1&limit=${limit}&locale=${locale}`,
-    );
+    const data = await autoCacheFetch(COLLECTION_TAGS.apartments, {
+      where,
+      depth: 1,
+      limit,
+      locale,
+    });
     return data.docs || [];
   } catch (error) {
     console.error("Error in getApartmentsByOwner:", error);
@@ -273,38 +308,36 @@ export interface ApartmentFilters {
   bedrooms?: number;
 }
 
-export function buildApartmentWhere(filters: ApartmentFilters): string {
-  let where = "";
+export function buildApartmentWhere(filters: ApartmentFilters): Where {
+  const where: Where = {};
 
   if (filters.q) {
     // OR across title + address for free-text
-    where += `&where[or][0][title][like]=${encodeURIComponent(filters.q)}`;
-    where += `&where[or][1][address][like]=${encodeURIComponent(filters.q)}`;
+    where.or = [
+      { title: { like: filters.q } },
+      { address: { like: filters.q } },
+    ];
   }
 
   if (filters.tagIds && filters.tagIds.length > 0) {
-    filters.tagIds.forEach((id, i) => {
-      where += `&where[tags][in][${i}]=${id}`;
-    });
+    where.tags = { in: filters.tagIds };
   }
 
   if (filters.listingType) {
-    where += `&where[listingType][equals]=${filters.listingType}`;
+    where.listingType = { equals: filters.listingType };
   }
 
   if (filters.ownerSlug) {
-    where += `&where[owner.agentSlug][equals]=${filters.ownerSlug}`;
+    where["owner.agentSlug"] = { equals: filters.ownerSlug };
   }
 
   if (filters.bedrooms !== undefined) {
-    where += `&where[keyFacts.bedrooms][equals]=${filters.bedrooms}`;
+    where["keyFacts.bedrooms"] = { equals: filters.bedrooms };
   }
 
   // Location: ward IDs resolved before this call
   if (filters.wardIds && filters.wardIds.length > 0) {
-    filters.wardIds.forEach((id, i) => {
-      where += `&where[location.region][in][${i}]=${id}`;
-    });
+    where["location.region"] = { in: filters.wardIds };
   }
 
   // Price: ONLY apply when listingType is also provided
@@ -312,14 +345,11 @@ export function buildApartmentWhere(filters: ApartmentFilters): string {
     filters.listingType &&
     (filters.priceMin !== undefined || filters.priceMax !== undefined)
   ) {
-    const priceUnit = filters.listingType === "sale" ? "total" : "per_month";
-    where += `&where[priceUnit][equals]=${priceUnit}`;
-    if (filters.priceMin !== undefined) {
-      where += `&where[price][greater_than_equal]=${filters.priceMin}`;
-    }
-    if (filters.priceMax !== undefined) {
-      where += `&where[price][less_than_equal]=${filters.priceMax}`;
-    }
+    where.priceUnit = { equals: filters.listingType === "sale" ? "total" : "per_month" };
+    where.price = {
+      ...(filters.priceMin !== undefined && { greater_than_equal: filters.priceMin }),
+      ...(filters.priceMax !== undefined && { less_than_equal: filters.priceMax }),
+    };
   }
 
   return where;
@@ -327,17 +357,16 @@ export function buildApartmentWhere(filters: ApartmentFilters): string {
 
 export async function getApartments(
   locale: string,
-  filtersOrExtraWhere: ApartmentFilters | string = {},
+  filters: ApartmentFilters = {},
   limit: number = 20,
 ): Promise<Apartment[]> {
   try {
-    const extraWhere =
-      typeof filtersOrExtraWhere === "string"
-        ? filtersOrExtraWhere
-        : buildApartmentWhere(filtersOrExtraWhere);
-    const data = await autoCacheFetch(
-      `/apartments?depth=1&limit=${limit}&locale=${locale}${extraWhere}`,
-    );
+    const data = await autoCacheFetch(COLLECTION_TAGS.apartments, {
+      where: buildApartmentWhere(filters),
+      depth: 1,
+      limit,
+      locale,
+    });
     return data.docs || [];
   } catch (error) {
     console.error("Error in getApartments:", error);
@@ -351,9 +380,11 @@ export async function getApartmentBySlug(
   locale: string,
 ): Promise<Apartment | null> {
   try {
-    const data = await autoCacheFetch(
-      `/apartments?where[slug][equals]=${slug}&depth=2&locale=${locale}`,
-    );
+    const data = await autoCacheFetch(COLLECTION_TAGS.apartments, {
+      where: { slug: { equals: slug } },
+      depth: 2,
+      locale,
+    });
     if (data.docs && data.docs.length > 0) {
       return data.docs[0];
     }
@@ -367,13 +398,16 @@ export async function getApartmentBySlug(
 export async function getCuratedApartments(
   listingType: "sale" | "rent",
   locale: string,
-  extraWhere: string = "",
+  extraWhere: Where = {},
   limit: number = 6
 ): Promise<Apartment[]> {
   try {
-    const data = await autoCacheFetch(
-      `/apartments?where[listingType][equals]=${listingType}${extraWhere}&depth=1&limit=${limit}&locale=${locale}`,
-    );
+    const data = await autoCacheFetch(COLLECTION_TAGS.apartments, {
+      where: { listingType: { equals: listingType }, ...extraWhere },
+      depth: 1,
+      limit,
+      locale,
+    });
     return data.docs || [];
   } catch (error) {
     console.error("Error in getCuratedApartments:", error);
@@ -387,9 +421,11 @@ export async function getCuratedApartments(
 
 export async function getLocations(locale: string): Promise<Location[]> {
   try {
-    const data = await autoCacheFetch(
-      `/locations?limit=500&depth=1&locale=${locale}`,
-    );
+    const data = await autoCacheFetch(COLLECTION_TAGS.locations, {
+      limit: 500,
+      depth: 1,
+      locale,
+    });
     return data.docs || [];
   } catch (error) {
     console.error("Error in getLocations:", error);
@@ -399,7 +435,7 @@ export async function getLocations(locale: string): Promise<Location[]> {
 
 export async function getTags(locale: string): Promise<Tag[]> {
   try {
-    const data = await autoCacheFetch(`/tags?limit=200&locale=${locale}`);
+    const data = await autoCacheFetch(COLLECTION_TAGS.tags, { limit: 200, locale });
     return data.docs || [];
   } catch (error) {
     console.error("Error in getTags:", error);
@@ -410,6 +446,20 @@ export async function getTags(locale: string): Promise<Tag[]> {
 // ─────────────────────────────────────────────────────────────
 // App Settings
 // ─────────────────────────────────────────────────────────────
+
+export async function getPlans(locale: string): Promise<Plan[]> {
+  try {
+    const data = await autoCacheFetch(COLLECTION_TAGS.plans, {
+      limit: 100,
+      locale,
+      sort: "price",
+    });
+    return data.docs || [];
+  } catch (error) {
+    console.error("Error in getPlans:", error);
+    return [];
+  }
+}
 
 export async function getAppSettings(): Promise<AppSetting | null> {
   try {

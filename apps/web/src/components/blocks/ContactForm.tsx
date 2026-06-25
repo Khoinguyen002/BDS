@@ -1,17 +1,55 @@
+"use client";
+
 import type { LandingPage, User } from "@bds/shared/payload-types";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import { ShieldCheckIcon, StarIcon, ChatCircleTextIcon, ClockIcon } from "@phosphor-icons/react/dist/ssr";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import { Button } from "@/components/ui/button";
+import { Turnstile } from "@marsidev/react-turnstile";
+import { useState } from "react";
+import { submitLead } from "@/app/actions/lead";
+import { toast } from "sonner";
+import { Spinner } from "@phosphor-icons/react/dist/ssr";
 
-export default async function ContactForm(
+export default function ContactForm(
   props: Extract<
     NonNullable<LandingPage["blocks"]>[number],
     { blockType: "contactForm" }
-  > & { ownerId?: number | User },
+  > & { ownerId?: number | User | null },
 ) {
-  const { title, placeholder } = props;
-  const t = await getTranslations("contact");
+  const { title, placeholder, ownerId } = props;
+  const t = useTranslations("contact");
+  
+  const [cfToken, setCfToken] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!cfToken) {
+      toast.error(t("captcha_required") || "Vui lòng xác thực CAPTCHA");
+      return;
+    }
+
+    setIsLoading(true);
+    const formData = new FormData(e.currentTarget);
+    formData.set("cfTurnstileResponse", cfToken);
+    
+    // Extract ID if ownerId is an object
+    if (ownerId) {
+      const id = typeof ownerId === 'object' && ownerId !== null ? ownerId.id : ownerId;
+      formData.set("ownerId", String(id));
+    }
+
+    const res = await submitLead(formData);
+    setIsLoading(false);
+
+    if (res.error) {
+      toast.error(res.error);
+    } else {
+      toast.success(t("submit_success") || "Gửi thông tin thành công!");
+      (e.target as HTMLFormElement).reset();
+    }
+  };
 
   return (
     <section className="py-24 bg-background-subtle border-t border-border relative overflow-hidden">
@@ -94,7 +132,7 @@ export default async function ContactForm(
 
           {/* Form */}
           <AnimatedSection delay={0.2} direction="up" className="w-full md:w-7/12">
-            <form className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
                 <label
                   htmlFor="contact-name"
@@ -104,7 +142,9 @@ export default async function ContactForm(
                 </label>
                 <input
                   type="text"
+                  name="name"
                   id="contact-name"
+                  required
                   className="w-full px-4 py-3.5 border border-border bg-background outline-none transition-all focus:border-(--theme-primary) text-foreground placeholder:text-foreground-muted text-sm"
                   placeholder={t("full_name_placeholder")}
                 />
@@ -119,7 +159,9 @@ export default async function ContactForm(
                 </label>
                 <input
                   type="tel"
+                  name="phone"
                   id="contact-phone"
+                  required
                   className="w-full px-4 py-3.5 border border-border bg-background outline-none transition-all focus:border-(--theme-primary) text-foreground placeholder:text-foreground-muted text-sm"
                   placeholder={t("phone_placeholder")}
                 />
@@ -134,17 +176,27 @@ export default async function ContactForm(
                 </label>
                 <input
                   type="email"
+                  name="email"
                   id="contact-email"
                   className="w-full px-4 py-3.5 border border-border bg-background outline-none transition-all focus:border-(--theme-primary) text-foreground placeholder:text-foreground-muted text-sm"
                   placeholder={t("email_placeholder")}
                 />
               </div>
+              
+              <div className="mt-2">
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                  onSuccess={(token) => setCfToken(token)}
+                  options={{ theme: "auto" }}
+                />
+              </div>
 
               <Button
-                type="button"
-                className="w-full text-sm uppercase tracking-wider mt-2 py-6"
+                type="submit"
+                disabled={isLoading}
+                className="w-full text-sm uppercase tracking-wider mt-2 py-6 flex items-center justify-center"
               >
-                {t("submit_button")}
+                {isLoading ? <Spinner className="w-5 h-5 animate-spin" /> : t("submit_button")}
               </Button>
             </form>
           </AnimatedSection>

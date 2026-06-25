@@ -1,4 +1,5 @@
-import type { CollectionConfig } from "payload";
+import { APIError, type CollectionConfig } from "payload";
+import { env } from "../env";
 
 export const leadsAccess: CollectionConfig["access"] = {
   create: () => true,
@@ -34,7 +35,7 @@ export const Leads: CollectionConfig = {
       name: "owner",
       type: "relationship",
       relationTo: "users",
-      required: true,
+      required: false, // Made optional so platform homepage can receive generic leads
       label: { vi: "Agent quản lý", en: "Owner Agent" },
     },
     { name: "apartmentRef", type: "relationship", relationTo: "apartments", label: { vi: "Căn hộ liên quan", en: "Related Apartment" } },
@@ -81,10 +82,50 @@ export const Leads: CollectionConfig = {
         readOnly: true,
       }
     },
+    {
+      name: "cfTurnstileResponse",
+      type: "text",
+      admin: { hidden: true }, // Virtual field, not shown in admin
+    },
   ],
   hooks: {
     beforeChange: [
       async ({ data, req, operation }) => {
+        // 1. Lightweight Server-to-Server Authentication
+        // Ensure the request comes from our trusted Next.js Server Action
+        if (req.headers) {
+          const internalKey = req.headers.get?.("x-internal-api-key") || req.headers["x-internal-api-key"];
+          if (internalKey !== env.INTERNAL_API_KEY) {
+            throw new APIError("Unauthorized: Invalid Internal API Key", 401);
+          }
+        }
+
+        // 2. Cloudflare Turnstile Verification
+        if (operation === "create") {
+          const token = data.cfTurnstileResponse;
+          if (!token) {
+            throw new APIError("Missing Cloudflare Turnstile Token", 400);
+          }
+          
+          const formData = new FormData();
+          formData.append("secret", env.TURNSTILE_SECRET_KEY);
+          formData.append("response", token);
+          
+          const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+            method: "POST",
+            body: formData,
+          });
+          const verifyData = await verifyRes.json();
+          
+          if (!verifyData.success) {
+            throw new APIError("Bot detected: Invalid Turnstile Token", 400);
+          }
+          
+          // Delete the virtual field so it doesn't get saved to DB
+          delete data.cfTurnstileResponse;
+        }
+
+        // 3. Subscription limits check
         if (operation === "create" && data.owner) {
           const ownerId = typeof data.owner === 'object' ? data.owner.id : data.owner;
           const ownerUser = await req.payload.findByID({ collection: "users", id: String(ownerId), depth: 0, req });

@@ -8,6 +8,7 @@ import { DetailBody } from "@/components/apartments/DetailBody";
 import { PriceBreakdown } from "@/components/apartments/PriceBreakdown";
 import { StickyCTA } from "@/components/apartments/StickyCTA";
 import { SimilarListings } from "@/components/apartments/SimilarListings";
+import { ViewCounter } from "@/components/apartments/ViewCounter";
 import { User } from "@bds/shared/payload-types";
 import { MapPinIcon } from "@phosphor-icons/react/dist/ssr";
 
@@ -101,6 +102,7 @@ export default async function ApartmentDetailPage({ params }: PageProps) {
 
   return (
     <>
+      <ViewCounter apartmentId={apt.id} />
       <main className="min-h-screen bg-background pt-16 pb-12 md:pb-12">
         <div className="container py-6 md:py-10">
           <Breadcrumbs

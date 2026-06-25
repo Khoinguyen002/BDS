@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { vi } from "@payloadcms/translations/languages/vi";
 import { en } from "@payloadcms/translations/languages/en";
 import { postgresAdapter } from "@payloadcms/db-postgres";
+import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { s3Storage } from "@payloadcms/storage-s3";
 import { cloudinaryStorage } from "./lib/cloudinary-storage";
@@ -128,6 +129,19 @@ export default buildConfig({
       ],
     },
   },
+  email: env.SMTP_HOST ? nodemailerAdapter({
+    defaultFromAddress: env.SMTP_FROM_ADDRESS || "noreply@dounus.id.vn",
+    defaultFromName: env.SMTP_FROM_NAME || "BDS Platform",
+    transportOptions: {
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT || 587,
+      secure: env.SMTP_PORT === 465, // TLS/STARTTLS uses 587 (secure: false), SSL uses 465 (secure: true)
+      auth: (env.SMTP_USER && env.SMTP_PASS) ? {
+        user: env.SMTP_USER,
+        pass: env.SMTP_PASS,
+      } : undefined,
+    },
+  }) : undefined,
   serverURL: env.PAYLOAD_PUBLIC_SERVER_URL,
   db: postgresAdapter({
     pool: {
@@ -138,6 +152,11 @@ export default buildConfig({
   editor: lexicalEditor({}),
   cors: [env.NEXT_PUBLIC_APP_URL],
   csrf: [env.NEXT_PUBLIC_APP_URL],
+  rateLimit: {
+    window: 15 * 60 * 1000, // 15 minutes
+    max: 500, // Limit each IP to 500 requests per window
+    trustProxy: true,
+  },
   cookiePrefix: "payload",
   typescript: {
     outputFile: path.resolve(

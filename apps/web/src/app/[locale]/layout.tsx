@@ -7,6 +7,7 @@ import { locales } from '@/i18n/request';
 import { cookies } from 'next/headers';
 import { CurrencyProvider } from '@/hooks/useCurrency';
 import { getExchangeRates } from '@/lib/exchange-rate';
+import { Toaster } from 'sonner';
 
 // Locale layout — chỉ lo i18n + currency. <html>/<body>/theme nằm ở root layout
 // (src/app/layout.tsx) nên đổi locale không gây flash theme.
@@ -33,6 +34,7 @@ export default async function LocaleLayout({
       <CurrencyProvider initialCurrency={initialCurrency} initialRates={initialRates}>
         <HtmlLang locale={locale} />
         {children}
+        <Toaster richColors position="top-right" />
         <Footer />
       </CurrencyProvider>
     </NextIntlClientProvider>

@@ -4,7 +4,10 @@ const envSchema = z.object({
   DATABASE_URI: z
     .string()
     .default("postgres://postgres:postgres@127.0.0.1:5432/bds"),
-  PAYLOAD_SECRET: z.string().default("supersecret_bds_2026"),
+  PAYLOAD_SECRET: z.string(),
+  INTERNAL_API_KEY: z.string(),
+  TURNSTILE_SECRET_KEY: z.string(),
+  SUPABASE_URL: z.string().url(),
   PAYLOAD_PUBLIC_SERVER_URL: z.string().default("http://localhost:3001"),
   NEXT_PUBLIC_APP_URL: z.string().default("http://localhost:3000"),
   S3_BUCKET: z.string().optional(),
@@ -16,11 +19,19 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
   REVALIDATE_SECRET: z.string().default("bds-super-secret-token-2026"),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM_NAME: z.string().optional(),
+  SMTP_FROM_ADDRESS: z.string().optional(),
 });
 
 export const env = envSchema.parse({
   DATABASE_URI: process.env.DATABASE_URI,
   PAYLOAD_SECRET: process.env.PAYLOAD_SECRET,
+  INTERNAL_API_KEY: process.env.INTERNAL_API_KEY,
+  TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
   PAYLOAD_PUBLIC_SERVER_URL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   S3_BUCKET: process.env.S3_BUCKET,
@@ -32,4 +43,10 @@ export const env = envSchema.parse({
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
   REVALIDATE_SECRET: process.env.REVALIDATE_SECRET,
+  SMTP_HOST: process.env.SMTP_HOST,
+  SMTP_PORT: process.env.SMTP_PORT,
+  SMTP_USER: process.env.SMTP_USER,
+  SMTP_PASS: process.env.SMTP_PASS,
+  SMTP_FROM_NAME: process.env.SMTP_FROM_NAME,
+  SMTP_FROM_ADDRESS: process.env.SMTP_FROM_ADDRESS,
 });

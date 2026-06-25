@@ -375,6 +375,7 @@ export interface LandingPage {
         | {
             title?: string | null;
             description?: string | null;
+            apartmentsFilter?: (number | Apartment)[] | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'curatedCollections';
@@ -400,6 +401,19 @@ export interface LandingPage {
             id?: string | null;
             blockName?: string | null;
             blockType: 'ctaSupply';
+          }
+        | {
+            title?: string | null;
+            description?: string | null;
+            plansList?:
+              | {
+                  plan: number | Plan;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'platformPricing';
           }
       )[]
     | null;
@@ -473,6 +487,7 @@ export interface Template {
         | {
             title?: string | null;
             description?: string | null;
+            apartmentsFilter?: (number | Apartment)[] | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'curatedCollections';
@@ -498,6 +513,19 @@ export interface Template {
             id?: string | null;
             blockName?: string | null;
             blockType: 'ctaSupply';
+          }
+        | {
+            title?: string | null;
+            description?: string | null;
+            plansList?:
+              | {
+                  plan: number | Plan;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'platformPricing';
           }
       )[]
     | null;
@@ -565,6 +593,7 @@ export interface Apartment {
         id?: string | null;
       }[]
     | null;
+  viewCount?: number | null;
   slug?: string | null;
   owner: number | User;
   updatedAt: string;
@@ -870,6 +899,7 @@ export interface LandingPagesSelect<T extends boolean = true> {
           | {
               title?: T;
               description?: T;
+              apartmentsFilter?: T;
               id?: T;
               blockName?: T;
             };
@@ -895,6 +925,20 @@ export interface LandingPagesSelect<T extends boolean = true> {
               description?: T;
               buttonLabel?: T;
               buttonLink?: T;
+              id?: T;
+              blockName?: T;
+            };
+        platformPricing?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              plansList?:
+                | T
+                | {
+                    plan?: T;
+                    id?: T;
+                  };
               id?: T;
               blockName?: T;
             };
@@ -958,6 +1002,7 @@ export interface ApartmentsSelect<T extends boolean = true> {
         body?: T;
         id?: T;
       };
+  viewCount?: T;
   slug?: T;
   owner?: T;
   updatedAt?: T;
@@ -1042,6 +1087,7 @@ export interface TemplatesSelect<T extends boolean = true> {
           | {
               title?: T;
               description?: T;
+              apartmentsFilter?: T;
               id?: T;
               blockName?: T;
             };
@@ -1067,6 +1113,20 @@ export interface TemplatesSelect<T extends boolean = true> {
               description?: T;
               buttonLabel?: T;
               buttonLink?: T;
+              id?: T;
+              blockName?: T;
+            };
+        platformPricing?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              plansList?:
+                | T
+                | {
+                    plan?: T;
+                    id?: T;
+                  };
               id?: T;
               blockName?: T;
             };
@@ -1398,6 +1458,20 @@ export interface ComponentPermission {
      */
     excludeUsers?: (number | User)[] | null;
   };
+  platformPricing?: {
+    /**
+     * Để trống nếu tất cả các gói đều được phép dùng.
+     */
+    allowedPlans?: (number | Plan)[] | null;
+    /**
+     * Những user này sẽ luôn được phép xài block này bất kể họ ở gói nào. (Gõ để tìm theo email)
+     */
+    includeUsers?: (number | User)[] | null;
+    /**
+     * Những user này BỊ CẤM xài block này bất kể họ mua gói nào. (Gõ để tìm theo email)
+     */
+    excludeUsers?: (number | User)[] | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1467,6 +1541,7 @@ export interface Homepage {
         | {
             title?: string | null;
             description?: string | null;
+            apartmentsFilter?: (number | Apartment)[] | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'curatedCollections';
@@ -1492,6 +1567,19 @@ export interface Homepage {
             id?: string | null;
             blockName?: string | null;
             blockType: 'ctaSupply';
+          }
+        | {
+            title?: string | null;
+            description?: string | null;
+            plansList?:
+              | {
+                  plan: number | Plan;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'platformPricing';
           }
       )[]
     | null;
@@ -1583,6 +1671,13 @@ export interface ComponentPermissionsSelect<T extends boolean = true> {
         includeUsers?: T;
         excludeUsers?: T;
       };
+  platformPricing?:
+    | T
+    | {
+        allowedPlans?: T;
+        includeUsers?: T;
+        excludeUsers?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1646,6 +1741,7 @@ export interface HomepageSelect<T extends boolean = true> {
           | {
               title?: T;
               description?: T;
+              apartmentsFilter?: T;
               id?: T;
               blockName?: T;
             };
@@ -1671,6 +1767,20 @@ export interface HomepageSelect<T extends boolean = true> {
               description?: T;
               buttonLabel?: T;
               buttonLink?: T;
+              id?: T;
+              blockName?: T;
+            };
+        platformPricing?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              plansList?:
+                | T
+                | {
+                    plan?: T;
+                    id?: T;
+                  };
               id?: T;
               blockName?: T;
             };

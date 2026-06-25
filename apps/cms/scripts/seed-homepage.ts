@@ -5,6 +5,24 @@ import configPromise from "../src/payload.config";
 export async function seedHomepage() {
   const payload = await getPayload({ config: configPromise });
 
+  // Fetch plans to populate the pricing block
+  const { docs: plans } = await payload.find({
+    collection: "plans",
+    limit: 10,
+  });
+
+  const freePlan = plans.find(p => p.slug === "free");
+  const starterPlan = plans.find(p => p.slug === "starter");
+  const proPlan = plans.find(p => p.slug === "pro");
+  const customPlan = plans.find(p => p.slug === "custom");
+
+  const orderedPlansList = [
+    freePlan && { plan: freePlan.id },
+    starterPlan && { plan: starterPlan.id },
+    proPlan && { plan: proPlan.id },
+    customPlan && { plan: customPlan.id },
+  ].filter(Boolean);
+
   const blocksVi = [
     {
       blockType: "platformHeroBanner",
@@ -24,6 +42,12 @@ export async function seedHomepage() {
       blockType: "platformFeaturedAgents",
       title: "Môi giới tiêu biểu",
       limit: 4,
+    },
+    {
+      blockType: "platformPricing",
+      title: "Bảng giá dịch vụ",
+      description: "Chọn gói phù hợp với bạn",
+      plansList: orderedPlansList,
     },
     {
       blockType: "ctaSupply",
@@ -53,6 +77,12 @@ export async function seedHomepage() {
       blockType: "platformFeaturedAgents",
       title: "Featured Agents",
       limit: 4,
+    },
+    {
+      blockType: "platformPricing",
+      title: "Pricing Plans",
+      description: "Choose the right plan for you",
+      plansList: orderedPlansList,
     },
     {
       blockType: "ctaSupply",

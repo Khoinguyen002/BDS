@@ -626,6 +626,16 @@ export async function seedTranslations() {
     // Lead generation form
     { key: "lead.form_title_sale", namespace: "contact", vi: "Nhận Báo Giá & Tài Liệu", en: "Get Quote & Documents" },
     { key: "lead.form_title_rent", namespace: "contact", vi: "Liên Hệ Tư Vấn Thuê", en: "Contact for Rent" },
+    
+    // Pricing Page
+    { key: "common.pricing.title", namespace: "common", vi: "Bảng Giá Dịch Vụ", en: "Pricing Plans" },
+    { key: "common.pricing.description", namespace: "common", vi: "Đầu tư thông minh cho sự nghiệp bất động sản của bạn. Bắt đầu miễn phí, nâng cấp khi bạn sẵn sàng.", en: "Smart investment for your real estate career. Start for free, upgrade when ready." },
+    { key: "common.pricing.get_started", namespace: "common", vi: "Bắt Đầu Ngay", en: "Get Started" },
+    { key: "common.pricing.contact_us", namespace: "common", vi: "Liên Hệ Thương Lượng", en: "Contact Us" },
+    { key: "common.pricing.month", namespace: "common", vi: "tháng", en: "month" },
+    { key: "common.pricing.features", namespace: "common", vi: "Quyền lợi bao gồm:", en: "Features included:" },
+    { key: "common.pricing.most_popular", namespace: "common", vi: "PHỔ BIẾN NHẤT", en: "MOST POPULAR" },
+    { key: "common.pricing.custom_price", namespace: "common", vi: "Thương lượng", en: "Negotiable" },
   ] satisfies {
     key: string;
     namespace: Translation["namespace"];

@@ -234,6 +234,13 @@ export const Apartments: CollectionConfig = {
 
     // ── Sidebar (hệ thống) ───────────────────────────────────
     {
+      name: "viewCount",
+      type: "number",
+      defaultValue: 0,
+      admin: { position: "sidebar", readOnly: true },
+      label: { vi: "Lượt xem", en: "View Count" },
+    },
+    {
       name: "slug",
       type: "text",
       label: { vi: "Đường dẫn (Slug)", en: "Slug" },

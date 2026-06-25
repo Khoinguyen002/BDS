@@ -31,7 +31,7 @@ export const REVERSE_DEPS: Readonly<Record<string, readonly CollectionTag[]>> = 
   [COLLECTION_TAGS.amenities]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.homepage],
   [COLLECTION_TAGS.users]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.homepage, COLLECTION_TAGS.users],
   [COLLECTION_TAGS.apartments]: [COLLECTION_TAGS.landingPages, COLLECTION_TAGS.homepage],
-  [COLLECTION_TAGS.plans]: [COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.users, COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.homepage],
+  [COLLECTION_TAGS.plans]: [COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.homepage, COLLECTION_TAGS.users, COLLECTION_TAGS.apartments],
   [COLLECTION_TAGS.subscriptions]: [COLLECTION_TAGS.users, COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.homepage],
 };
 

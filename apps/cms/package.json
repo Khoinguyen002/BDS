@@ -14,12 +14,15 @@
     "seed:apartments": "tsx --env-file=.env scripts/seed-apartments.ts",
     "seed:locations": "tsx --env-file=.env scripts/seed-locations.ts",
     "seed:homepage": "tsx --env-file=.env scripts/seed-homepage.ts",
+    "seed:plans": "tsx --env-file=.env scripts/seed-plans.ts",
     "migrate:supabase": "tsx --env-file=.env scripts/migrate-from-supabase.ts",
-    "gen:cache-tags": "tsx scripts/gen-cache-tags.ts"
+    "gen:cache-tags": "tsx scripts/gen-cache-tags.ts",
+    "test:email": "tsx --env-file=.env scripts/test-email.ts"
   },
   "dependencies": {
     "@bds/shared": "workspace:*",
     "@payloadcms/db-postgres": "^3.85.1",
+    "@payloadcms/email-nodemailer": "^3.85.1",
     "@payloadcms/next": "^3.85.1",
     "@payloadcms/plugin-cloud-storage": "^3.85.1",
     "@payloadcms/richtext-lexical": "^3.85.1",

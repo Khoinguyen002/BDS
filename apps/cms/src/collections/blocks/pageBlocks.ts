@@ -223,6 +223,37 @@ export const pageBlocks: Block[] = [
         localized: true,
         label: { vi: "Mô tả", en: "Description" },
       },
+      {
+        name: "apartmentsFilter",
+        type: "relationship",
+        relationTo: "apartments",
+        label: {
+          vi: "Chọn các căn hộ hiển thị (Để trống sẽ tự động hiển thị)",
+          en: "Filter Apartments",
+        },
+        hasMany: true,
+        admin: {
+          components: {
+            Field: "@/components/ApartmentPickerField#ApartmentPickerField",
+          },
+        },
+        filterOptions: ({ data, siblingData }): any => {
+          const owner =
+            (data as any)?.owner ||
+            (siblingData as any)?.owner;
+
+          const ownerId =
+            typeof owner === "object" && owner !== null && "id" in owner
+              ? owner.id
+              : owner;
+
+          if (ownerId) {
+            return { owner: { equals: ownerId } };
+          }
+
+          return { id: { exists: true } };
+        },
+      },
     ],
   },
   {
@@ -305,6 +336,44 @@ export const pageBlocks: Block[] = [
         name: "buttonLink",
         type: "text",
         label: { vi: "Link nút", en: "Button Link" },
+      },
+    ],
+  },
+  {
+    slug: "platformPricing",
+    labels: {
+      singular: { vi: "Bảng Giá (Trang chủ)", en: "Platform Pricing" },
+      plural: { vi: "Bảng Giá (Trang chủ)", en: "Platform Pricing" },
+    },
+    admin: {
+      group: "Content",
+    },
+    fields: [
+      {
+        name: "title",
+        type: "text",
+        localized: true,
+        label: { vi: "Tiêu đề", en: "Title" },
+      },
+      {
+        name: "description",
+        type: "text",
+        localized: true,
+        label: { vi: "Mô tả", en: "Description" },
+      },
+      {
+        name: "plansList",
+        type: "array",
+        label: { vi: "Các gói hiển thị (Sắp xếp theo thứ tự)", en: "Display Plans (Ordered)" },
+        fields: [
+          {
+            name: "plan",
+            type: "relationship",
+            relationTo: "plans",
+            required: true,
+            label: { vi: "Chọn gói", en: "Select Plan" },
+          },
+        ],
       },
     ],
   },

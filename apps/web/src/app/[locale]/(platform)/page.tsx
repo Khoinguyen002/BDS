@@ -5,6 +5,8 @@ import { CuratedCollections } from "@/components/home/CuratedCollections";
 import { MarketSnapshot } from "@/components/home/MarketSnapshot";
 import { FeaturedAgents } from "@/components/home/FeaturedAgents";
 import { CtaSupply } from "@/components/home/CtaSupply";
+import PlatformPricingBlock from "@/components/home/PlatformPricingBlock";
+import ContactForm from "@/components/blocks/ContactForm";
 
 interface PageProps {
   params: Promise<{
@@ -18,8 +20,8 @@ export default async function GlobalHomePage({ params }: PageProps) {
   // Pre-fetch some data for SSR
   const [featuredAgents, rentApartments, saleApartments, locations, allTags, homepageData] = await Promise.all([
     getFeaturedAgents(4),
-    getCuratedApartments("rent", locale, "", 3), 
-    getCuratedApartments("sale", locale, "", 3),
+    getCuratedApartments("rent", locale, {}, 3),
+    getCuratedApartments("sale", locale, {}, 3),
     getLocations(locale),
     getTags(locale),
     getHomepage(),
@@ -44,16 +46,25 @@ export default async function GlobalHomePage({ params }: PageProps) {
                   subtitle={block.subtitle} 
                 />
               );
-            case "curatedCollections":
+            case "curatedCollections": {
+              const hasFilter = block.apartmentsFilter && block.apartmentsFilter.length > 0;
+              let parsedRent = rentApartments;
+              let parsedSale = saleApartments;
+              if (hasFilter) {
+                 const apts = block.apartmentsFilter.map((ap: any) => typeof ap === 'object' ? ap : ({} as any)).filter((a: any) => a.id);
+                 parsedRent = apts.filter((a: any) => a.listingType === 'rent');
+                 parsedSale = apts.filter((a: any) => a.listingType === 'sale');
+              }
               return (
                 <CuratedCollections 
                   key={idx} 
-                  initialRent={rentApartments} 
-                  initialSale={saleApartments} 
+                  initialRent={parsedRent} 
+                  initialSale={parsedSale} 
                   title={block.title} 
                   description={block.description} 
                 />
               );
+            }
             case "marketSnapshot":
               return (
                 <MarketSnapshot 
@@ -72,6 +83,16 @@ export default async function GlobalHomePage({ params }: PageProps) {
                 />
               );
             }
+            case "platformPricing":
+              return (
+                <PlatformPricingBlock 
+                  key={idx} 
+                  locale={locale} 
+                  title={block.title} 
+                  description={block.description} 
+                  plansList={block.plansList}
+                />
+              );
             case "ctaSupply":
               return (
                 <CtaSupply 
@@ -80,6 +101,14 @@ export default async function GlobalHomePage({ params }: PageProps) {
                   description={block.description} 
                   buttonLabel={block.buttonLabel} 
                   buttonLink={block.buttonLink} 
+                />
+              );
+            case "contactForm":
+              return (
+                <ContactForm 
+                  key={idx} 
+                  {...block} 
+                  ownerId={undefined} // No specific owner for platform leads
                 />
               );
             default:
