@@ -1,7 +1,6 @@
 "use server";
 
 import { SERVER_URL } from "@/lib/payload-fetcher";
-import { revalidateTag } from "next/cache";
 
 export async function submitLead(formData: FormData) {
   try {

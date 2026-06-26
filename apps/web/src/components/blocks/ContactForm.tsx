@@ -9,7 +9,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import { useState } from "react";
 import { submitLead } from "@/app/actions/lead";
 import { toast } from "sonner";
-import { Spinner } from "@phosphor-icons/react/dist/ssr";
+import { SpinnerIcon } from "@phosphor-icons/react/dist/ssr";
 
 export default function ContactForm(
   props: Extract<
@@ -23,10 +23,10 @@ export default function ContactForm(
   const [cfToken, setCfToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!cfToken) {
-      toast.error(t("captcha_required") || "Vui lòng xác thực CAPTCHA");
+      toast.error(t("captcha_required" as never) || "Vui lòng xác thực CAPTCHA");
       return;
     }
 
@@ -46,7 +46,7 @@ export default function ContactForm(
     if (res.error) {
       toast.error(res.error);
     } else {
-      toast.success(t("submit_success") || "Gửi thông tin thành công!");
+      toast.success(t("submit_success" as never) || "Gửi thông tin thành công!");
       (e.target as HTMLFormElement).reset();
     }
   };
@@ -196,7 +196,7 @@ export default function ContactForm(
                 disabled={isLoading}
                 className="w-full text-sm uppercase tracking-wider mt-2 py-6 flex items-center justify-center"
               >
-                {isLoading ? <Spinner className="w-5 h-5 animate-spin" /> : t("submit_button")}
+                {isLoading ? <SpinnerIcon className="w-5 h-5 animate-spin" /> : t("submit_button")}
               </Button>
             </form>
           </AnimatedSection>

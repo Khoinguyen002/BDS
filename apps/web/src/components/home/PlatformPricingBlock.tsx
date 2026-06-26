@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { getPlans } from "@/lib/payload-fetcher";
-import { Check } from "@phosphor-icons/react/dist/ssr";
+import { CheckIcon } from "@phosphor-icons/react/dist/ssr";
 
 import type { Plan } from "@bds/shared/payload-types";
 
@@ -112,7 +112,7 @@ export default async function PlatformPricingBlock({ title, description, locale,
                   <ul className="space-y-4">
                     {plan.limits && (
                       <li className="flex items-start gap-3 text-sm text-foreground-muted leading-tight">
-                        <Check className="w-5 h-5 text-primary shrink-0" />
+                        <CheckIcon className="w-5 h-5 text-primary shrink-0" />
                         <span>
                           <strong className="text-foreground font-medium">{plan.limits.maxListings}</strong> Tin đăng
                         </span>
@@ -120,21 +120,21 @@ export default async function PlatformPricingBlock({ title, description, locale,
                     )}
                     {plan.limits?.maxLeadsPerMonth ? (
                       <li className="flex items-start gap-3 text-sm text-foreground-muted leading-tight">
-                        <Check className="w-5 h-5 text-primary shrink-0" />
+                        <CheckIcon className="w-5 h-5 text-primary shrink-0" />
                         <span>
                           <strong className="text-foreground font-medium">{plan.limits.maxLeadsPerMonth}</strong> Lead/tháng
                         </span>
                       </li>
                     ) : plan.limits ? (
                       <li className="flex items-start gap-3 text-sm text-foreground-muted leading-tight">
-                        <Check className="w-5 h-5 text-primary shrink-0" />
+                        <CheckIcon className="w-5 h-5 text-primary shrink-0" />
                         <span>Không giới hạn Lead</span>
                       </li>
                     ) : null}
 
                     {plan.features?.customFeatures?.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-3 text-sm text-foreground-muted leading-tight">
-                        <Check className="w-5 h-5 text-primary shrink-0" />
+                        <CheckIcon className="w-5 h-5 text-primary shrink-0" />
                         <span>{feature.text}</span>
                       </li>
                     ))}

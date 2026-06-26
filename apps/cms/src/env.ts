@@ -7,7 +7,7 @@ const envSchema = z.object({
   PAYLOAD_SECRET: z.string(),
   INTERNAL_API_KEY: z.string(),
   TURNSTILE_SECRET_KEY: z.string(),
-  SUPABASE_URL: z.string().url(),
+  SUPABASE_URL: z.string(),
   PAYLOAD_PUBLIC_SERVER_URL: z.string().default("http://localhost:3001"),
   NEXT_PUBLIC_APP_URL: z.string().default("http://localhost:3000"),
   S3_BUCKET: z.string().optional(),

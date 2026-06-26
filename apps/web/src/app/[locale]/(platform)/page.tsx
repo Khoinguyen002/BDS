@@ -51,9 +51,9 @@ export default async function GlobalHomePage({ params }: PageProps) {
               let parsedRent = rentApartments;
               let parsedSale = saleApartments;
               if (hasFilter) {
-                 const apts = block.apartmentsFilter.map((ap: any) => typeof ap === 'object' ? ap : ({} as any)).filter((a: any) => a.id);
-                 parsedRent = apts.filter((a: any) => a.listingType === 'rent');
-                 parsedSale = apts.filter((a: any) => a.listingType === 'sale');
+                 const apts = block.apartmentsFilter.map((ap: unknown) => typeof ap === 'object' && ap !== null ? ap : ({} as Record<string, unknown>)).filter((a: Record<string, unknown>) => a.id);
+                 parsedRent = apts.filter((a: Record<string, unknown>) => a.listingType === 'rent') as typeof rentApartments;
+                 parsedSale = apts.filter((a: Record<string, unknown>) => a.listingType === 'sale') as typeof saleApartments;
               }
               return (
                 <CuratedCollections 

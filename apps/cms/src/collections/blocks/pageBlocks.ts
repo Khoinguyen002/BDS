@@ -237,10 +237,10 @@ export const pageBlocks: Block[] = [
             Field: "@/components/ApartmentPickerField#ApartmentPickerField",
           },
         },
-        filterOptions: ({ data, siblingData }): any => {
+        filterOptions: ({ data, siblingData }): import("payload").Where => {
           const owner =
-            (data as any)?.owner ||
-            (siblingData as any)?.owner;
+            (data as Record<string, unknown>)?.owner ||
+            (siblingData as Record<string, unknown>)?.owner;
 
           const ownerId =
             typeof owner === "object" && owner !== null && "id" in owner

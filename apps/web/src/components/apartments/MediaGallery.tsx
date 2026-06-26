@@ -7,7 +7,7 @@ import {
   VirtualRealityIcon,
   CaretLeftIcon,
   CaretRightIcon,
-  X as XIcon,
+  XIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { useTranslations } from "next-intl";
 import useEmblaCarousel from "embla-carousel-react";

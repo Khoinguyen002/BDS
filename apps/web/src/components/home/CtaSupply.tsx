@@ -11,7 +11,7 @@ type CtaSupplyProps = {
   buttonLink?: string;
 };
 
-export const CtaSupply = ({ title, description, buttonLabel, buttonLink }: CtaSupplyProps) => {
+export const CtaSupply = ({ title, description, buttonLabel }: CtaSupplyProps) => {
   const t = useTranslations("home");
   return (
     <section className="py-24 bg-foreground text-background">
