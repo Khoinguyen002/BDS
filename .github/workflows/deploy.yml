@@ -1,0 +1,58 @@
+name: Deploy Worker
+on:
+  push:
+    branches:
+      - main
+      - dev # Nhánh thứ 2 (dev)
+    paths:
+      - "apps/web/**" # Vẫn giữ rule chỉ build khi có code web thay đổi
+      - "packages/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Build Next.js for Cloudflare (OpenNext)
+        run: pnpm run build:cf
+        working-directory: apps/web
+
+      # -----------------------------------------------------------------
+      # DEPLOY CHO NHÁNH DEV (Môi trường test)
+      # -----------------------------------------------------------------
+      - name: Deploy with Wrangler (Dev)
+        if: github.ref == 'refs/heads/dev' # Chỉ chạy step này nếu push lên nhánh dev
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --env dev
+          workingDirectory: "apps/web"
+
+      # -----------------------------------------------------------------
+      # DEPLOY CHO NHÁNH MAIN (Môi trường production)
+      # -----------------------------------------------------------------
+      - name: Deploy with Wrangler (Production)
+        if: github.ref == 'refs/heads/main' # Chỉ chạy step này nếu push lên nhánh main
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --env production
+          workingDirectory: "apps/web"

@@ -1,0 +1,60 @@
+name: Deploy CMS to VPS
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      # Chỉ trigger deploy CMS nếu có thay đổi trong thư mục cms hoặc packages dùng chung
+      - "apps/cms/**"
+      - "packages/**"
+
+jobs:
+  deploy-vps:
+    runs-on: ubuntu-latest
+    steps:
+      # -----------------------------------------------------------------
+      # DEPLOY CMS CHO NHÁNH DEV
+      # -----------------------------------------------------------------
+      - name: Deploy CMS (Dev)
+        if: github.ref == 'refs/heads/dev'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }} # Tuỳ chọn, mặc định là 22
+          script: |
+            cd ~/dev-bds/BDS
+
+            # Pull code mới nhất
+            git pull origin dev
+
+            # Cài dependency và build
+            pnpm install
+            pnpm --filter cms build
+
+            pm2 restart bds-cms-dev
+
+      # -----------------------------------------------------------------
+      # DEPLOY CMS CHO NHÁNH MAIN
+      # -----------------------------------------------------------------
+      - name: Deploy CMS (Production)
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            cd ~/BDS
+
+            # Pull code mới nhất
+            git pull origin main
+
+            # Cài dependency và build
+            pnpm install
+            pnpm --filter cms build
+
+            pm2 restart bds-cms-prod
