@@ -129,25 +129,30 @@ export default buildConfig({
       ],
     },
   },
-  email: env.SMTP_HOST ? nodemailerAdapter({
-    defaultFromAddress: env.SMTP_FROM_ADDRESS || "noreply@dounus.id.vn",
-    defaultFromName: env.SMTP_FROM_NAME || "BDS Platform",
-    transportOptions: {
-      host: env.SMTP_HOST,
-      port: env.SMTP_PORT || 587,
-      secure: env.SMTP_PORT === 465, // TLS/STARTTLS uses 587 (secure: false), SSL uses 465 (secure: true)
-      auth: (env.SMTP_USER && env.SMTP_PASS) ? {
-        user: env.SMTP_USER,
-        pass: env.SMTP_PASS,
-      } : undefined,
-    },
-  }) : undefined,
+  email: env.SMTP_HOST
+    ? nodemailerAdapter({
+        defaultFromAddress: env.SMTP_FROM_ADDRESS || "noreply@dounus.id.vn",
+        defaultFromName: env.SMTP_FROM_NAME || "BDS Platform",
+        transportOptions: {
+          host: env.SMTP_HOST,
+          port: env.SMTP_PORT || 587,
+          secure: env.SMTP_PORT === 465, // TLS/STARTTLS uses 587 (secure: false), SSL uses 465 (secure: true)
+          auth:
+            env.SMTP_USER && env.SMTP_PASS
+              ? {
+                  user: env.SMTP_USER,
+                  pass: env.SMTP_PASS,
+                }
+              : undefined,
+        },
+      })
+    : undefined,
   serverURL: env.PAYLOAD_PUBLIC_SERVER_URL,
   db: postgresAdapter({
     pool: {
       connectionString: env.DATABASE_URI,
     },
-    push: true,
+    push: env.PAYLOAD_DISABLE_DB_PUSH === "1",
   }),
   editor: lexicalEditor({}),
   cors: [env.NEXT_PUBLIC_APP_URL],
@@ -165,12 +170,21 @@ export default buildConfig({
     ),
   },
   secret: env.PAYLOAD_SECRET,
-  collections: [Users, LandingPages, Media, Apartments, Leads, Templates, Translations, Amenities, Tags, Locations, Plans, Subscriptions],
-  globals: [
-    AppSettings,
-    ComponentPermissions,
-    Homepage
+  collections: [
+    Users,
+    LandingPages,
+    Media,
+    Apartments,
+    Leads,
+    Templates,
+    Translations,
+    Amenities,
+    Tags,
+    Locations,
+    Plans,
+    Subscriptions,
   ],
+  globals: [AppSettings, ComponentPermissions, Homepage],
   plugins: [
     // Ưu tiên Cloudinary nếu có cấu hình; fallback S3; nếu không có cả hai → local storage.
     ...(env.CLOUDINARY_CLOUD_NAME
@@ -184,24 +198,24 @@ export default buildConfig({
           }),
         ]
       : env.S3_BUCKET
-      ? [
-          s3Storage({
-            collections: {
-              media: true,
-            },
-            bucket: env.S3_BUCKET,
-            config: {
-              credentials: {
-                accessKeyId: env.S3_ACCESS_KEY_ID || "",
-                secretAccessKey: env.S3_SECRET_ACCESS_KEY || "",
+        ? [
+            s3Storage({
+              collections: {
+                media: true,
               },
-              region: env.S3_REGION,
-              endpoint: env.S3_ENDPOINT || "",
-              forcePathStyle: true,
-            },
-          }),
-        ]
-      : []),
+              bucket: env.S3_BUCKET,
+              config: {
+                credentials: {
+                  accessKeyId: env.S3_ACCESS_KEY_ID || "",
+                  secretAccessKey: env.S3_SECRET_ACCESS_KEY || "",
+                },
+                region: env.S3_REGION,
+                endpoint: env.S3_ENDPOINT || "",
+                forcePathStyle: true,
+              },
+            }),
+          ]
+        : []),
   ],
   endpoints: [
     {
