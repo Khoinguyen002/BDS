@@ -15,6 +15,10 @@ const intlMiddleware = createMiddleware({
 export default intlMiddleware;
 
 export const config = {
-  // Match only internationalized pathnames
-  matcher: ["/", "/(vi|en)/:path*"],
+  matcher: [
+    "/",
+    "/(vi|en)/:path*",
+    // Catch paths without locale prefix (để redirect về /vi/...)
+    "/((?!_next|api|.*\\..*).*)",
+  ],
 };
