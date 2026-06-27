@@ -33,6 +33,8 @@ jobs:
       - name: Build Next.js for Cloudflare (OpenNext)
         run: pnpm run build:cf
         working-directory: apps/web
+        env:
+          NEXT_PUBLIC_SERVER_URL: ${{ github.ref == 'refs/heads/main' && 'https://cms.dounus.id.vn' || 'https://cms-dev.dounus.id.vn' }}
 
       # -----------------------------------------------------------------
       # DEPLOY CHO NHÁNH DEVELOP (Môi trường test)
