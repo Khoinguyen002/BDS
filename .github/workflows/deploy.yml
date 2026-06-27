@@ -3,8 +3,9 @@ on:
   push:
     branches:
       - main
-      - dev # Nhánh thứ 2 (dev)
+      - develop # Tên nhánh thật của mầy là develop, không phải dev
     paths:
+      - ".github/workflows/deploy.yml" # Cho phép trigger khi sửa chính file workflow này
       - "apps/web/**" # Vẫn giữ rule chỉ build khi có code web thay đổi
       - "packages/**"
 
@@ -34,10 +35,10 @@ jobs:
         working-directory: apps/web
 
       # -----------------------------------------------------------------
-      # DEPLOY CHO NHÁNH DEV (Môi trường test)
+      # DEPLOY CHO NHÁNH DEVELOP (Môi trường test)
       # -----------------------------------------------------------------
       - name: Deploy with Wrangler (Dev)
-        if: github.ref == 'refs/heads/dev' # Chỉ chạy step này nếu push lên nhánh dev
+        if: github.ref == 'refs/heads/develop' # Chỉ chạy step này nếu push lên nhánh develop
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

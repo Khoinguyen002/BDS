@@ -3,8 +3,9 @@ on:
   push:
     branches:
       - main
-      - dev
+      - develop
     paths:
+      - ".github/workflows/deploy-cms.yml" # Cho phép trigger khi sửa chính file workflow này
       # Chỉ trigger deploy CMS nếu có thay đổi trong thư mục cms hoặc packages dùng chung
       - "apps/cms/**"
       - "packages/**"
@@ -14,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # -----------------------------------------------------------------
-      # DEPLOY CMS CHO NHÁNH DEV
+      # DEPLOY CMS CHO NHÁNH DEVELOP
       # -----------------------------------------------------------------
       - name: Deploy CMS (Dev)
-        if: github.ref == 'refs/heads/dev'
+        if: github.ref == 'refs/heads/develop'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}

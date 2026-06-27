@@ -48,7 +48,7 @@
       "name": "bds-web-dev",
       "routes": [
         {
-          "pattern": "dev.bds.dounus.id.vn",
+          "pattern": "dev-bds.dounus.id.vn",
           "custom_domain": true,
         },
       ],
