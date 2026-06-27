@@ -3,6 +3,7 @@
 // NEXT_PUBLIC_* được Next inline lúc build cho client bundle.
 
 export const env = {
+  NODE_ENV: process.env.NODE_ENV ?? "development",
   // URL Payload CMS — dùng cho cả server (fetcher) lẫn client (ảnh).
   NEXT_PUBLIC_SERVER_URL:
     process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:3001",

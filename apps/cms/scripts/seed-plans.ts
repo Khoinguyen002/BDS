@@ -169,10 +169,11 @@ export async function seedPlans() {
         
         // Update English locale
         const enData = plansEn.find(p => p.slug === plan.slug);
-        if (enData && updated.features?.customFeatures) {
+        const updatedCustomFeatures = updated.features?.customFeatures;
+        if (enData && updatedCustomFeatures) {
           enData.features.customFeatures = enData.features.customFeatures.map((item, index) => ({
             ...item,
-            id: updated.features.customFeatures[index]?.id,
+            id: updatedCustomFeatures[index]?.id,
           }));
           await payload.update({
             collection: "plans",
@@ -192,10 +193,11 @@ export async function seedPlans() {
         
         // Create English locale
         const enData = plansEn.find(p => p.slug === plan.slug);
-        if (enData && created.features?.customFeatures) {
+        const createdCustomFeatures = created.features?.customFeatures;
+        if (enData && createdCustomFeatures) {
           enData.features.customFeatures = enData.features.customFeatures.map((item, index) => ({
             ...item,
-            id: created.features.customFeatures[index]?.id,
+            id: createdCustomFeatures[index]?.id,
           }));
           await payload.update({
             collection: "plans",

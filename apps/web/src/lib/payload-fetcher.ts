@@ -26,7 +26,7 @@ export type Where = {
 };
 
 export const SERVER_URL = env.NEXT_PUBLIC_SERVER_URL;
-const REVALIDATE_TIME = false; // Infinite cache — chỉ dựa vào tag purge từ CMS.
+const REVALIDATE_TIME = env.NODE_ENV === "development" ? 1 : false; // Infinite cache — chỉ dựa vào tag purge từ CMS.
 const DEFAULT_LOCALE = "vi";
 
 /**

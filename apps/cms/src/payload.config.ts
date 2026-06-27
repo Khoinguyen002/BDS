@@ -131,21 +131,21 @@ export default buildConfig({
   },
   email: env.SMTP_HOST
     ? nodemailerAdapter({
-        defaultFromAddress: env.SMTP_FROM_ADDRESS || "noreply@dounus.id.vn",
-        defaultFromName: env.SMTP_FROM_NAME || "BDS Platform",
-        transportOptions: {
-          host: env.SMTP_HOST,
-          port: env.SMTP_PORT || 587,
-          secure: env.SMTP_PORT === 465, // TLS/STARTTLS uses 587 (secure: false), SSL uses 465 (secure: true)
-          auth:
-            env.SMTP_USER && env.SMTP_PASS
-              ? {
-                  user: env.SMTP_USER,
-                  pass: env.SMTP_PASS,
-                }
-              : undefined,
-        },
-      })
+      defaultFromAddress: env.SMTP_FROM_ADDRESS || "noreply@dounus.id.vn",
+      defaultFromName: env.SMTP_FROM_NAME || "BDS Platform",
+      transportOptions: {
+        host: env.SMTP_HOST,
+        port: env.SMTP_PORT || 587,
+        secure: env.SMTP_PORT === 465, // TLS/STARTTLS uses 587 (secure: false), SSL uses 465 (secure: true)
+        auth:
+          env.SMTP_USER && env.SMTP_PASS
+            ? {
+              user: env.SMTP_USER,
+              pass: env.SMTP_PASS,
+            }
+            : undefined,
+      },
+    })
     : undefined,
   serverURL: env.PAYLOAD_PUBLIC_SERVER_URL,
   db: postgresAdapter({
@@ -157,11 +157,6 @@ export default buildConfig({
   editor: lexicalEditor({}),
   cors: [env.NEXT_PUBLIC_APP_URL],
   csrf: [env.NEXT_PUBLIC_APP_URL],
-  rateLimit: {
-    window: 15 * 60 * 1000, // 15 minutes
-    max: 500, // Limit each IP to 500 requests per window
-    trustProxy: true,
-  },
   cookiePrefix: "payload",
   typescript: {
     outputFile: path.resolve(
@@ -189,32 +184,32 @@ export default buildConfig({
     // Ưu tiên Cloudinary nếu có cấu hình; fallback S3; nếu không có cả hai → local storage.
     ...(env.CLOUDINARY_CLOUD_NAME
       ? [
-          cloudinaryStorage({
-            cloudName: env.CLOUDINARY_CLOUD_NAME,
-            apiKey: env.CLOUDINARY_API_KEY || "",
-            apiSecret: env.CLOUDINARY_API_SECRET || "",
-            folder: "bds",
-            collections: { media: true },
-          }),
-        ]
+        cloudinaryStorage({
+          cloudName: env.CLOUDINARY_CLOUD_NAME,
+          apiKey: env.CLOUDINARY_API_KEY || "",
+          apiSecret: env.CLOUDINARY_API_SECRET || "",
+          folder: "bds",
+          collections: { media: true },
+        }),
+      ]
       : env.S3_BUCKET
         ? [
-            s3Storage({
-              collections: {
-                media: true,
+          s3Storage({
+            collections: {
+              media: true,
+            },
+            bucket: env.S3_BUCKET,
+            config: {
+              credentials: {
+                accessKeyId: env.S3_ACCESS_KEY_ID || "",
+                secretAccessKey: env.S3_SECRET_ACCESS_KEY || "",
               },
-              bucket: env.S3_BUCKET,
-              config: {
-                credentials: {
-                  accessKeyId: env.S3_ACCESS_KEY_ID || "",
-                  secretAccessKey: env.S3_SECRET_ACCESS_KEY || "",
-                },
-                region: env.S3_REGION,
-                endpoint: env.S3_ENDPOINT || "",
-                forcePathStyle: true,
-              },
-            }),
-          ]
+              region: env.S3_REGION,
+              endpoint: env.S3_ENDPOINT || "",
+              forcePathStyle: true,
+            },
+          }),
+        ]
         : []),
   ],
   endpoints: [
