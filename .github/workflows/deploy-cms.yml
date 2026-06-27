@@ -63,3 +63,29 @@ jobs:
             pnpm --filter cms build
 
             pm2 restart bds-cms-prod
+
+      # -----------------------------------------------------------------
+      # GỬI EMAIL THÔNG BÁO KHI SUCCESS
+      # -----------------------------------------------------------------
+      - name: Send Notification Email
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "✅ [BDS-CMS] Deploy Thành Công (${{ github.ref == 'refs/heads/main' && 'PROD' || 'DEV' }})"
+          to: ${{ secrets.NOTIFY_EMAIL }}
+          from: "BDS GitHub Actions <no-reply@dounus.id.vn>"
+          body: |
+            Báo cáo đại ca: 
+            Dự án BDS (CMS/Backend) vừa được build và deploy THÀNH CÔNG lên VPS!
+            
+            - Môi trường: ${{ github.ref == 'refs/heads/main' && '🚀 PRODUCTION' || '🧪 DEVELOPMENT' }}
+            - Nhánh: ${{ github.ref_name }}
+            - Commit: ${{ github.sha }}
+            - Người Push: ${{ github.actor }}
+            - Link Log: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            Chúc đại ca code vui vẻ, ít bug!
