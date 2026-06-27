@@ -77,7 +77,7 @@ jobs:
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: "✅ [BDS-CMS] Deploy Thành Công (${{ github.ref == 'refs/heads/main' && 'PROD' || 'DEV' }})"
           to: ${{ secrets.NOTIFY_EMAIL }}
-          from: "BDS GitHub Actions <no-reply@dounus.id.vn>"
+          from: "BDS GitHub Actions <${{ secrets.SMTP_USERNAME }}>"
           body: |
             Báo cáo đại ca: 
             Dự án BDS (CMS/Backend) vừa được build và deploy THÀNH CÔNG lên VPS!
