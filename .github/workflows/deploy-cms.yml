@@ -35,7 +35,14 @@ jobs:
 
             # Cài dependency và build
             pnpm install
-            pnpm --filter cms build
+            
+            set -o pipefail
+            pnpm --filter cms build 2>&1 | tee build.log
+            
+            if grep -iqE "error: invalid login|535 authentication failed|error verifying nodemailer|econnrefused|typeerror:|syntaxerror:|unhandled promise rejection|failed to compile" build.log; then
+              echo "❌ BUILD FAILED: Phát hiện lỗi ngầm nghiêm trọng (SMTP, Database, Syntax...) lẩn trốn trong log!"
+              exit 1
+            fi
 
             pm2 restart bds-cms-dev
 
@@ -60,7 +67,14 @@ jobs:
 
             # Cài dependency và build
             pnpm install
-            pnpm --filter cms build
+            
+            set -o pipefail
+            pnpm --filter cms build 2>&1 | tee build.log
+            
+            if grep -iqE "error: invalid login|535 authentication failed|error verifying nodemailer|econnrefused|typeerror:|syntaxerror:|unhandled promise rejection|failed to compile" build.log; then
+              echo "❌ BUILD FAILED: Phát hiện lỗi ngầm nghiêm trọng (SMTP, Database, Syntax...) lẩn trốn trong log!"
+              exit 1
+            fi
 
             pm2 restart bds-cms-prod
 
