@@ -26,6 +26,8 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }} # Tuỳ chọn, mặc định là 22
           script: |
+            set -e # ⚠️ Cực kỳ quan trọng: Lệnh này giúp script DỪNG NGAY LẬP TỨC nếu có bất kỳ lệnh nào ở dưới bị lỗi (như build fail)
+
             cd ~/dev-bds/BDS
 
             # Pull code mới nhất
@@ -49,6 +51,8 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
+            set -e
+
             cd ~/BDS
 
             # Pull code mới nhất

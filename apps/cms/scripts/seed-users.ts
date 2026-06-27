@@ -9,7 +9,6 @@ async function run() {
       email: "demo@bds.com",
       password: "password123",
       role: "admin",
-      name: "Demo Admin",
       brandName: "BDS Demo",
       agentSlug: "bds-demo",
     },

@@ -28,8 +28,18 @@ export const Leads: CollectionConfig = {
   },
   access: leadsAccess,
   fields: [
-    { name: "name", type: "text", required: true, label: { vi: "Họ và tên", en: "Name" } },
-    { name: "phone", type: "text", required: true, label: { vi: "Số điện thoại", en: "Phone" } },
+    {
+      name: "name",
+      type: "text",
+      required: true,
+      label: { vi: "Họ và tên", en: "Name" },
+    },
+    {
+      name: "phone",
+      type: "text",
+      required: true,
+      label: { vi: "Số điện thoại", en: "Phone" },
+    },
     { name: "email", type: "text", label: { vi: "Email", en: "Email" } },
     {
       name: "owner",
@@ -38,20 +48,32 @@ export const Leads: CollectionConfig = {
       required: false, // Made optional so platform homepage can receive generic leads
       label: { vi: "Agent quản lý", en: "Owner Agent" },
     },
-    { name: "apartmentRef", type: "relationship", relationTo: "apartments", label: { vi: "Căn hộ liên quan", en: "Related Apartment" } },
+    {
+      name: "apartmentRef",
+      type: "relationship",
+      relationTo: "apartments",
+      label: { vi: "Căn hộ liên quan", en: "Related Apartment" },
+    },
     {
       name: "type",
       type: "select",
       options: [
         { label: { vi: "Liên hệ Bán", en: "Sale Contact" }, value: "sale" },
         { label: { vi: "Liên hệ Thuê", en: "Rent Contact" }, value: "rent" },
-        { label: { vi: "Đăng tin/Ký gửi", en: "Consignment" }, value: "consignment" },
+        {
+          label: { vi: "Đăng tin/Ký gửi", en: "Consignment" },
+          value: "consignment",
+        },
       ],
       required: true,
       defaultValue: "sale",
       label: { vi: "Loại liên hệ", en: "Type" },
     },
-    { name: "message", type: "textarea", label: { vi: "Lời nhắn", en: "Message" } },
+    {
+      name: "message",
+      type: "textarea",
+      label: { vi: "Lời nhắn", en: "Message" },
+    },
     {
       name: "status",
       type: "select",
@@ -60,11 +82,16 @@ export const Leads: CollectionConfig = {
         { label: { vi: "Mới", en: "New" }, value: "new" },
         { label: { vi: "Đã liên hệ", en: "Contacted" }, value: "contacted" },
         { label: { vi: "Thành công", en: "Closed" }, value: "closed" },
-        { label: { vi: "Thất bại", en: "Lost" }, value: "lost" }
+        { label: { vi: "Thất bại", en: "Lost" }, value: "lost" },
       ],
       defaultValue: "new",
     },
-    { name: "deleted", type: "checkbox", defaultValue: false, label: { vi: "Đã xóa", en: "Deleted" } },
+    {
+      name: "deleted",
+      type: "checkbox",
+      defaultValue: false,
+      label: { vi: "Đã xóa", en: "Deleted" },
+    },
     {
       name: "dedupeWarning",
       type: "checkbox",
@@ -78,9 +105,12 @@ export const Leads: CollectionConfig = {
       defaultValue: false,
       label: { vi: "Bị ẩn (Vượt giới hạn gói)", en: "Hidden (Limit Exceeded)" },
       admin: {
-        description: { vi: "Đánh dấu True nếu lead này đến sau khi user đã vượt giới hạn tháng", en: "True if lead arrives after user exceeded monthly limit" },
+        description: {
+          vi: "Đánh dấu True nếu lead này đến sau khi user đã vượt giới hạn tháng",
+          en: "True if lead arrives after user exceeded monthly limit",
+        },
         readOnly: true,
-      }
+      },
     },
     {
       name: "cfTurnstileResponse",
@@ -94,7 +124,7 @@ export const Leads: CollectionConfig = {
         // 1. Lightweight Server-to-Server Authentication
         // Ensure the request comes from our trusted Next.js Server Action
         if (req.headers) {
-          const internalKey = req.headers.get?.("x-internal-api-key") || req.headers["x-internal-api-key"];
+          const internalKey = req.headers.get?.("x-internal-api-key");
           if (internalKey !== env.INTERNAL_API_KEY) {
             throw new APIError("Unauthorized: Invalid Internal API Key", 401);
           }
@@ -106,73 +136,100 @@ export const Leads: CollectionConfig = {
           if (!token) {
             throw new APIError("Missing Cloudflare Turnstile Token", 400);
           }
-          
+
           const formData = new FormData();
           formData.append("secret", env.TURNSTILE_SECRET_KEY);
           formData.append("response", token);
-          
-          const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-            method: "POST",
-            body: formData,
-          });
+
+          const verifyRes = await fetch(
+            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+            {
+              method: "POST",
+              body: formData,
+            },
+          );
           const verifyData = await verifyRes.json();
-          
+
           if (!verifyData.success) {
             throw new APIError("Bot detected: Invalid Turnstile Token", 400);
           }
-          
+
           // Delete the virtual field so it doesn't get saved to DB
           delete data.cfTurnstileResponse;
         }
 
         // 3. Subscription limits check
         if (operation === "create" && data.owner) {
-          const ownerId = typeof data.owner === 'object' ? data.owner.id : data.owner;
-          const ownerUser = await req.payload.findByID({ collection: "users", id: String(ownerId), depth: 0, req });
-          
-          if (ownerUser.role !== 'admin' && ownerUser.activeSubscription) {
-            const subId = typeof ownerUser.activeSubscription === 'object' ? ownerUser.activeSubscription.id : ownerUser.activeSubscription;
-            const sub = await req.payload.findByID({ collection: 'subscriptions', id: subId, depth: 0, req });
-            
+          const ownerId =
+            typeof data.owner === "object" ? data.owner.id : data.owner;
+          const ownerUser = await req.payload.findByID({
+            collection: "users",
+            id: String(ownerId),
+            depth: 0,
+            req,
+          });
+
+          if (ownerUser.role !== "admin" && ownerUser.activeSubscription) {
+            const subId =
+              typeof ownerUser.activeSubscription === "object"
+                ? ownerUser.activeSubscription.id
+                : ownerUser.activeSubscription;
+            const sub = await req.payload.findByID({
+              collection: "subscriptions",
+              id: subId,
+              depth: 0,
+              req,
+            });
+
             const now = new Date();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
-            
-            let lastReset = sub.usage?.lastLeadResetDate ? new Date(sub.usage.lastLeadResetDate) : null;
+
+            let lastReset = sub.usage?.lastLeadResetDate
+              ? new Date(sub.usage.lastLeadResetDate)
+              : null;
             let currentLeads = sub.usage?.currentLeadsThisMonth || 0;
-            
+
             // Lazy Reset: Nếu chưa có lastReset hoặc đã khác tháng/năm
-            if (!lastReset || lastReset.getMonth() !== currentMonth || lastReset.getFullYear() !== currentYear) {
-               currentLeads = 0;
-               lastReset = now;
+            if (
+              !lastReset ||
+              lastReset.getMonth() !== currentMonth ||
+              lastReset.getFullYear() !== currentYear
+            ) {
+              currentLeads = 0;
+              lastReset = now;
             }
-            
+
             const maxLeads = sub.customLimits?.limits?.maxLeadsPerMonth;
-            
+
             // Check nếu có giới hạn
-            if (maxLeads !== undefined && maxLeads !== null && maxLeads !== -1) {
+            if (
+              maxLeads !== undefined &&
+              maxLeads !== null &&
+              maxLeads !== -1
+            ) {
               if (currentLeads >= maxLeads) {
                 data.isHidden = true; // Mark as hidden
               }
             }
-            
+
             // Tăng số đếm và cập nhật lại lastReset
             await req.payload.update({
-               collection: 'subscriptions',
-               id: subId,
-               data: {
-                 usage: {
-                   ...sub.usage,
-                   currentLeadsThisMonth: currentLeads + 1,
-                   lastLeadResetDate: lastReset.toISOString(),
-                 }
-               },
-               req,
+              collection: "subscriptions",
+              id: subId,
+              data: {
+                usage: {
+                  ...sub.usage,
+                  currentLeadsThisMonth: currentLeads + 1,
+                  lastLeadResetDate: lastReset.toISOString(),
+                },
+              },
+              req,
             });
           }
         }
         return data;
-      }
+      },
     ],
     beforeValidate: [
       async ({ data, req, operation }) => {
