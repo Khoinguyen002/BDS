@@ -67,10 +67,11 @@ jobs:
         if: success()
         run: |
           jq -n \
+            --arg fromName "BDS Web Actions" \
             --arg to_raw "${{ secrets.NOTIFY_EMAIL }}" \
             --arg subject "✅ [BDS-Web] Deploy Thành Công (${{ github.ref == 'refs/heads/main' && 'PROD' || 'DEV' }})" \
             --arg html "<h2>Trạng thái Deploy: Thành Công</h2><p>Dự án BDS (Web) vừa được deploy <b style='color: green;'>THÀNH CÔNG</b> lên Cloudflare.</p><br/><ul><li><b>Môi trường:</b> ${{ github.ref == 'refs/heads/main' && '🚀 PRODUCTION' || '🧪 DEVELOPMENT' }}</li><li><b>Nhánh:</b> ${{ github.ref_name }}</li><li><b>Commit:</b> ${{ github.sha }}</li><li><b>Người Push:</b> ${{ github.actor }}</li><li><b>Chi tiết Log:</b> <a href='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'>Xem tại đây</a></li></ul>" \
-            '{to: ($to_raw | split(",")), subject: $subject, html: $html}' > mail.json
+            '{fromName: $fromName, to: ($to_raw | split(",")), subject: $subject, html: $html}' > mail.json
           
           curl -X POST https://node-smtp.dounus.id.vn/send \
             -H "Content-Type: application/json" \
@@ -81,10 +82,11 @@ jobs:
         if: failure()
         run: |
           jq -n \
+            --arg fromName "BDS Web Actions" \
             --arg to_raw "${{ secrets.NOTIFY_EMAIL }}" \
             --arg subject "❌ [BDS-Web] Deploy Thất Bại (${{ github.ref == 'refs/heads/main' && 'PROD' || 'DEV' }})" \
             --arg html "<h2>Trạng thái Deploy: Thất Bại</h2><p>Dự án BDS (Web) deploy <b style='color: red;'>THẤT BẠI</b> lên Cloudflare. Vào check log gấp!</p><br/><ul><li><b>Môi trường:</b> ${{ github.ref == 'refs/heads/main' && '🚀 PRODUCTION' || '🧪 DEVELOPMENT' }}</li><li><b>Nhánh:</b> ${{ github.ref_name }}</li><li><b>Commit:</b> ${{ github.sha }}</li><li><b>Người Push:</b> ${{ github.actor }}</li><li><b>Chi tiết Log:</b> <a href='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'>Xem tại đây</a></li></ul>" \
-            '{to: ($to_raw | split(",")), subject: $subject, html: $html}' > mail.json
+            '{fromName: $fromName, to: ($to_raw | split(",")), subject: $subject, html: $html}' > mail.json
           
           curl -X POST https://node-smtp.dounus.id.vn/send \
             -H "Content-Type: application/json" \
