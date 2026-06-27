@@ -65,46 +65,28 @@ jobs:
       # -----------------------------------------------------------------
       - name: Send Notification Email (Success)
         if: success()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_HOST }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "✅ [BDS-Web] Deploy Thành Công (${{ github.ref == 'refs/heads/main' && 'PROD' || 'DEV' }})"
-          to: ${{ secrets.NOTIFY_EMAIL }}
-          from: "BDS GitHub Actions <${{ secrets.SMTP_USERNAME }}>"
-          html_body: |
-            <h2>Trạng thái Deploy: Thành Công</h2>
-            <p>Dự án BDS (Web) vừa được deploy <b style="color: green;">THÀNH CÔNG</b> lên Cloudflare.</p>
-            <br/>
-            <ul>
-              <li><b>Môi trường:</b> ${{ github.ref == 'refs/heads/main' && '🚀 PRODUCTION' || '🧪 DEVELOPMENT' }}</li>
-              <li><b>Nhánh:</b> ${{ github.ref_name }}</li>
-              <li><b>Commit:</b> ${{ github.sha }}</li>
-              <li><b>Người Push:</b> ${{ github.actor }}</li>
-              <li><b>Chi tiết Log:</b> <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">Xem tại đây</a></li>
-            </ul>
+        run: |
+          jq -n \
+            --arg to_raw "${{ secrets.NOTIFY_EMAIL }}" \
+            --arg subject "✅ [BDS-Web] Deploy Thành Công (${{ github.ref == 'refs/heads/main' && 'PROD' || 'DEV' }})" \
+            --arg html "<h2>Trạng thái Deploy: Thành Công</h2><p>Dự án BDS (Web) vừa được deploy <b style='color: green;'>THÀNH CÔNG</b> lên Cloudflare.</p><br/><ul><li><b>Môi trường:</b> ${{ github.ref == 'refs/heads/main' && '🚀 PRODUCTION' || '🧪 DEVELOPMENT' }}</li><li><b>Nhánh:</b> ${{ github.ref_name }}</li><li><b>Commit:</b> ${{ github.sha }}</li><li><b>Người Push:</b> ${{ github.actor }}</li><li><b>Chi tiết Log:</b> <a href='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'>Xem tại đây</a></li></ul>" \
+            '{to: ($to_raw | split(",")), subject: $subject, html: $html}' > mail.json
+          
+          curl -X POST https://node-smtp.dounus.id.vn/send \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.SMTP_API_TOKEN }}" \
+            -d @mail.json
 
       - name: Send Notification Email (Failure)
         if: failure()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_HOST }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "❌ [BDS-Web] Deploy Thất Bại (${{ github.ref == 'refs/heads/main' && 'PROD' || 'DEV' }})"
-          to: ${{ secrets.NOTIFY_EMAIL }}
-          from: "BDS GitHub Actions <${{ secrets.SMTP_USERNAME }}>"
-          html_body: |
-            <h2>Trạng thái Deploy: Thất Bại</h2>
-            <p>Dự án BDS (Web) deploy <b style="color: red;">THẤT BẠI</b> lên Cloudflare. Vào check log gấp!</p>
-            <br/>
-            <ul>
-              <li><b>Môi trường:</b> ${{ github.ref == 'refs/heads/main' && '🚀 PRODUCTION' || '🧪 DEVELOPMENT' }}</li>
-              <li><b>Nhánh:</b> ${{ github.ref_name }}</li>
-              <li><b>Commit:</b> ${{ github.sha }}</li>
-              <li><b>Người Push:</b> ${{ github.actor }}</li>
-              <li><b>Chi tiết Log:</b> <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">Xem tại đây</a></li>
-            </ul>
+        run: |
+          jq -n \
+            --arg to_raw "${{ secrets.NOTIFY_EMAIL }}" \
+            --arg subject "❌ [BDS-Web] Deploy Thất Bại (${{ github.ref == 'refs/heads/main' && 'PROD' || 'DEV' }})" \
+            --arg html "<h2>Trạng thái Deploy: Thất Bại</h2><p>Dự án BDS (Web) deploy <b style='color: red;'>THẤT BẠI</b> lên Cloudflare. Vào check log gấp!</p><br/><ul><li><b>Môi trường:</b> ${{ github.ref == 'refs/heads/main' && '🚀 PRODUCTION' || '🧪 DEVELOPMENT' }}</li><li><b>Nhánh:</b> ${{ github.ref_name }}</li><li><b>Commit:</b> ${{ github.sha }}</li><li><b>Người Push:</b> ${{ github.actor }}</li><li><b>Chi tiết Log:</b> <a href='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'>Xem tại đây</a></li></ul>" \
+            '{to: ($to_raw | split(",")), subject: $subject, html: $html}' > mail.json
+          
+          curl -X POST https://node-smtp.dounus.id.vn/send \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.SMTP_API_TOKEN }}" \
+            -d @mail.json

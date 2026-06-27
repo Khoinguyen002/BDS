@@ -648,7 +648,7 @@ export interface Lead {
   name: string;
   phone: string;
   email?: string | null;
-  owner: number | User;
+  owner?: (number | null) | User;
   apartmentRef?: (number | null) | Apartment;
   type: 'sale' | 'rent' | 'consignment';
   message?: string | null;
@@ -659,6 +659,7 @@ export interface Lead {
    * True if lead arrives after user exceeded monthly limit
    */
   isHidden?: boolean | null;
+  cfTurnstileResponse?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1024,6 +1025,7 @@ export interface LeadsSelect<T extends boolean = true> {
   deleted?: T;
   dedupeWarning?: T;
   isHidden?: T;
+  cfTurnstileResponse?: T;
   updatedAt?: T;
   createdAt?: T;
 }
