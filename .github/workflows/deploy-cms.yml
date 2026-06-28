@@ -5,8 +5,7 @@ on:
       - main
       - develop
     paths:
-      - ".github/workflows/deploy-cms.yml" # Cho phép trigger khi sửa chính file workflow này
-      # Chỉ trigger deploy CMS nếu có thay đổi trong thư mục cms hoặc packages dùng chung
+      - ".github/workflows/deploy-cms.yml"
       - "apps/cms/**"
       - "packages/**"
 
@@ -14,42 +13,84 @@ jobs:
   deploy-vps:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Setup SSH Natively
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
       # -----------------------------------------------------------------
       # DEPLOY CMS CHO NHÁNH DEVELOP
       # -----------------------------------------------------------------
-      - name: Deploy CMS (Dev)
+      - name: Fetch .env & Build (Dev)
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          # Lấy .env từ VPS về Runner
+          scp -P ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:~/dev-bds/BDS/apps/cms/.env apps/cms/.env
+          
+          # Cài dependency và build
+          pnpm install
+          pnpm --filter cms build
+
+          # Nén thư mục build để gửi sang VPS (giảm thời gian transfer)
+          tar -czf next-build.tar.gz apps/cms/.next
+
+          # Gửi file nén sang VPS
+          scp -P ${{ secrets.VPS_PORT || 22 }} next-build.tar.gz ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:~/dev-bds/BDS/
+
+      - name: Apply & Restart VPS Services (Dev)
         if: github.ref == 'refs/heads/develop'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }} # Tuỳ chọn, mặc định là 22
+          port: ${{ secrets.VPS_PORT || 22 }}
           script: |
-            set -e # ⚠️ Cực kỳ quan trọng: Lệnh này giúp script DỪNG NGAY LẬP TỨC nếu có bất kỳ lệnh nào ở dưới bị lỗi (như build fail)
-
+            set -e
             cd ~/dev-bds/BDS
-
-            # Pull code mới nhất
+            
             git pull origin develop
-
-            # Cài dependency và build
-            pnpm install
+            pnpm install --prod
             
-            set -o pipefail
-            pnpm --filter cms build 2>&1 | tee build.log
+            # Xoá folder build cũ đi để tránh rác từ các bản build trước
+            rm -rf apps/cms/.next
+            tar -xzf next-build.tar.gz
+            rm next-build.tar.gz
             
-            if grep -iqE "error: invalid login|535 authentication failed|error verifying nodemailer|econnrefused|typeerror:|syntaxerror:|unhandled promise rejection|failed to compile" build.log; then
-              echo "❌ BUILD FAILED: Phát hiện lỗi ngầm nghiêm trọng (SMTP, Database, Syntax...) lẩn trốn trong log!"
-              exit 1
-            fi
-
             pm2 restart bds-cms-dev
 
       # -----------------------------------------------------------------
       # DEPLOY CMS CHO NHÁNH MAIN
       # -----------------------------------------------------------------
-      - name: Deploy CMS (Production)
+      - name: Fetch .env & Build (Production)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          scp -P ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:~/BDS/apps/cms/.env apps/cms/.env
+          
+          pnpm install
+          pnpm --filter cms build
+
+          tar -czf next-build.tar.gz apps/cms/.next
+
+          scp -P ${{ secrets.VPS_PORT || 22 }} next-build.tar.gz ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:~/BDS/
+
+      - name: Apply & Restart VPS Services (Production)
         if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -59,23 +100,16 @@ jobs:
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
             set -e
-
             cd ~/BDS
-
-            # Pull code mới nhất
+            
             git pull origin main
-
-            # Cài dependency và build
-            pnpm install
+            pnpm install --prod
             
-            set -o pipefail
-            pnpm --filter cms build 2>&1 | tee build.log
+            # Xoá folder build cũ đi để tránh rác từ các bản build trước
+            rm -rf apps/cms/.next
+            tar -xzf next-build.tar.gz
+            rm next-build.tar.gz
             
-            if grep -iqE "error: invalid login|535 authentication failed|error verifying nodemailer|econnrefused|typeerror:|syntaxerror:|unhandled promise rejection|failed to compile" build.log; then
-              echo "❌ BUILD FAILED: Phát hiện lỗi ngầm nghiêm trọng (SMTP, Database, Syntax...) lẩn trốn trong log!"
-              exit 1
-            fi
-
             pm2 restart bds-cms-prod
 
       # -----------------------------------------------------------------
