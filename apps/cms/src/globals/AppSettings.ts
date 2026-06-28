@@ -1,5 +1,5 @@
 import { GlobalConfig } from "payload";
-import { COLLECTION_TAGS } from "@bds/shared/cache-tags";
+import { GLOBAL_TAGS } from "@bds/shared/cache-tags";
 import { triggerRevalidateWithCascade } from "../utils/revalidate";
 
 export const AppSettings: GlobalConfig = {
@@ -106,7 +106,7 @@ export const AppSettings: GlobalConfig = {
   hooks: {
     afterChange: [
       async ({ req }) => {
-        triggerRevalidateWithCascade({ tag: COLLECTION_TAGS.appSettings, req });
+        triggerRevalidateWithCascade({ tag: GLOBAL_TAGS.appSettings, req });
       },
     ],
   },

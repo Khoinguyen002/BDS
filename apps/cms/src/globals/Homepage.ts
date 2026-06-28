@@ -1,5 +1,5 @@
 import { GlobalConfig } from "payload";
-import { COLLECTION_TAGS } from "@bds/shared/cache-tags";
+import { GLOBAL_TAGS } from "@bds/shared/cache-tags";
 import { triggerRevalidateTag } from "../utils/revalidate";
 import { pageBlocks } from "../collections/blocks/pageBlocks";
 
@@ -29,7 +29,7 @@ export const Homepage: GlobalConfig = {
   hooks: {
     afterChange: [
       async ({ req }) => {
-        triggerRevalidateTag({ tag: COLLECTION_TAGS.homepage, req });
+        triggerRevalidateTag({ tag: GLOBAL_TAGS.homepage, req });
       },
     ],
   },
