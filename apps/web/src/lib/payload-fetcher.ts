@@ -4,15 +4,15 @@
  * Centralized service for data fetching from Payload CMS API.
  *
  * Quy tắc:
- * 1. autoCacheFetch CHỈ gọi Payload built-in REST API (/api/{collection-slug})
- * 2. Collection tag tự derive từ endpoint — KHÔNG truyền tag thủ công
+ * 1. fetchPayloadData CHỈ gọi Payload built-in REST API (/api/{collection-slug} hoặc /api/globals/{global-slug})
+ * 2. Tag tự derive từ endpoint — KHÔNG truyền tag thủ công, phân biệt Collection/Global bằng cache-tags.ts
  * 3. Custom endpoint → dùng fetch() thường, KHÔNG cache
  * 4. Cache: infinite (revalidate: false) + tag tường minh; làm tươi hoàn toàn
  *    dựa vào revalidateTag từ CMS hook (xem @bds/shared/cache-tags)
  */
 
 import type { User, LandingPage, Apartment, Location, Tag, AppSetting, Plan } from "@bds/shared/payload-types";
-import { COLLECTION_TAGS, type CollectionTag } from "@bds/shared/cache-tags";
+import { COLLECTION_TAGS, type CollectionTag, GLOBAL_TAGS, type GlobalTag } from "@bds/shared/cache-tags";
 import { getLocale } from 'next-intl/server';
 import { stringify } from 'qs-esm';
 import { env } from "../env";
@@ -58,25 +58,23 @@ export interface PayloadQuery {
 }
 
 /**
- * autoCacheFetch — fetch Payload built-in collection REST API với auto-tagging.
+ * fetchPayloadData — fetch Payload built-in collection/global REST API với auto-tagging.
  *
- * - CHỈ dùng cho collection (truyền đúng CollectionTag, type-safe).
- * - Cache tag = chính collection đó (tường minh, không derive từ chuỗi).
+ * - Nhận diện tự động CollectionTag (truy xuất /api/{slug}) hoặc GlobalTag (/api/globals/{slug}).
+ * - Cache tag = chính entity đó (tường minh, không derive từ chuỗi).
  * - Query params được chuẩn hóa qua qs-esm (where lồng nhau, array, v.v.).
  * - locale tự lấy từ next-intl nếu không truyền.
- *
- * Globals (homepage, app-settings…) KHÔNG đi qua đây — dùng fetch() thường
- * vì endpoint là /api/globals/{slug}.
  */
-async function autoCacheFetch(
-  collection: CollectionTag,
+async function fetchPayloadData(
+  tag: CollectionTag | GlobalTag,
   query: PayloadQuery = {},
   options?: RequestInit,
 ) {
-  if (!Object.values(COLLECTION_TAGS).includes(collection)) {
-    throw new Error(
-      `autoCacheFetch: "${collection}" không có trong COLLECTION_TAGS.`,
-    );
+  const isGlobal = Object.values(GLOBAL_TAGS).includes(tag as GlobalTag);
+  const isCollection = Object.values(COLLECTION_TAGS).includes(tag as CollectionTag);
+
+  if (!isGlobal && !isCollection) {
+    throw new Error(`fetchPayloadData: "${tag}" không có trong COLLECTION_TAGS hoặc GLOBAL_TAGS.`);
   }
 
   const { id, locale, ...rest } = query;
@@ -85,14 +83,20 @@ async function autoCacheFetch(
     { addQueryPrefix: true },
   );
 
-  const path = id != null ? `${collection}/${id}` : collection;
+  let path = "";
+  if (isGlobal) {
+    path = `globals/${tag}`;
+  } else {
+    path = id != null ? `${tag}/${id}` : tag;
+  }
+
   const url = `${SERVER_URL}/api/${path}${search}`;
 
   const res = await fetch(url, {
     ...options,
     next: {
       revalidate: REVALIDATE_TIME,
-      tags: [collection],
+      tags: [tag],
       ...options?.next,
     },
   });
@@ -108,7 +112,7 @@ async function autoCacheFetch(
 
 export async function getUserBySlug(agentSlug: string): Promise<User | null> {
   try {
-    const data = await autoCacheFetch(COLLECTION_TAGS.users, {
+    const data = await fetchPayloadData(COLLECTION_TAGS.users, {
       where: { agentSlug: { equals: agentSlug } },
     });
     if (data.docs && data.docs.length > 0) {
@@ -123,7 +127,7 @@ export async function getUserBySlug(agentSlug: string): Promise<User | null> {
 
 export async function getFeaturedAgents(limit: number = 4): Promise<User[]> {
   try {
-    const data = await autoCacheFetch(COLLECTION_TAGS.users, {
+    const data = await fetchPayloadData(COLLECTION_TAGS.users, {
       where: { verified: { equals: true } },
       sort: "-successfulTransactions",
       limit,
@@ -143,7 +147,7 @@ export async function getLandingPageByOwner(
   userId: string | number,
 ): Promise<LandingPage | null> {
   try {
-    const data = await autoCacheFetch(COLLECTION_TAGS.landingPages, {
+    const data = await fetchPayloadData(COLLECTION_TAGS.landingPages, {
       where: { owner: { equals: userId } },
       depth: 1,
     });
@@ -159,18 +163,7 @@ export async function getLandingPageByOwner(
 
 export async function getHomepage(): Promise<{ blocks?: Record<string, unknown>[] } | null> {
   try {
-    const url = new URL(`${SERVER_URL}/api/globals/homepage`);
-    url.searchParams.set("locale", await resolveLocale());
-    const res = await fetch(url.toString(), {
-      next: {
-        revalidate: REVALIDATE_TIME,
-        tags: [COLLECTION_TAGS.homepage],
-      },
-    });
-    if (!res.ok) {
-      return null;
-    }
-    const data = await res.json();
+    const data = await fetchPayloadData(GLOBAL_TAGS.homepage);
     return data;
   } catch (error) {
     console.error("Error in getHomepage:", error);
@@ -186,7 +179,7 @@ type DictionaryNode = string | { [key: string]: DictionaryNode };
 
 export const getDictionary = async (locale: string): Promise<Record<string, DictionaryNode>> => {
   try {
-    const data = await autoCacheFetch(
+    const data = await fetchPayloadData(
       COLLECTION_TAGS.translations,
       { locale, limit: 1000 },
       { cache: "force-cache" },
@@ -226,7 +219,7 @@ export const getApartmentBySlugOrId = async (
 ): Promise<Apartment | null> => {
   try {
     // Attempt fetch by slug first
-    const data = await autoCacheFetch(COLLECTION_TAGS.apartments, {
+    const data = await fetchPayloadData(COLLECTION_TAGS.apartments, {
       where: { slug: { equals: slugOrId } },
       depth: 2,
     });
@@ -235,7 +228,7 @@ export const getApartmentBySlugOrId = async (
     }
 
     // Fallback: Attempt fetch by ID if slug not found (and it's a valid ID)
-    const fallbackData = await autoCacheFetch(COLLECTION_TAGS.apartments, {
+    const fallbackData = await fetchPayloadData(COLLECTION_TAGS.apartments, {
       id: slugOrId,
       depth: 2,
     });
@@ -281,7 +274,7 @@ export async function getApartmentsByOwner(
   }
 
   try {
-    const data = await autoCacheFetch(COLLECTION_TAGS.apartments, {
+    const data = await fetchPayloadData(COLLECTION_TAGS.apartments, {
       where,
       depth: 1,
       limit,
@@ -361,7 +354,7 @@ export async function getApartments(
   limit: number = 20,
 ): Promise<Apartment[]> {
   try {
-    const data = await autoCacheFetch(COLLECTION_TAGS.apartments, {
+    const data = await fetchPayloadData(COLLECTION_TAGS.apartments, {
       where: buildApartmentWhere(filters),
       depth: 1,
       limit,
@@ -380,7 +373,7 @@ export async function getApartmentBySlug(
   locale: string,
 ): Promise<Apartment | null> {
   try {
-    const data = await autoCacheFetch(COLLECTION_TAGS.apartments, {
+    const data = await fetchPayloadData(COLLECTION_TAGS.apartments, {
       where: { slug: { equals: slug } },
       depth: 2,
       locale,
@@ -402,7 +395,7 @@ export async function getCuratedApartments(
   limit: number = 6
 ): Promise<Apartment[]> {
   try {
-    const data = await autoCacheFetch(COLLECTION_TAGS.apartments, {
+    const data = await fetchPayloadData(COLLECTION_TAGS.apartments, {
       where: { listingType: { equals: listingType }, ...extraWhere },
       depth: 1,
       limit,
@@ -421,7 +414,7 @@ export async function getCuratedApartments(
 
 export async function getLocations(locale: string): Promise<Location[]> {
   try {
-    const data = await autoCacheFetch(COLLECTION_TAGS.locations, {
+    const data = await fetchPayloadData(COLLECTION_TAGS.locations, {
       limit: 500,
       depth: 1,
       locale,
@@ -435,7 +428,7 @@ export async function getLocations(locale: string): Promise<Location[]> {
 
 export async function getTags(locale: string): Promise<Tag[]> {
   try {
-    const data = await autoCacheFetch(COLLECTION_TAGS.tags, { limit: 200, locale });
+    const data = await fetchPayloadData(COLLECTION_TAGS.tags, { limit: 200, locale });
     return data.docs || [];
   } catch (error) {
     console.error("Error in getTags:", error);
@@ -449,7 +442,7 @@ export async function getTags(locale: string): Promise<Tag[]> {
 
 export async function getPlans(locale: string): Promise<Plan[]> {
   try {
-    const data = await autoCacheFetch(COLLECTION_TAGS.plans, {
+    const data = await fetchPayloadData(COLLECTION_TAGS.plans, {
       limit: 100,
       locale,
       sort: "price",
@@ -463,17 +456,7 @@ export async function getPlans(locale: string): Promise<Plan[]> {
 
 export async function getAppSettings(): Promise<AppSetting | null> {
   try {
-    const url = new URL(`${SERVER_URL}/api/globals/app-settings`);
-    const res = await fetch(url.toString(), {
-      next: {
-        revalidate: REVALIDATE_TIME,
-        tags: [COLLECTION_TAGS.appSettings],
-      },
-    });
-    if (!res.ok) {
-      return null;
-    }
-    const data = await res.json();
+    const data = await fetchPayloadData(GLOBAL_TAGS.appSettings);
     return data;
   } catch (error) {
     console.error("Error in getAppSettings:", error);

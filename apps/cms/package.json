@@ -16,7 +16,7 @@
     "seed:homepage": "cross-env PAYLOAD_DISABLE_DB_PUSH=1 tsx --env-file=.env scripts/seed-homepage.ts",
     "seed:plans": "cross-env PAYLOAD_DISABLE_DB_PUSH=1 tsx --env-file=.env scripts/seed-plans.ts",
     "migrate:supabase": "cross-env PAYLOAD_DISABLE_DB_PUSH=1 tsx --env-file=.env scripts/migrate-from-supabase.ts",
-    "gen:cache-tags": "tsx scripts/gen-cache-tags.ts",
+    "gen:cache-tags": "cross-env PAYLOAD_SECRET=1 INTERNAL_API_KEY=1 TURNSTILE_SECRET_KEY=1 SUPABASE_URL=1 DATABASE_URI=1 tsx scripts/gen-cache-tags.ts",
     "test:email": "tsx --env-file=.env scripts/test-email.ts"
   },
   "dependencies": {

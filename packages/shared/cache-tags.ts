@@ -15,24 +15,30 @@ export const COLLECTION_TAGS = {
   tags: "tags",
   translations: "translations",
   users: "users",
+} as const;
+
+export type CollectionTag = (typeof COLLECTION_TAGS)[keyof typeof COLLECTION_TAGS];
+
+// ── Global-level tags ────────────────────────────────────────────────
+export const GLOBAL_TAGS = {
   appSettings: "app-settings",
   componentPermissions: "component-permissions",
   homepage: "homepage",
 } as const;
 
-export type CollectionTag = (typeof COLLECTION_TAGS)[keyof typeof COLLECTION_TAGS];
+export type GlobalTag = (typeof GLOBAL_TAGS)[keyof typeof GLOBAL_TAGS];
 
 // ── Reverse dependency map (transitive closure via BFS) ──────────
-// Khi collection X thay đổi → cascade purge TẤT CẢ collections phụ thuộc
+// Khi collection/global X thay đổi → cascade purge TẤT CẢ entities phụ thuộc
 // (trực tiếp + gián tiếp). Auto-derived từ Payload relationship fields.
-export const REVERSE_DEPS: Readonly<Record<string, readonly CollectionTag[]>> = {
-  [COLLECTION_TAGS.tags]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.homepage],
-  [COLLECTION_TAGS.locations]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.homepage],
-  [COLLECTION_TAGS.amenities]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.homepage],
-  [COLLECTION_TAGS.users]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.homepage, COLLECTION_TAGS.users],
-  [COLLECTION_TAGS.apartments]: [COLLECTION_TAGS.landingPages, COLLECTION_TAGS.homepage],
-  [COLLECTION_TAGS.plans]: [COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.homepage, COLLECTION_TAGS.users, COLLECTION_TAGS.apartments],
-  [COLLECTION_TAGS.subscriptions]: [COLLECTION_TAGS.users, COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, COLLECTION_TAGS.componentPermissions, COLLECTION_TAGS.homepage],
+export const REVERSE_DEPS: Readonly<Record<string, readonly (CollectionTag | GlobalTag)[]>> = {
+  [COLLECTION_TAGS.tags]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, GLOBAL_TAGS.homepage],
+  [COLLECTION_TAGS.locations]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, GLOBAL_TAGS.homepage],
+  [COLLECTION_TAGS.amenities]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, GLOBAL_TAGS.homepage],
+  [COLLECTION_TAGS.users]: [COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, GLOBAL_TAGS.componentPermissions, GLOBAL_TAGS.homepage, COLLECTION_TAGS.users],
+  [COLLECTION_TAGS.apartments]: [COLLECTION_TAGS.landingPages, GLOBAL_TAGS.homepage],
+  [COLLECTION_TAGS.plans]: [COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, GLOBAL_TAGS.componentPermissions, GLOBAL_TAGS.homepage, COLLECTION_TAGS.users, COLLECTION_TAGS.apartments],
+  [COLLECTION_TAGS.subscriptions]: [COLLECTION_TAGS.users, COLLECTION_TAGS.apartments, COLLECTION_TAGS.landingPages, COLLECTION_TAGS.subscriptions, GLOBAL_TAGS.componentPermissions, GLOBAL_TAGS.homepage],
 };
 
 // ── External source tags (không phải Payload collection) ───────────

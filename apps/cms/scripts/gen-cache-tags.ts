@@ -156,10 +156,19 @@ if (missingHooks.length > 0) {
   );
 }
 
-// 1. COLLECTION_TAGS
+// 1. Tags separation
 const collectionTags: Record<string, string> = {};
+const globalTags: Record<string, string> = {};
+
+const collectionSlugs = new Set(ALL_COLLECTIONS.map(c => c.slug));
+const globalSlugs = new Set(ALL_GLOBALS.map(c => c.slug));
+
 for (const col of cacheable) {
-  collectionTags[slugToKey(col.slug)] = col.slug;
+  if (collectionSlugs.has(col.slug)) {
+    collectionTags[slugToKey(col.slug)] = col.slug;
+  } else if (globalSlugs.has(col.slug)) {
+    globalTags[slugToKey(col.slug)] = col.slug;
+  }
 }
 
 // 2. Build direct reverse deps
@@ -202,28 +211,52 @@ lines.push(
 );
 lines.push("");
 
+lines.push("// ── Global-level tags ────────────────────────────────────────────────");
+lines.push("export const GLOBAL_TAGS = {");
+for (const [key, slug] of Object.entries(globalTags)) {
+  lines.push(`  ${key}: "${slug}",`);
+}
+lines.push("} as const;");
+lines.push("");
+lines.push(
+  "export type GlobalTag = (typeof GLOBAL_TAGS)[keyof typeof GLOBAL_TAGS];",
+);
+lines.push("");
+
+
 // REVERSE_DEPS (transitive)
 lines.push(
   "// ── Reverse dependency map (transitive closure via BFS) ──────────",
 );
 lines.push(
-  "// Khi collection X thay đổi → cascade purge TẤT CẢ collections phụ thuộc",
+  "// Khi collection/global X thay đổi → cascade purge TẤT CẢ entities phụ thuộc",
 );
 lines.push("// (trực tiếp + gián tiếp). Auto-derived từ Payload relationship fields.");
 lines.push(
-  "export const REVERSE_DEPS: Readonly<Record<string, readonly CollectionTag[]>> = {",
+  "export const REVERSE_DEPS: Readonly<Record<string, readonly (CollectionTag | GlobalTag)[]>> = {",
 );
+
+function getTagRef(slug: string) {
+  const key = slugToKey(slug);
+  if (key in collectionTags) return `COLLECTION_TAGS.${key}`;
+  if (key in globalTags) return `GLOBAL_TAGS.${key}`;
+  return null;
+}
 
 for (const [slug, deps] of Object.entries(transitiveDeps)) {
   if (deps.length === 0) continue;
-  const key = slugToKey(slug);
-  // Chỉ output nếu key tồn tại trong COLLECTION_TAGS (slug cacheable)
-  if (!(key in collectionTags)) continue;
-  const tagRef = `COLLECTION_TAGS.${key}`;
+  
+  const sourceRef = getTagRef(slug);
+  if (!sourceRef) continue;
+
   const depsList = deps
-    .map((s) => `COLLECTION_TAGS.${slugToKey(s)}`)
+    .map((s) => getTagRef(s))
+    .filter(Boolean)
     .join(", ");
-  lines.push(`  [${tagRef}]: [${depsList}],`);
+    
+  if (depsList) {
+    lines.push(`  [${sourceRef}]: [${depsList}],`);
+  }
 }
 
 lines.push("};");
@@ -242,10 +275,11 @@ const outPath = resolve(__dirname, "../../../packages/shared/cache-tags.ts");
 writeFileSync(outPath, lines.join("\n") + "\n", "utf-8");
 
 console.log(`✅ Generated ${outPath}`);
-console.log(`   Cacheable: ${Object.keys(collectionTags).join(", ")}`);
-console.log(`   Excluded:  ${[...excluded].join(", ")}`);
+console.log(`   Collections: ${Object.keys(collectionTags).join(", ")}`);
+console.log(`   Globals:     ${Object.keys(globalTags).join(", ")}`);
+console.log(`   Excluded:    ${[...excluded].join(", ")}`);
 console.log(
-  `   Reverse deps (transitive): ${Object.entries(transitiveDeps)
+  `   Reverse deps: ${Object.entries(transitiveDeps)
     .filter(([, v]) => v.length > 0)
     .map(([k, v]) => `${k} → [${v.join(", ")}]`)
     .join("; ")}`,
