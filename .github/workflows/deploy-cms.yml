@@ -18,13 +18,12 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        # Không truyền version cứng ở đây nữa, nó sẽ tự đọc pnpm@10.6.3 từ package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22 # Cập nhật lên bản Node LTS mới nhất hoặc bỏ luôn để lấy mặc định
           cache: 'pnpm'
 
       - name: Setup SSH Natively
